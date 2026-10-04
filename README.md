@@ -10,7 +10,7 @@
 ## 👨‍💻 Thông tin Nhóm / Tác giả
 * **Giảng viên hướng dẫn:** 
 * **Thành viên thực hiện:**
-  * Nguyễn Trung Tỉnh - MSSV:6651071077 (Trưởng nhóm: Nguyễn Quang Nhân Kiệt - Logic OOP : , DSA : , Turn System :)
+  * Nguyễn Trung Tỉnh - MSSV:6651071077 (Trưởng nhóm, Character design, Thuyết trình, Director, Monster design)
   * Trần Văn B - MSSV: 20xxxxxx (UI/UX, Render Sprite Animation, Map)
   *
   *
