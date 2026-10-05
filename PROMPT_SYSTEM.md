@@ -41,6 +41,9 @@ Tôi là Member 1. Hãy viết C++17 cho các thành phần sau:
    - Cung cấp hàm cancelLastAction() (Undo/Cancel) để người chơi quay lại Menu chọn lệnh nếu chưa kết thúc lượt.
 3. Tạo file GameEngine.h/.cpp điều phối Game Loop chính.
 
+
+
+
 *****[TASK: OOP ENTITIES, FACTORY & TEMPLATE INVENTORY]
 Tôi là Member 2. Hãy viết C++17 cho các thành phần sau:
 1. Class cơ sở Character (Abstract Class) chứa các thuộc tính m_name, m_stats (Stats struct), m_element, m_currentHp, m_currentMp.
@@ -51,6 +54,9 @@ Tôi là Member 2. Hãy viết C++17 cho các thành phần sau:
    - Hàm createHero(string name, RaceType race, ClassType pClass) tính m_stats = raceStats + classStats.
    - Random nạp đúng 4 skills (1 Race, 1 Class, 2 Element).
 4. Template Class Inventory<T> quản lý danh sách vật phẩm std::vector<T> có các hàm addItem(), removeItem(), getItem().
+
+
+
 
 *****[TASK: DSA TURN MANAGER & OBSERVER PATTERN]
 Tôi là Member 3. Hãy viết C++17 cho các thành phần sau:
@@ -65,6 +71,9 @@ Tôi là Member 3. Hãy viết C++17 cho các thành phần sau:
    - Interface ICombatObserver với hàm virtual void onHealthChanged(Character* target, int damage), virtual void onCharacterDied(Character* target).
    - Class SubjectCombat để TurnManager/Character gọi thông báo cho Observer.
 
+
+
+
 *****[[TASK: RAYLIB GRAPHICS & BATTLE RENDERER]
 Tôi là Member 4. Hãy viết C++17 bằng thư viện Raylib cho các thành phần sau:
 1. Class SpriteAnimation quản lý Sprite Sheet 2D:
@@ -75,6 +84,9 @@ Tôi là Member 4. Hãy viết C++17 bằng thư viện Raylib cho các thành p
    - Hàm drawManaBar(Vector2 pos, int currentMp, int maxMp): Vẽ thanh MP xanh dương.
    - Hàm drawTurnOrderBar(const std::vector<Character*>& turnList): Vẽ danh sách lượt đánh ở góc màn hình.
 3. Kế thừa ICombatObserver từ Member 3 để khi sự kiện onHealthChanged() kích hoạt, UI tự động tạo hiệu ứng nhấp nháy hoặc nổi số Damage (Floating Text).
+
+
+
 
 *****[TASK: GAME DATA CONFIG, SOUND ENGINE & MENU SYSTEM]
 Tôi là Member 5 (Director). Hãy viết C++17 bằng thư viện Raylib cho các thành phần sau:
