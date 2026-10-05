@@ -1,4 +1,5 @@
-[PROJECT CONTEXT & STRICT CODING STANDARDS] ==> " PROMT chung, nên điền cho AI PROMT này trước rồi PROMT cụ thể của nhiệm vụ sau "
+==> " PROMT chung, nên điền cho AI PROMT này trước rồi PROMT cụ thể của nhiệm vụ sau "
+[PROJECT CONTEXT & STRICT CODING STANDARDS] 
 Dự án: Game 2.5D Turn-based RPG (Battle Engine - ĐT10) trên Visual Studio 2022.
 Chuẩn C++: C++17. Thư viện đồ họa: Raylib.
 
