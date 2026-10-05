@@ -16,7 +16,7 @@
 | **1** | **Nguyễn Trung Tỉnh** | **6651071077** | **Trưởng nhóm (Director)**<br>• Quản lý dự án, thiết kế Character & Monster, làm Slide/Báo cáo.<br>• Code Module: Data Engine (`GameData`), Audio Engine (`SoundManager`), UI Menu. | `feature/member5-data-sound` |
 | **2** | **Member 1** | *(Sửa MSSV)* | **Core Engine & FSM Specialist**<br>• Xây dựng Game Loop, Máy trạng thái FSM (`GameStateMachine`).<br>• Cài đặt **Command Pattern** (Đánh, Skill, Item & Cancel/Back nước đi). | `feature/member1-engine` |
 | **3** | **Nguyễn Quang Nhân Kiệt** | *6651071035* | **OOP Entities & Factory Specialist**<br>• Cây kế thừa `Character` $\rightarrow$ `Player`/`Enemy`/`Boss`.<br>• Công thức Dame Ngũ hành $5 \times 5$, **Factory Method**, Template `Inventory<T>`. | `feature/member2-entities` |
-| **4** | **Member 3** | *(Sửa MSSV)* | **DSA & Turn System Specialist**<br>• `TurnManager` dùng `std::priority_queue` xếp lượt theo `m_spd`.<br>• Quản lý 7 hiệu ứng Buff/Debuff, **Observer Pattern**, AI Boss. | `feature/member3-dsa` |
+| **4** | **Nguyễn Quốc Đạt** | *6651071014* | **DSA & Turn System Specialist**<br>• `TurnManager` dùng `std::priority_queue` xếp lượt theo `m_spd`.<br>• Quản lý 7 hiệu ứng Buff/Debuff, **Observer Pattern**, AI Boss. | `feature/member3-dsa` |
 | **5** | **Member 4** | *(Sửa MSSV)* | **UI/UX & Graphics Specialist**<br>• Render Sprite Animation 2D (Idle/Attack), dựng bản đồ (Map).<br>• Vẽ HUD thanh máu HP/MP Bar, render danh sách Turn Order & UI. | `feature/member4-graphics` |
 
 ---
