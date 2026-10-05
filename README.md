@@ -90,11 +90,11 @@ RPG_Game_DT10/
 │   ├── images/             # Sprite sheets Pixel Art, Background, Icons
 │   └── audio/              # Sound FX (SFX) & Music (BGM)
 ├── src/                    # Source Code C++
-│   ├── core/               # Member 1: Game Loop, FSM, Command Pattern
-│   ├── entities/           # Member 2: Character, Player, Enemy, Factory, Inventory<T>
-│   ├── dsa/                # Member 3: TurnManager (Priority Queue), Status Effects, Observer
-│   ├── graphics/           # Member 4 (Trần Văn B): Raylib Renderer, Sprite Animation, Map, UI
-│   └── data/               # Member 5 (Nguyễn Trung Tỉnh): GameData, SoundManager, Start Menu
+│   ├── core/               # Member 1: (Tên member) Game Loop, FSM, Command Pattern
+│   ├── entities/           # Member 2: (Tên member) Character, Player, Enemy, Factory, Inventory<T>
+│   ├── dsa/                # Member 3: (Tên member) TurnManager (Priority Queue), Status Effects, Observer
+│   ├── graphics/           # Member 4: (Tên member) Raylib Renderer, Sprite Animation, Map, UI
+│   └── data/               # Member 5: (Nguyễn Trung Tỉnh): GameData, SoundManager, Start Menu
 ├── .gitignore              # Git Ignore file cho Visual Studio 2022
 ├── PROMPT_SYSTEM.md        # Bộ Prompt đồng bộ AI cho 5 thành viên
 └── README.md               # Tài liệu dự án
