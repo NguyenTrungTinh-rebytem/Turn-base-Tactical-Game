@@ -73,7 +73,7 @@ $$\text{Base Stats} = \text{Race Stats} + \text{Class Stats}$$
 
 ### B. Ma trận Khắc hệ Ngũ Hành ($5 \times 5$)
 * **5 Hệ:** Kim (0), Mộc (1), Thủy (2), Hỏa (3), Thổ (4).
-* **Công thức Dame:** $\text{Damage} = \text{BaseDamage} \times \text{ELEMENT\_MATRIX}[\text{AtkElement}][\text{DefElement}]$.
+* **Công thức Dame:** 
 * **Hệ số:** Tương khắc (+50% Dame $\rightarrow 1.5$), Bị khắc (-50% Dame $\rightarrow 0.5$), Bình hòa ($1.0$).
 
 ### C. Kỹ năng & Hiệu ứng
