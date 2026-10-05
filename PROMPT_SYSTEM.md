@@ -1,3 +1,34 @@
+[PROJECT CONTEXT & STRICT CODING STANDARDS] ==> " PROMT chung, nên điền cho AI PROMT này trước rồi PROMT cụ thể của nhiệm vụ sau "
+Dự án: Game 2.5D Turn-based RPG (Battle Engine - ĐT10) trên Visual Studio 2022.
+Chuẩn C++: C++17. Thư viện đồ họa: Raylib.
+
+1. RULES ĐẶT TÊN (NGHIÊM NGẶT 100%):
+- Biến thành viên Class: BẮT BUỘC có tiền tố "m_" và viết camelCase. Ví dụ: m_hp, m_maxHp, m_mp, m_maxMp, m_a (Attack), m_ma (Magic Attack), m_d (Defend), m_md (Magic Defend), m_spd (Speed), m_skills, m_element.
+- Class / Struct: PascalCase. Ví dụ: Character, Player, Enemy, Skill, TurnManager.
+- Functions / Methods: camelCase. Ví dụ: takeDamage(), executeSkill(), getSpeed().
+- Enums: UPPER_SNAKE_CASE.
+
+2. CÁC KIỂU DỮ LIỆU CỐ ĐỊNH TẤT CẢ PHẢI DÙNG CHUNG:
+- Enum Ngũ hành: enum class Element { KIM = 0, MOC, THUY, HOA, THO };
+- Ma trận khắc hệ (float):
+  ELEMENT_MATRIX[5][5] = {
+    { 1.0f, 1.5f, 1.5f, 0.5f, 0.5f }, // KIM
+    { 0.5f, 1.0f, 1.5f, 0.5f, 1.5f }, // MOC
+    { 0.5f, 0.5f, 1.0f, 1.5f, 1.5f }, // THUY
+    { 1.5f, 1.5f, 0.5f, 1.0f, 0.5f }, // HOA
+    { 1.5f, 0.5f, 0.5f, 1.5f, 1.0f }  // THO
+  };
+- Struct Chỉ số (Stats):
+  struct Stats {
+      int hp, mp, a, ma, d, md, spd;
+      Stats operator+(const Stats& other) const {
+          return { hp + other.hp, mp + other.mp, a + other.a, ma + other.ma, d + other.d, md + other.md, spd + other.spd };
+      }
+  };
+- Smart Pointers: Dùng std::unique_ptr và std::shared_ptr, KHÔNG dùng con trỏ thô để quản lý vòng đời object.
+- Tách biệt rõ file .h (Header) và .cpp (Implementation). Dùng Forward Declaration khi cần.
+
+
 *****[TASK: CORE ENGINE & COMMAND PATTERN]
 Tôi là Member 1. Hãy viết C++17 cho các thành phần sau:
 1. Class GameStateMachine quản lý 4 trạng thái: State::MENU, State::IN_BATTLE, State::VICTORY, State::GAME_OVER.
