@@ -91,8 +91,8 @@ RPG_Game_DT10/
 │   └── audio/              # Sound FX (SFX) & Music (BGM)
 ├── src/                    # Source Code C++
 │   ├── core/               # Member 1: (Võ Tấn Tiến) Game Loop, FSM, Command Pattern
-│   ├── entities/           # Member 2: (Nguyễn Quốc Đạt) Character, Player, Enemy, Factory, Inventory<T>
-│   ├── dsa/                # Member 3: Nguyễn Quang Nhân Kiệt TurnManager (Priority Queue), Status Effects, Observer
+│   ├── entities/           # Member 2: (Nguyễn Quang Nhân Kiệt) Character, Player, Enemy, Factory, Inventory<T>
+│   ├── dsa/                # Member 3:  (Nguyễn Quốc Đạt) TurnManager (Priority Queue), Status Effects, Observer
 │   ├── graphics/           # Member 4: (Huỳnh Quang Khải) Raylib Renderer, Sprite Animation, Map, UI
 │   └── data/               # Member 5: (Nguyễn Trung Tỉnh): GameData, SoundManager, Start Menu
 ├── .gitignore              # Git Ignore file cho Visual Studio 2022
