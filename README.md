@@ -93,7 +93,7 @@ RPG_Game_DT10/
 │   ├── core/               # Member 1: (Tên member) Game Loop, FSM, Command Pattern
 │   ├── entities/           # Member 2: (Tên member) Character, Player, Enemy, Factory, Inventory<T>
 │   ├── dsa/                # Member 3: Nguyễn Quang Nhân Kiệt TurnManager (Priority Queue), Status Effects, Observer
-│   ├── graphics/           # Member 4: (Tên member) Raylib Renderer, Sprite Animation, Map, UI
+│   ├── graphics/           # Member 4: (Huỳnh Quang Khải) Raylib Renderer, Sprite Animation, Map, UI
 │   └── data/               # Member 5: (Nguyễn Trung Tỉnh): GameData, SoundManager, Start Menu
 ├── .gitignore              # Git Ignore file cho Visual Studio 2022
 ├── PROMPT_SYSTEM.md        # Bộ Prompt đồng bộ AI cho 5 thành viên
