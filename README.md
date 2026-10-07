@@ -90,8 +90,8 @@ RPG_Game_DT10/
 │   ├── images/             # Sprite sheets Pixel Art, Background, Icons
 │   └── audio/              # Sound FX (SFX) & Music (BGM)
 ├── src/                    # Source Code C++
-│   ├── core/               # Member 1: (Tên member) Game Loop, FSM, Command Pattern
-│   ├── entities/           # Member 2: (Tên member) Character, Player, Enemy, Factory, Inventory<T>
+│   ├── core/               # Member 1: (Võ Tấn Tiến) Game Loop, FSM, Command Pattern
+│   ├── entities/           # Member 2: (Nguyễn Quốc Đạt) Character, Player, Enemy, Factory, Inventory<T>
 │   ├── dsa/                # Member 3: Nguyễn Quang Nhân Kiệt TurnManager (Priority Queue), Status Effects, Observer
 │   ├── graphics/           # Member 4: (Huỳnh Quang Khải) Raylib Renderer, Sprite Animation, Map, UI
 │   └── data/               # Member 5: (Nguyễn Trung Tỉnh): GameData, SoundManager, Start Menu
