@@ -14,10 +14,10 @@
 | STT | Họ và Tên | MSSV | Vai trò & Phân công Nhiệm vụ | Nhánh Git (Branch) |
 | :-: | :--- | :-: | :--- | :--- |
 | **1** | **Nguyễn Trung Tỉnh** | **6651071077** | **Trưởng nhóm (Director)**<br>• Quản lý dự án, thiết kế Character & Monster, làm Slide/Báo cáo.<br>• Code Module: Data Engine (`GameData`), Audio Engine (`SoundManager`), UI Menu. | `feature/member5-data-sound` |
-| **2** | **Member 1** | *(Sửa MSSV)* | **Core Engine & FSM Specialist**<br>• Xây dựng Game Loop, Máy trạng thái FSM (`GameStateMachine`).<br>• Cài đặt **Command Pattern** (Đánh, Skill, Item & Cancel/Back nước đi). | `feature/member1-engine` |
-| **3** | **Member 2** | *(Sửa MSSV)* | **OOP Entities & Factory Specialist**<br>• Cây kế thừa `Character` $\rightarrow$ `Player`/`Enemy`/`Boss`.<br>• Công thức Dame Ngũ hành $5 \times 5$, **Factory Method**, Template `Inventory<T>`. | `feature/member2-entities` |
-| **4** | **Member 3** | *(Sửa MSSV)* | **DSA & Turn System Specialist**<br>• `TurnManager` dùng `std::priority_queue` xếp lượt theo `m_spd`.<br>• Quản lý 7 hiệu ứng Buff/Debuff, **Observer Pattern**, AI Boss. | `feature/member3-dsa` |
-| **5** | **Member 4** | *(Sửa MSSV)* | **UI/UX & Graphics Specialist**<br>• Render Sprite Animation 2D (Idle/Attack), dựng bản đồ (Map).<br>• Vẽ HUD thanh máu HP/MP Bar, render danh sách Turn Order & UI. | `feature/member4-graphics` |
+| **2** | **Võ Tấn Tiến**| **6651071074** | **Core Engine & FSM Specialist**<br>• Xây dựng Game Loop, Máy trạng thái FSM (`GameStateMachine`).<br>• Cài đặt **Command Pattern** (Đánh, Skill, Item & Cancel/Back nước đi). | `feature/member1-engine` |
+| **3** | **Nguyễn Quang Nhân Kiệt** | *6651071035* | **OOP Entities & Factory Specialist**<br>• Cây kế thừa `Character` $\rightarrow$ `Player`/`Enemy`/`Boss`.<br>• Công thức Dame Ngũ hành $5 \times 5$, **Factory Method**, Template `Inventory<T>`. | `feature/member2-entities` |
+| **4** | **Nguyễn Quốc Đạt** | *6651071014* | **DSA & Turn System Specialist**<br>• `TurnManager` dùng `std::priority_queue` xếp lượt theo `m_spd`.<br>• Quản lý 7 hiệu ứng Buff/Debuff, **Observer Pattern**, AI Boss. | `feature/member3-dsa` |
+| **5** | **Huỳnh Quang Khải** | **6651071030** | **UI/UX & Graphics Specialist**<br>• Render Sprite Animation 2D (Idle/Attack), dựng bản đồ (Map).<br>• Vẽ HUD thanh máu HP/MP Bar, render danh sách Turn Order & UI. | `feature/member4-graphics` |
 
 ---
 
@@ -90,11 +90,11 @@ RPG_Game_DT10/
 │   ├── images/             # Sprite sheets Pixel Art, Background, Icons
 │   └── audio/              # Sound FX (SFX) & Music (BGM)
 ├── src/                    # Source Code C++
-│   ├── core/               # Member 1: Game Loop, FSM, Command Pattern
-│   ├── entities/           # Member 2: Character, Player, Enemy, Factory, Inventory<T>
-│   ├── dsa/                # Member 3: TurnManager (Priority Queue), Status Effects, Observer
-│   ├── graphics/           # Member 4 (Trần Văn B): Raylib Renderer, Sprite Animation, Map, UI
-│   └── data/               # Member 5 (Nguyễn Trung Tỉnh): GameData, SoundManager, Start Menu
+│   ├── core/               # Member 1: (Võ Tấn Tiến) Game Loop, FSM, Command Pattern
+│   ├── entities/           # Member 2: (Nguyễn Quang Nhân Kiệt) Character, Player, Enemy, Factory, Inventory<T>
+│   ├── dsa/                # Member 3:  (Nguyễn Quốc Đạt) TurnManager (Priority Queue), Status Effects, Observer
+│   ├── graphics/           # Member 4: (Huỳnh Quang Khải) Raylib Renderer, Sprite Animation, Map, UI
+│   └── data/               # Member 5: (Nguyễn Trung Tỉnh): GameData, SoundManager, Start Menu
 ├── .gitignore              # Git Ignore file cho Visual Studio 2022
 ├── PROMPT_SYSTEM.md        # Bộ Prompt đồng bộ AI cho 5 thành viên
 └── README.md               # Tài liệu dự án
