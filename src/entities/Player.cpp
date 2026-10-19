@@ -6,10 +6,11 @@ Player::Player(const std::string& name, const Stats& stats, Element element)
 {
 }
 
+// Player phải đủ MP mới dùng được skill.
 void Player::executeSkill(Skill* skill, Character* target)
 {
     if (!canAct(skill, target)) return;
-    if (m_currentMp < skill->m_mpCost) return;
+    if (m_currentMp < skill->m_mpCost) return;  // Không đủ MP: bỏ qua
 
     m_currentMp -= skill->m_mpCost;
     target->takeDamage(calcSkillDamage(skill), skill->m_element, skill->m_isMagic);

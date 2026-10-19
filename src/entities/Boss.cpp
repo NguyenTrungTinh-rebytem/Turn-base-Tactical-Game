@@ -1,17 +1,11 @@
-#include "entities/Boss.h"
-#include "data/Skill.h"
-
-Boss::Boss(const std::string& name, const Stats& stats, Element element)
-    : Character(name, stats, element)
-{
-}
-
+// Giảm sát thương gốc trước, rồi để Character::takeDamage lo phần hệ và phòng thủ.
 void Boss::takeDamage(int amount, Element atkElement, bool isMagic)
 {
     const int reducedAmount = static_cast<int>(static_cast<float>(amount) * DAMAGE_TAKEN_RATE);
     Character::takeDamage(reducedAmount, atkElement, isMagic);
 }
 
+// Giống Enemy nhưng sát thương gốc được nhân DAMAGE_DEALT_RATE.
 void Boss::executeSkill(Skill* skill, Character* target)
 {
     if (!canAct(skill, target)) return;
