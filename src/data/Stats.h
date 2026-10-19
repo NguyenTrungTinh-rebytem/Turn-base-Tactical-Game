@@ -1,15 +1,17 @@
 #pragma once
 
+// Bộ chỉ số của một nhân vật. Dùng chung cho race, class, buff...
 struct Stats
 {
-    int m_hp  = 0;
-    int m_mp  = 0;
-    int m_a   = 0;
-    int m_ma  = 0;
-    int m_d   = 0;
-    int m_md  = 0;
-    int m_spd = 0;
+    int m_hp  = 0;   // Máu tối đa
+    int m_mp  = 0;   // Mana tối đa
+    int m_a   = 0;   // Tấn công vật lý
+    int m_ma  = 0;   // Tấn công phép
+    int m_d   = 0;   // Phòng thủ vật lý
+    int m_md  = 0;   // Phòng thủ phép
+    int m_spd = 0;   // Tốc độ, TurnManager dùng để xếp thứ tự lượt
 
+    // Cộng từng chỉ số của hai bộ Stats, ví dụ: raceStats + classStats.
     Stats operator+(const Stats& other) const
     {
         Stats result;
@@ -23,6 +25,8 @@ struct Stats
         return result;
     }
 
+    // CHỈ so sánh theo tốc độ (m_spd), không phải toàn bộ chỉ số.
+    // Khi sắp xếp giảm dần cho TurnManager: dùng (b < a) hoặc std::greater.
     bool operator<(const Stats& other) const
     {
         return m_spd < other.m_spd;
