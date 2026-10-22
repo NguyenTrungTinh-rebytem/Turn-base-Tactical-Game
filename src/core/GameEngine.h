@@ -1,11 +1,13 @@
 #pragma once
 
+#include <memory>
 #include <string>
+#include "BattleSystem.h"
 #include "GameStateMachine.h"
 
 // Owns the window and runs the main game loop:
 //   while (window is open) { processInput(); update(dt); render(); }
-// Each of the three steps dispatches on the current State.
+// Each step dispatches on the current State of the GameStateMachine.
 class GameEngine
 {
 public:
@@ -25,17 +27,19 @@ private:
 
     // ---- input per state
     void handleMenuInput();
-    void handleBattleInput();
+    void handlePlayerTurnInput();
     void handleResultInput();
 
-    // ---- update per state
-    void updateBattle(float deltaTime);
+    // ---- battle flow
+    void startBattle();
+    void finishPlayerAction();   // called after the player used up the turn
+    void updateEnemyTurn(float deltaTime);
 
-    // ---- render per state
+    // ---- drawing
     void drawMenu() const;
     void drawBattle() const;
-    void drawVictory() const;
-    void drawGameOver() const;
+    void drawCommands() const;
+    void drawResult(const char* title, bool canRetry) const;
 
 private:
     int m_screenWidth;
@@ -43,5 +47,6 @@ private:
     std::string m_title;
 
     GameStateMachine m_stateMachine;
-    float m_battleTime;   // seconds spent in the current battle (placeholder state)
+    std::unique_ptr<BattleSystem> m_battle;   // null while in the menu
+    float m_enemyTimer;                       // short pause so the player can read the log
 };

@@ -15,22 +15,30 @@ bool GameStateMachine::isState(State state) const
     return m_currentState == state;
 }
 
-// MENU      -> IN_BATTLE
-// IN_BATTLE -> VICTORY | GAME_OVER
-// VICTORY   -> MENU
-// GAME_OVER -> MENU | IN_BATTLE (retry)
+bool GameStateMachine::isInBattle() const
+{
+    return m_currentState == State::PLAYER_TURN || m_currentState == State::ENEMY_TURN;
+}
+
+// MENU        -> PLAYER_TURN
+// PLAYER_TURN -> ENEMY_TURN | VICTORY
+// ENEMY_TURN  -> PLAYER_TURN | GAME_OVER
+// VICTORY     -> MENU
+// GAME_OVER   -> MENU | PLAYER_TURN (retry)
 bool GameStateMachine::canTransition(State from, State to) const
 {
     switch (from)
     {
     case State::MENU:
-        return to == State::IN_BATTLE;
-    case State::IN_BATTLE:
-        return to == State::VICTORY || to == State::GAME_OVER;
+        return to == State::PLAYER_TURN;
+    case State::PLAYER_TURN:
+        return to == State::ENEMY_TURN || to == State::VICTORY;
+    case State::ENEMY_TURN:
+        return to == State::PLAYER_TURN || to == State::GAME_OVER;
     case State::VICTORY:
         return to == State::MENU;
     case State::GAME_OVER:
-        return to == State::MENU || to == State::IN_BATTLE;
+        return to == State::MENU || to == State::PLAYER_TURN;
     }
     return false;
 }
