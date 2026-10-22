@@ -2,6 +2,7 @@
 #include <queue>
 #include <vector>
 class Character;
+class CommandStack; 
 class CharacterCompare
 {
 public:
@@ -19,6 +20,7 @@ private:
     Character* m_currentCharacter;
 
 public:
+    void processTurn(CommandStack& commandStack);   
     TurnManager();
     void addCharacter(Character* character);
     Character* getNextTurn();
