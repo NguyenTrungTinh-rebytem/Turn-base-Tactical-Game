@@ -33,7 +33,6 @@ void GameEngine::initialize()
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "2.5D RPG Battle Engine - Demo");
     SetTargetFPS(60);
 
-    // 1. Nạp dữ liệu CSV
     try {
         m_gameData.loadAll("data");
         m_battleLog = "Data CSV nap thanh cong!";
@@ -42,7 +41,6 @@ void GameEngine::initialize()
         m_battleLog = std::string("Data load notice: ") + e.what();
     }
 
-    // 2. Thiết lập sân đấu mặc định
     m_battleMap.setStage(StageId::STAGE_1);
 
     m_stateMachine.changeState(GameStateMachine::State::MENU);
@@ -55,8 +53,9 @@ void GameEngine::setupBattle()
     m_combatants.clear();
     m_turnManager.clear();
     m_commandStack.clear();
+    m_aiTurnTimer = 0.0f;
 
-    // Hero & Quái vật (Không dấu)
+    // 1. Khoi tao Hero (m_combatants[0])
     Stats heroStats{ 120, 50, 25, 20, 5, 8, 15 };
     auto hero = std::make_unique<Player>("Chien Binh", heroStats, Element::KIM);
 
@@ -66,6 +65,7 @@ void GameEngine::setupBattle()
         Skill{ "S03", "Hoi Mau", SkillOwnerType::CLASS, "Priest", SkillType::HEAL, 25, 20, EffectType::REGEN, 2, Element::THUY, true }
     };
 
+    // 2. Khoi tao Quai vat (m_combatants[1], m_combatants[2])
     Stats goblinStats{ 60, 0, 28, 0, 5, 2, 10 };
     auto goblin = std::make_unique<Enemy>("Goblin", goblinStats, Element::MOC);
 
@@ -82,7 +82,8 @@ void GameEngine::setupBattle()
 
     m_currentCharacter = m_turnManager.getNextTurn();
     m_selectedTarget = m_combatants[1].get();
-    m_battleLog = "Tran dau bat dau! Luot cua: " + (m_currentCharacter ? m_currentCharacter->getName() : "None");
+    m_battlePhase = BattlePhase::PLAYER_TURN;
+    m_battleLog = "Tran dau bat dau! Den luot: " + (m_currentCharacter ? m_currentCharacter->getName() : "None");
 }
 
 void GameEngine::processEvents()
@@ -114,7 +115,11 @@ void GameEngine::processEvents()
         break;
 
     case GameStateMachine::State::IN_BATTLE:
-        processPlayerInput();
+        // CHI XU LY INPUT KHI DANG TRONG PHASE LUOT CUA PLAYER
+        if (m_battlePhase == BattlePhase::PLAYER_TURN)
+        {
+            processPlayerInput();
+        }
         break;
 
     case GameStateMachine::State::VICTORY:
@@ -131,11 +136,7 @@ void GameEngine::processPlayerInput()
 {
     if (!m_currentCharacter) return;
 
-    // Chỉ nhận Input khi đến lượt của Player
-    Player* player = dynamic_cast<Player*>(m_currentCharacter);
-    if (!player) return;
-
-    // Chuyển mục tiêu nhắm đánh (Tab hoặc Phím Mũi Tên)
+    // Doi muc tieu (TAB hoac Mui ten)
     if (IsKeyPressed(KEY_TAB) || IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_LEFT))
     {
         for (size_t i = 1; i < m_combatants.size(); ++i) {
@@ -146,32 +147,39 @@ void GameEngine::processPlayerInput()
         }
     }
 
-    // Phím A: Tấn công thường
-if (IsKeyPressed(KEY_A) && m_selectedTarget)
-{
-    Character* attacker = player;
-    Character* target = m_selectedTarget;
+    // Phim A: Tan cong thuong
+    if (IsKeyPressed(KEY_A) && m_selectedTarget)
+    {
+        Character* attacker = m_combatants[0].get(); // Chien Binh
+        Character* target = m_selectedTarget;
 
-    // Khởi tạo AttackCommand với 2 con trỏ Character* đúng theo AttackCommand.h
-    auto command = std::make_unique<AttackCommand>(attacker, target);
+        int hpBefore = target->getCurrentHp();
 
-    int hpBefore = target->getCurrentHp();
-    queuePlayerCommand(std::move(command)); // Khởi chạy lệnh tấn công
-    int dealt = hpBefore - target->getCurrentHp();
+        // Truyen 2 con tro attacker, target theo dung AttackCommand(Character*, Character*)
+        auto command = std::make_unique<AttackCommand>(attacker, target);
+        queuePlayerCommand(std::move(command));
 
-    m_battleLog = attacker->getName() + " tấn công " + target->getName() + " gây " + std::to_string(dealt) + " sát thương!";
-    
-    // Chuyển lượt
-    m_currentCharacter = m_turnManager.getNextTurn();
-}
+        int dealt = hpBefore - target->getCurrentHp();
+        m_battleLog = attacker->getName() + " tan cong " + target->getName() + " gay " + std::to_string(dealt) + " sat thuong!";
 
-    // Phím S: Mở danh sách Skill
+        // Lay luot tiep theo
+        m_currentCharacter = m_turnManager.getNextTurn();
+        m_aiTurnTimer = 0.0f;
+
+        // Kiem tra luot tiep theo thuoc ve ai
+        if (m_currentCharacter == m_combatants[0].get()) {
+            m_battlePhase = BattlePhase::PLAYER_TURN;
+        } else {
+            m_battlePhase = BattlePhase::AI_THINKING;
+        }
+    }
+
+    // Phim S: Biet/Tat Menu Skill
     if (IsKeyPressed(KEY_S))
     {
         m_isSelectingSkill = !m_isSelectingSkill;
     }
 
-    // Chọn Kỹ năng khi menu Skill đang mở
     if (m_isSelectingSkill)
     {
         if (IsKeyPressed(KEY_ONE) && m_heroSkills.size() >= 1) m_selectedSkillIndex = 0;
@@ -181,32 +189,35 @@ if (IsKeyPressed(KEY_A) && m_selectedTarget)
         if (IsKeyPressed(KEY_SPACE) && m_selectedTarget)
         {
             Skill* skill = &m_heroSkills[m_selectedSkillIndex];
+            Character* player = m_combatants[0].get();
+
             if (player->getCurrentMp() >= skill->m_mpCost)
             {
                 Character* target = (skill->m_type == SkillType::HEAL) ? player : m_selectedTarget;
-                
-                auto command = std::make_unique<UseSkillCommand>(
-                    [player, skill, target, this]() {
-                        int hpBefore = target->getCurrentHp();
-                        if (skill->m_type == SkillType::HEAL) {
-                            player->heal(skill->m_power);
-                            m_battleLog = player->getName() + " dùng " + skill->m_name + " hồi " + std::to_string(skill->m_power) + " HP!";
-                        } else {
-                            player->executeSkill(skill, target);
-                            int dealt = hpBefore - target->getCurrentHp();
-                            m_battleLog = player->getName() + " dùng " + skill->m_name + " gây " + std::to_string(dealt) + " sát thương!";
-                        }
-                    },
-                    []() {}
-                );
+                int hpBefore = target->getCurrentHp();
 
-                queuePlayerCommand(std::move(command));
+                player->executeSkill(skill, target);
+
+                if (skill->m_type == SkillType::HEAL) {
+                    m_battleLog = player->getName() + " dung " + skill->m_name + " hoi HP!";
+                } else {
+                    int dealt = hpBefore - target->getCurrentHp();
+                    m_battleLog = player->getName() + " dung " + skill->m_name + " gay " + std::to_string(dealt) + " sat thuong!";
+                }
+
                 m_isSelectingSkill = false;
                 m_currentCharacter = m_turnManager.getNextTurn();
+                m_aiTurnTimer = 0.0f;
+
+                if (m_currentCharacter == m_combatants[0].get()) {
+                    m_battlePhase = BattlePhase::PLAYER_TURN;
+                } else {
+                    m_battlePhase = BattlePhase::AI_THINKING;
+                }
             }
             else
             {
-                m_battleLog = "Không đủ MP để dùng " + skill->m_name + "!";
+                m_battleLog = "Khong du MP de dung " + skill->m_name + "!";
             }
         }
     }
@@ -216,19 +227,15 @@ void GameEngine::executeAiTurn(Character* aiChar)
 {
     if (!aiChar || !aiChar->isAlive()) return;
 
-    // Tìm mục tiêu tấn công là Chiến Binh (Player)
     Character* hero = m_combatants[0].get();
     if (!hero || !hero->isAlive()) return;
 
     int hpBefore = hero->getCurrentHp();
 
-    // Thực hiện đòn đánh dựa trên chỉ số công của AI
     int rawDmg = aiChar->getStats().m_a;
     hero->takeDamage(rawDmg, aiChar->getElement(), false);
 
     int dealt = hpBefore - hero->getCurrentHp();
-
-    // Cập nhật Battle Log cho đòn đánh của AI
     m_battleLog = aiChar->getName() + " tan cong " + hero->getName() + " gay " + std::to_string(dealt) + " sat thuong!";
 }
 
@@ -238,39 +245,50 @@ void GameEngine::update(float deltaTime)
 
     checkBattleCondition();
 
-    // Xử lý lượt đánh của AI (Bất kỳ nhân vật nào KHÔNG PHẢI là Player)
-    if (m_currentCharacter && m_currentCharacter->isAlive())
+    if (!m_currentCharacter)
     {
-        Player* isPlayer = dynamic_cast<Player*>(m_currentCharacter);
+        m_currentCharacter = m_turnManager.getNextTurn();
+        return;
+    }
 
-        if (!isPlayer) // Nếu là AI (Goblin, Ma Vương, ...)
+    // TIEP TUC XU LY PHASE AI
+    if (m_battlePhase == BattlePhase::AI_THINKING)
+    {
+        if (m_currentCharacter && m_currentCharacter->isAlive() && m_currentCharacter != m_combatants[0].get())
         {
             m_aiTurnTimer += deltaTime;
 
-            // Chờ 0.8 giây để người chơi nhìn rõ lượt và Battle Log
-            if (m_aiTurnTimer >= 0.8f)
+            // Cho dung 1.2 giay cho moi luot cua Quai vat
+            if (m_aiTurnTimer >= 1.2f)
             {
                 executeAiTurn(m_currentCharacter);
+
+                // Lay luot ke tiếp
                 m_currentCharacter = m_turnManager.getNextTurn();
-                m_aiTurnTimer = 0.0f; // Reset timer cho lượt sau
+                m_aiTurnTimer = 0.0f;
+
+                // Neu luot tiep theo quay ve Player -> Doi Phase
+                if (m_currentCharacter == m_combatants[0].get())
+                {
+                    m_battlePhase = BattlePhase::PLAYER_TURN;
+                }
             }
         }
         else
         {
-            m_aiTurnTimer = 0.0f; // Reset timer khi đến lượt Người chơi
+            m_battlePhase = BattlePhase::PLAYER_TURN;
         }
     }
 }
+
 void GameEngine::checkBattleCondition()
 {
-    // 1. Kiểm tra Hero chết -> GAME_OVER
     if (m_combatants.empty() || !m_combatants[0]->isAlive())
     {
         m_stateMachine.changeState(GameStateMachine::State::GAME_OVER);
         return;
     }
 
-    // 2. Kiểm tra toàn bộ Enemy/Boss chết -> VICTORY
     bool allEnemiesDead = true;
     for (size_t i = 1; i < m_combatants.size(); ++i) {
         if (m_combatants[i]->isAlive()) {
@@ -319,7 +337,6 @@ void GameEngine::render()
 
 void GameEngine::renderBattleUI()
 {
-    // 1. Ve thong tin Nhan vat & Thanh HP/MP tren San dau
     for (size_t i = 0; i < m_combatants.size(); ++i)
     {
         auto& c = m_combatants[i];
@@ -332,23 +349,19 @@ void GameEngine::renderBattleUI()
         int x = (int)pos.x - 60;
         int y = (int)pos.y - 120;
 
-        // Khung mau chon Target
         if (c.get() == m_selectedTarget) {
             DrawRectangleLines(x - 5, y - 5, 130, 90, GOLD);
         }
 
-        // Ten & Luot
         Color titleColor = (c.get() == m_currentCharacter) ? YELLOW : WHITE;
         DrawText(c->getName().c_str(), x, y, 18, titleColor);
 
-        // HP Bar
         float hpRatio = (float)c->getCurrentHp() / (float)c->getStats().m_hp;
         DrawRectangle(x, y + 25, 120, 12, RED);
         DrawRectangle(x, y + 25, (int)(120 * hpRatio), 12, GREEN);
         DrawRectangleLines(x, y + 25, 120, 12, BLACK);
         DrawText(TextFormat("%d/%d", c->getCurrentHp(), c->getStats().m_hp), x + 25, y + 26, 10, WHITE);
 
-        // MP Bar
         if (c->getStats().m_mp > 0) {
             float mpRatio = (float)c->getCurrentMp() / (float)c->getStats().m_mp;
             DrawRectangle(x, y + 42, 120, 8, DARKGRAY);
@@ -357,17 +370,23 @@ void GameEngine::renderBattleUI()
         }
     }
 
-    // 2. Bang Huong dan & Battle Log phia duoi
     DrawRectangle(20, 560, 1240, 140, Fade(BLACK, 0.8f));
     DrawRectangleLines(20, 560, 1240, 140, RAYWHITE);
 
     DrawText("DEN LUOT:", 40, 575, 20, YELLOW);
-    DrawText(m_currentCharacter ? m_currentCharacter->getName().c_str() : "None", 160, 575, 20, GREEN);
+    if (m_currentCharacter)
+    {
+        if (m_currentCharacter == m_combatants[0].get()) {
+            DrawText(m_currentCharacter->getName().c_str(), 160, 575, 20, GREEN);
+        } else {
+            std::string aiTurnText = m_currentCharacter->getName() + " (Dang suy nghi...)";
+            DrawText(aiTurnText.c_str(), 160, 575, 20, RED);
+        }
+    }
 
     DrawText("DIEU KHIEN: [A] Tan Cong  |  [S] Ky Nang  |  [TAB] Doi Muc Tieu  |  [ESC/Z] Undo", 40, 610, 18, LIGHTGRAY);
     DrawText(TextFormat("BATTLE LOG: %s", m_battleLog.c_str()), 40, 650, 20, ORANGE);
 
-    // 3. Menu chon Skill khi nhan S
     if (m_isSelectingSkill)
     {
         DrawRectangle(400, 300, 480, 220, Fade(DARKBLUE, 0.95f));
@@ -383,6 +402,7 @@ void GameEngine::renderBattleUI()
         }
     }
 }
+
 void GameEngine::shutdown()
 {
     if (m_isInitialized)
@@ -414,7 +434,7 @@ bool GameEngine::cancelLastAction()
 
     bool result = m_commandStack.cancelLastAction();
     if (result) {
-        m_battleLog = "Đã hoàn tác (Undo) hành động vừa rồi!";
+        m_battleLog = "Da hoan tac (Undo) hanh dong vua roi!";
     }
     return result;
 }

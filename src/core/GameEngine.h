@@ -18,8 +18,6 @@
 
 class GameEngine
 {
-    private:
-    float m_aiTurnTimer = 0.0f;
 public:
     GameEngine() = default;
     ~GameEngine() = default;
@@ -45,7 +43,14 @@ private:
     void executeAiTurn(Character* aiChar);
     void checkBattleCondition();
 
-    // Core Managers & State Machine
+    // Enum quan ly Phase tran dau ro rang
+    enum class BattlePhase {
+        PLAYER_TURN,
+        AI_THINKING,
+        CHECK_END
+    };
+
+    // Core Managers
     GameStateMachine m_stateMachine;
     CommandStack m_commandStack;
     GameData m_gameData;
@@ -56,14 +61,16 @@ private:
     std::vector<std::unique_ptr<Character>> m_combatants;
     std::vector<Skill> m_heroSkills;
 
-    // Battle Tracking
+    // Tracking State
     Character* m_currentCharacter = nullptr;
     Character* m_selectedTarget = nullptr;
+    BattlePhase m_battlePhase = BattlePhase::PLAYER_TURN;
 
-    // UI state
+    // UI & Timer
     int m_selectedSkillIndex = 0;
     bool m_isSelectingSkill = false;
-    std::string m_battleLog = "Chao mừng den voi Battle Demo!";
+    float m_aiTurnTimer = 0.0f;
+    std::string m_battleLog = "Chao mung den voi Battle Engine!";
 
     bool m_isRunning = false;
     bool m_isInitialized = false;
