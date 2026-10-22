@@ -3,41 +3,37 @@
 #include <string>
 #include <utility>
 #include <algorithm>
-#include "data/Element.h"
-#include "data/Stats.h"
+#include "data/DataTypes.h"
 
-struct Skill;  // Khai báo trước (Forward declaration)
+struct Skill;
 
-// Lớp cha trừu tượng cho Player, Enemy, Boss.
 class Character
 {
 public:
     Character(const std::string& name, const Stats& stats, Element element);
-
-    // Bắt buộc virtual để xóa đối tượng con qua con trỏ lớp cha an toàn.
     virtual ~Character() = default;
 
-    // Nhận sát thương tính theo Ma trận Khắc hệ Ngũ hành & Phòng thủ
+    // Nhận sát thương tính theo Ma trận Ngũ Hành và Phòng thủ
     virtual void takeDamage(int amount, Element atkElement, bool isMagic);
 
-    // Nạp chồng takeDamage nhận 1 tham số (cho BURN / Sát thương chuẩn không qua thủ)
+    // Nhận sát thương trực tiếp (dùng cho hiệu ứng BURN/Mất HP)
     virtual void takeDamage(int amount) {
         m_currentHp = std::max(0, m_currentHp - amount);
     }
 
-    // Hàm hồi máu cho REGEN / Skill Heal
+    // Hồi máu (dùng cho hiệu ứng REGEN/Kỹ năng hồi HP)
     virtual void heal(int amount) {
         m_currentHp = std::min(m_stats.m_hp, m_currentHp + amount);
     }
 
-    // Quản lý trạng thái Stun (Cho TurnManager & StatusEffect)
+    // Trạng thái Choáng (dùng cho hiệu ứng STUN)
     bool isStunned() const { return m_isStunned; }
     void setStunned(bool stunned) { m_isStunned = stunned; }
 
-    // Quản lý thay đổi Speed tạm thời (Cho hiệu ứng SLOW)
+    // Thay đổi Tốc độ (dùng cho hiệu ứng SLOW)
     void setSpeed(int spd) { m_stats.m_spd = spd; }
 
-    // Dùng skill lên mục tiêu. Thuần ảo: mỗi lớp con tự định nghĩa cách xử lý.
+    // Dùng kỹ năng
     virtual void executeSkill(Skill* skill, Character* target) = 0;
 
     // Getters
@@ -49,25 +45,25 @@ public:
     int                getSpeed() const     { return m_stats.m_spd; }
     bool               isAlive() const      { return m_currentHp > 0; }
 
-protected:
-    // Kiểm tra skill/mục tiêu hợp lệ và cả hai bên còn sống.
-    bool canAct(const Skill* skill, const Character* target) const;
+    // Nạp chồng toán tử < so sánh Tốc độ để hỗ trợ Priority Queue cho TurnManager
+    bool operator<(const Character& other) const {
+        return m_stats.m_spd < other.m_stats.m_spd;
+    }
 
-    // Sát thương gốc của skill = chỉ số tấn công (vật lý/phép) + sức mạnh skill.
+protected:
+    bool canAct(const Skill* skill, const Character* target) const;
     int  calcSkillDamage(const Skill* skill) const;
 
     std::string m_name;
-    Stats       m_stats;       // Chỉ số tối đa
+    Stats       m_stats;
     Element     m_element;
-    int         m_currentHp;   // Máu hiện tại
-    int         m_currentMp;   // Mana hiện tại
-    bool        m_isStunned = false; // Trạng thái bị choáng/bỏ lượt
+    int         m_currentHp;
+    int         m_currentMp;
+    bool        m_isStunned = false;
 };
 
-// Smart pointer quản lý vòng đời nhân vật
 using CharacterPtr = std::unique_ptr<Character>;
 
-// Hàm khởi tạo FactoryHelper
 template <typename T, typename... Args>
 CharacterPtr makeCharacter(Args&&... args)
 {
