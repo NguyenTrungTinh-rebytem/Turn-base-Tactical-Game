@@ -1,4 +1,4 @@
-#include "OOP-14: Update StatusEffect.h"
+#include "StatusEffect.h"
 #include "../src/entities/Character.h"
 #include <algorithm>
 void StatusEffectManager::addEffect(
