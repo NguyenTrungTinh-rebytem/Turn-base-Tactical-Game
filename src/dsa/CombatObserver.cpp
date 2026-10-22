@@ -1,4 +1,4 @@
-#include "OOP-14: Update CombatObserver.h"
+#include "CombatObserver.h"
 void SubjectCombat::addObserver(ICombatObserver* observer)
 {
     if (observer == nullptr)
