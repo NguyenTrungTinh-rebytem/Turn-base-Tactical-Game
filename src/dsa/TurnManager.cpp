@@ -13,7 +13,7 @@ bool CharacterCompare::operator()(
     if (rhs == nullptr)
         return false;
 
-    return lhs->getStats().spd < rhs->getStats().spd;
+    return lhs->getStats().m_spd < rhs->getStats().m_spd;
 }
 
 TurnManager::TurnManager()

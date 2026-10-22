@@ -18,3 +18,13 @@ void Character::takeDamage(int amount, Element atkElement, bool isMagic) {
     m_currentHp -= finalDamage;
     if (m_currentHp < 0) m_currentHp = 0;
 }
+bool Character::canAct(const Skill* skill, const Character* target) const {
+    if (!skill) return false;
+    return m_currentMp >= skill->m_mpCost && !isStunned();
+}
+
+int Character::calcSkillDamage(const Skill* skill) const {
+    if (!skill) return 0;
+    int baseAtk = skill->m_isMagic ? m_stats.m_ma : m_stats.m_a;
+    return baseAtk + skill->m_power;
+}

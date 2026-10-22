@@ -55,7 +55,7 @@ void StatusEffectManager::updateEffects(Character* target)
             target->setSpeed(
                 std::max(
                     0,
-                    target->getStats().spd -
+                    target->getStats().m_spd -
                     static_cast<int>(effect.value)
                 )
             );
