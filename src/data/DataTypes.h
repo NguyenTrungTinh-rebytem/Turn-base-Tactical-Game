@@ -1,36 +1,44 @@
 #pragma once
 #include <string>
 #include <vector>
-
-// Enum Ngũ hành chuẩn PROMPT
-enum class Element { KIM = 0, MOC, THUY, HOA, THO };
-
-// Ma trận khắc hệ 5x5 chuẩn
-constexpr float ELEMENT_MATRIX[5][5] = {
-    { 1.0f, 1.5f, 1.5f, 0.5f, 0.5f }, // KIM
-    { 0.5f, 1.0f, 1.5f, 0.5f, 1.5f }, // MOC
-    { 0.5f, 0.5f, 1.0f, 1.5f, 1.5f }, // THUY
-    { 1.5f, 1.5f, 0.5f, 1.0f, 0.5f }, // HOA
-    { 1.5f, 0.5f, 0.5f, 1.5f, 1.0f }  // THO
-};
+#include "data/Stats.h"
+#include "data/Element.h"
 
 enum class EffectType { NONE, ATK_BOOST, DEF_BOOST, REGEN, STUN, BURN, SLOW, WEAKNESS };
+
 enum class SkillType { DAMAGE, HEAL, BUFF, DEBUFF };
+
 enum class SkillOwnerType { RACE, CLASS };
 
-// Struct Stats thống nhất
-struct Stats {
-    int m_hp = 0;
-    int m_mp = 0;
-    int m_spd = 0;
-    int m_a = 0;   // Physical Attack
-    int m_ma = 0;  // Magic Attack
-    int m_d = 0;   // Physical Defend
-    int m_md = 0;  // Magic Defend
+struct SkillData {
+    std::string m_id;
+    std::string m_name;
+    SkillOwnerType m_ownerType = SkillOwnerType::RACE;
+    std::string m_owner;
+    SkillType m_type = SkillType::DAMAGE;
+    int m_power = 0;
+    int m_mpCost = 0;
+    EffectType m_effect = EffectType::NONE;
+    int m_effectTurns = 0;
+};
 
-    Stats operator+(const Stats& other) const {
-        return Stats{ m_hp + other.m_hp, m_mp + other.m_mp, m_spd + other.m_spd,
-                      m_a + other.m_a, m_ma + other.m_ma, m_d + other.m_d, m_md + other.m_md };
-    }
-    bool operator<(const Stats& other) const { return m_spd < other.m_spd; }
+struct RaceData {
+    std::string m_name;
+    Stats m_stats;
+    std::vector<std::string> m_skillIds;
+};
+
+struct ClassData {
+    std::string m_name;
+    Stats m_stats;
+    std::vector<std::string> m_skillIds;
+};
+
+struct MonsterData {
+    std::string m_id;
+    std::string m_name;
+    Element m_element = Element::KIM;
+    bool m_isBoss = false;
+    int m_stage = 1;
+    Stats m_stats;
 };
