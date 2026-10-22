@@ -4,7 +4,7 @@
 #include "SpriteAnimation.h"
 #include <memory>
 
-int main() {
+int test_sprite_main() {
     constexpr int SCREEN_W = 1280;
     constexpr int SCREEN_H = 720;
     InitWindow(SCREEN_W, SCREEN_H, "[THE FIRST STEP] - Sprint 1: Sprite Test");

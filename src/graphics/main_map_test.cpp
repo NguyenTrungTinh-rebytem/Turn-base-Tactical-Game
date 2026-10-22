@@ -34,7 +34,7 @@ static std::vector<Actor> buildStage(const BattleMap& map, StageId stage) {
     return actors;
 }
 
-int main() {
+int test_map_main(){
     InitWindow(1280, 720, "[THE FIRST STEP] - Map Test");
     SetTargetFPS(60);
 
