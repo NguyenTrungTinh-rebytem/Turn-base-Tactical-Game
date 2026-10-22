@@ -1,9 +1,7 @@
 #include "GameEngine.h"
-
 #include <random>
 #include <utility>
 #include "raylib.h"
-#include "BattleUnit.h"
 
 namespace
 {

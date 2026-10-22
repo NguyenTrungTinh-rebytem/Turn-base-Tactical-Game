@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <string>
-#include "BattleSystem.h"
 #include "GameStateMachine.h"
 
 // Owns the window and runs the main game loop:
