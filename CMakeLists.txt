@@ -20,8 +20,20 @@ include_directories(
 )
 
 # 3. Thư viện đồ họa Raylib (Bắt buộc cho dự án này)
-find_package(raylib 4.0 REQUIRED)
+set(RAYLIB_ROOT "" CACHE PATH "Thu muc goc raylib (chua include/ va lib/)")
 
+find_path(RAYLIB_INCLUDE_DIR raylib.h PATHS "${RAYLIB_ROOT}/include" REQUIRED)
+find_library(RAYLIB_LIBRARY NAMES raylib raylib.lib PATHS "${RAYLIB_ROOT}/lib" REQUIRED)
+
+if(NOT TARGET raylib)
+    add_library(raylib STATIC IMPORTED)
+    set_target_properties(raylib PROPERTIES
+        IMPORTED_LOCATION "${RAYLIB_LIBRARY}"
+        INTERFACE_INCLUDE_DIRECTORIES "${RAYLIB_INCLUDE_DIR}")
+    if(WIN32)
+        set_property(TARGET raylib APPEND PROPERTY INTERFACE_LINK_LIBRARIES winmm gdi32 opengl32)
+    endif()
+endif()
 # 4. Tạo file thực thi
 add_executable(game ${SOURCES})
 target_link_libraries(game PRIVATE raylib)
