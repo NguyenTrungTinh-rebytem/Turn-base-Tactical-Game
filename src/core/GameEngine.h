@@ -14,6 +14,9 @@
 #include "entities/Enemy.h"
 #include "entities/Boss.h"
 #include "entities/Inventory.h"
+#include "entities/Item.h"
+#include "entities/Party.h"
+#include "entities/CharacterFactory.h"
 #include "raylib.h"
 
 #include <memory>
@@ -24,7 +27,7 @@
 
 // GameEngine (Core) la noi NOI tat ca module:
 //   Data     -> GameData (CSV: hero, quai, skill)
-//   Entities -> Character/Player/Enemy/Boss, Inventory<T>
+//   Entities -> Character/Player/Enemy/Boss, CharacterFactory, Party, Item, Inventory<T>
 //   DSA      -> TurnManager (vong luot), StatusEffectManager, SubjectCombat (Observer)
 //   Graphics -> BattleMap, SpriteAnimation
 // GameEngine ke thua rieng ICombatObserver de tu nhan thong bao mau/chet.
@@ -58,9 +61,8 @@ private:
     void loadStage(int stage);
     void createHero();
     void spawnEnemies(int stage);
-    void addCombatant(std::unique_ptr<Character> character);
+    void addCombatant(std::shared_ptr<Character> character);
     int  finalStage() const;
-    static Skill toBattleSkill(const SkillData& data, Element heroElement);
 
     // ----- input nguoi choi -----
     enum class BattlePhase {
@@ -73,7 +75,7 @@ private:
     void cycleTarget();
     void ensureValidTarget();
     void doBasicAttack();
-    void doUseItem();
+    void doUseItem(ItemKind kind);
     bool castSkill(size_t skillIndex);
     void confirmTurn();
 
@@ -98,6 +100,7 @@ private:
     int  indexOf(const Character* character) const;
     bool isHero(const Character* character) const;
     Character* hero() const;
+    const std::vector<Skill>& heroSkills() const;
     BattleSlot slotOf(int index) const;
     std::string resolvePath(const std::string& relativePath) const;
     void spawnFloatingText(const Character* character, const std::string& text, Color color);
@@ -111,12 +114,11 @@ private:
     SubjectCombat m_combatSubject;
 
     // ----- Entities (Engine so huu, cac module khac chi quan sat bang con tro tho) -----
-    std::vector<std::unique_ptr<Character>> m_combatants;            // [0] = hero
+    std::vector<std::shared_ptr<Character>> m_combatants;            // [0] = hero (cung doi tuong voi m_party.getLeader())
     std::vector<std::unique_ptr<SpriteAnimation>> m_sprites;         // song song voi m_combatants
     std::unordered_map<const Character*, StatusEffectManager> m_statusEffects;
     std::unordered_map<const Character*, int> m_lastHp;              // de Observer tinh delta
-    std::vector<Skill> m_heroSkills;
-    Inventory<std::string> m_inventory;
+    Party m_party;                                                   // Hero (toi da 3) + tui do dung chung
 
     // ----- Tracking State -----
     Character* m_currentCharacter = nullptr;

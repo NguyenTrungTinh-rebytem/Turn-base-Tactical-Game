@@ -1,8 +1,9 @@
 #include "entities/Player.h"
 #include "data/Skill.h"
 
-Player::Player(const std::string& name, const Stats& stats, Element element)
-    : Character(name, stats, element)
+Player::Player(const std::string& name, const Stats& stats, Element element,
+               const std::string& raceName, const std::string& className)
+    : Character(name, stats, element), m_raceName(raceName), m_className(className)
 {
 }
 

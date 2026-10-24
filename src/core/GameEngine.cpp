@@ -26,10 +26,11 @@ namespace
     // ----- Gameplay -----
     constexpr float AI_TURN_DELAY = 1.2f;
     constexpr int   POTION_HEAL = 40;
+    constexpr int   MANA_POTION_RESTORE = 30;
     constexpr int   INITIAL_POTIONS = 3;
+    constexpr int   INITIAL_MANA_POTIONS = 2;
     constexpr int   STAGE1_ENEMY_COUNT = 3;
     constexpr float STAGE_CLEAR_HEAL_RATE = 0.3f;   // hoi 30% HP khi qua man
-    const char* const POTION_NAME = "Potion";
 
     // ----- He so hieu ung (StatusEffectManager chi dem luot, Core ap dung vao sat thuong) -----
     constexpr float ATK_BOOST_BONUS = 0.25f;
@@ -199,37 +200,7 @@ int GameEngine::finalStage() const
     return m_dataLoaded ? 2 : 1;
 }
 
-Skill GameEngine::toBattleSkill(const SkillData& data, Element heroElement)
-{
-    // TODO(Data): khi GameData co buildSkill(id) thi thay ham nay.
-    // CSV chua co cot element/isMagic nen Core suy ra tam tu hieu ung.
-    Skill skill;
-    skill.m_id = data.m_id;
-    skill.m_name = data.m_name;
-    skill.m_ownerType = data.m_ownerType;
-    skill.m_owner = data.m_owner;
-    skill.m_type = data.m_type;
-    skill.m_power = data.m_power;     // DAMAGE/DEBUFF: % cua ATK; HEAL: luong HP hoi co dinh
-    skill.m_mpCost = data.m_mpCost;
-    skill.m_effect = data.m_effect;
-    skill.m_effectTurns = data.m_effectTurns;
-
-    switch (data.m_effect)
-    {
-    case EffectType::BURN:     skill.m_element = Element::HOA;  break;
-    case EffectType::SLOW:     skill.m_element = Element::THUY; break;
-    case EffectType::STUN:     skill.m_element = Element::THO;  break;
-    case EffectType::WEAKNESS: skill.m_element = Element::MOC;  break;
-    default:                   skill.m_element = heroElement;   break;
-    }
-
-    skill.m_isMagic = (data.m_ownerType == SkillOwnerType::CLASS)
-        ? (data.m_owner == "Mage" || data.m_owner == "Enchanter")
-        : (data.m_owner == "Elf");
-    return skill;
-}
-
-void GameEngine::addCombatant(std::unique_ptr<Character> character)
+void GameEngine::addCombatant(std::shared_ptr<Character> character)
 {
     if (!character) return;
 
@@ -245,35 +216,29 @@ void GameEngine::addCombatant(std::unique_ptr<Character> character)
 
 void GameEngine::createHero()
 {
-    Stats heroStats{ 120, 50, 25, 20, 5, 8, 15 };
-    m_heroSkills.clear();
+    std::shared_ptr<Player> hero;
 
-    bool fromData = false;
     if (m_dataLoaded)
     {
         try {
-            heroStats = m_gameData.getBaseStats(HERO_RACE, HERO_CLASS);
-            for (const auto& id : m_gameData.getHeroSkillIds(HERO_RACE, HERO_CLASS))
-                m_heroSkills.push_back(toBattleSkill(m_gameData.getSkill(id), HERO_ELEMENT));
-            fromData = true;
+            hero = CharacterFactory::createHero(m_gameData, HERO_NAME, HERO_RACE, HERO_CLASS, HERO_ELEMENT);
         }
         catch (const std::exception& e) {
             std::cerr << "Hero data error: " << e.what() << std::endl;
-            m_heroSkills.clear();
         }
     }
 
-    if (!fromData)
+    if (!hero)
     {
         // Du phong khi chua co CSV
-        m_heroSkills = {
-            Skill{ "S01", "Chem Manh", SkillOwnerType::CLASS, "Warrior", SkillType::DAMAGE, 130, 5, EffectType::NONE, 0, Element::KIM, false },
-            Skill{ "S02", "Hoa Cau", SkillOwnerType::CLASS, "Mage", SkillType::DAMAGE, 150, 12, EffectType::BURN, 2, Element::HOA, true },
-            Skill{ "S03", "Hoi Mau", SkillOwnerType::CLASS, "Priest", SkillType::HEAL, 30, 10, EffectType::REGEN, 2, Element::THUY, true }
-        };
+        hero = std::make_shared<Player>(HERO_NAME, Stats{ 120, 50, 25, 20, 5, 8, 15 }, HERO_ELEMENT);
+        hero->addSkill(Skill{ "S01", "Chem Manh", SkillOwnerType::CLASS, "Warrior", SkillType::DAMAGE, 130, 5, EffectType::NONE, 0, Element::KIM, false });
+        hero->addSkill(Skill{ "S02", "Hoa Cau", SkillOwnerType::CLASS, "Mage", SkillType::DAMAGE, 150, 12, EffectType::BURN, 2, Element::HOA, true });
+        hero->addSkill(Skill{ "S03", "Hoi Mau", SkillOwnerType::CLASS, "Priest", SkillType::HEAL, 30, 10, EffectType::REGEN, 2, Element::THUY, true });
     }
 
-    addCombatant(std::make_unique<Player>(HERO_NAME, heroStats, HERO_ELEMENT));
+    m_party.addMember(hero);
+    addCombatant(hero);
 }
 
 void GameEngine::spawnEnemies(int stage)
@@ -346,9 +311,11 @@ void GameEngine::startNewGame()
     m_sprites.clear();
     m_floatingTexts.clear();
 
-    m_inventory = Inventory<std::string>();
+    m_party.clear();
     for (int i = 0; i < INITIAL_POTIONS; ++i)
-        m_inventory.addItem(POTION_NAME);
+        m_party.getInventory().addItem(std::make_shared<Potion>(POTION_HEAL));
+    for (int i = 0; i < INITIAL_MANA_POTIONS; ++i)
+        m_party.getInventory().addItem(std::make_shared<ManaPotion>(MANA_POTION_RESTORE));
 
     createHero();
     loadStage(1);
@@ -463,7 +430,7 @@ void GameEngine::processPlayerInput()
     if (m_isSelectingSkill)
     {
         const KeyboardKey keys[] = { KEY_ONE, KEY_TWO, KEY_THREE, KEY_FOUR };
-        for (size_t i = 0; i < m_heroSkills.size() && i < 4; ++i)
+        for (size_t i = 0; i < heroSkills().size() && i < 4; ++i)
         {
             if (IsKeyPressed(keys[i]))
                 m_selectedSkillIndex = static_cast<int>(i);
@@ -483,7 +450,9 @@ void GameEngine::processPlayerInput()
     if (IsKeyPressed(KEY_A))
         doBasicAttack();
     else if (IsKeyPressed(KEY_I))
-        doUseItem();
+        doUseItem(ItemKind::POTION);
+    else if (IsKeyPressed(KEY_M))
+        doUseItem(ItemKind::MANA_POTION);
 }
 
 void GameEngine::doBasicAttack()
@@ -507,44 +476,50 @@ void GameEngine::doBasicAttack()
     m_battlePhase = BattlePhase::PLAYER_CONFIRM;
 }
 
-void GameEngine::doUseItem()
+void GameEngine::doUseItem(ItemKind kind)
 {
     Character* h = hero();
-    if (m_inventory.getItems().empty()) {
-        m_battleLog = "Het binh mau!";
-        return;
-    }
-    if (h->getCurrentHp() >= h->getStats().m_hp) {
-        m_battleLog = "HP da day, khong can dung Potion.";
+    if (!h) return;
+
+    Inventory<ItemPtr>& bag = m_party.getInventory();
+    const int index = bag.findIndex([kind](const ItemPtr& item) { return item->getKind() == kind; });
+    if (index < 0) {
+        m_battleLog = (kind == ItemKind::POTION) ? "Het Potion!" : "Het Mana Potion!";
         return;
     }
 
-    auto healed = std::make_shared<int>(0);
+    const ItemPtr item = bag.getItem(static_cast<std::size_t>(index));
+    if (!item->canUse(*h)) {
+        m_battleLog = item->getName() + " khong can dung luc nay (da day).";
+        return;
+    }
 
-    auto executeAction = [this, h, healed]() {
-        const int before = h->getCurrentHp();
-        h->heal(POTION_HEAL);
-        *healed = h->getCurrentHp() - before;
-        m_inventory.removeItem(POTION_NAME);
+    auto amount = std::make_shared<int>(0);
+
+    auto executeAction = [this, h, item, amount]() {
+        *amount = item->use(*h);                  // da hinh: Potion hoi HP, ManaPotion hoi MP
+        m_party.getInventory().removeItem(item);
         syncHealth(h);
     };
-    auto undoAction = [this, h, healed]() {
-        h->takeDamage(*healed);     // tru lai dung luong da hoi
-        m_inventory.addItem(POTION_NAME);
+    auto undoAction = [this, h, item, amount]() {
+        item->revert(*h, *amount);                // tra lai dung luong da hoi
+        m_party.getInventory().addItem(item);
     };
 
     queuePlayerCommand(std::make_unique<UseItemCommand>(executeAction, undoAction));
 
-    m_battleLog = h->getName() + " dung Potion hoi " + std::to_string(*healed) + " HP!  [ENTER] ket thuc luot, [ESC/Z] hoan tac";
+    const char* unit = (kind == ItemKind::POTION) ? " HP" : " MP";
+    m_battleLog = h->getName() + " dung " + item->getName() + " hoi " + std::to_string(*amount) + unit
+                + "!  [ENTER] ket thuc luot, [ESC/Z] hoan tac";
     m_battlePhase = BattlePhase::PLAYER_CONFIRM;
 }
 
 bool GameEngine::castSkill(size_t skillIndex)
 {
-    if (skillIndex >= m_heroSkills.size()) return false;
+    if (skillIndex >= heroSkills().size()) return false;
 
     Character* h = hero();
-    const Skill skill = m_heroSkills[skillIndex];   // ban sao: thao tac an toan trong lambda
+    const Skill skill = heroSkills()[skillIndex];   // ban sao: thao tac an toan trong lambda
 
     if (h->getCurrentMp() < skill.m_mpCost) {
         m_battleLog = "Khong du MP de dung " + skill.m_name + "!";
@@ -778,16 +753,8 @@ float GameEngine::damageMultiplier(const Character* attacker, const Character* t
 
 void GameEngine::spendMpWithoutDamage(const Skill& skill)
 {
-    // Character khong co API tru MP rieng; cach duy nhat la executeSkill().
-    // Goi len chinh hero voi power = 0 roi hoi lai dung luong HP vua mat.
-    // TODO(Entities): them Character::spendMp(int) de bo workaround nay.
-    Character* h = hero();
-    Skill free = skill;
-    free.m_power = 0;
-    const int hpBefore = h->getCurrentHp();
-    h->executeSkill(&free, h);
-    const int lost = hpBefore - h->getCurrentHp();
-    if (lost > 0) h->heal(lost);
+    if (Character* h = hero())
+        h->consumeMp(skill.m_mpCost);
 }
 
 void GameEngine::applySkillEffect(const Skill& skill, Character* target)
@@ -894,6 +861,13 @@ int GameEngine::indexOf(const Character* character) const
 Character* GameEngine::hero() const
 {
     return m_combatants.empty() ? nullptr : m_combatants[0].get();
+}
+
+const std::vector<Skill>& GameEngine::heroSkills() const
+{
+    static const std::vector<Skill> none;
+    const Player* leader = m_party.getLeader();
+    return leader ? leader->getSkills() : none;
 }
 
 bool GameEngine::isHero(const Character* character) const
@@ -1043,22 +1017,27 @@ void GameEngine::renderBattleUI()
     if (m_battlePhase == BattlePhase::PLAYER_CONFIRM)
         DrawText("[ENTER] Ket thuc luot  |  [ESC/Z] Hoan tac (Undo)", 40, 610, 18, LIGHTGRAY);
     else
-        DrawText(TextFormat("[A] Tan Cong | [S] Ky Nang | [I] Potion x%d | [TAB] Doi Muc Tieu | [ESC] Menu",
-                            static_cast<int>(m_inventory.getItems().size())), 40, 610, 18, LIGHTGRAY);
+    {
+        const auto& bag = m_party.getInventory();
+        const int potions = static_cast<int>(bag.countIf([](const ItemPtr& i) { return i->getKind() == ItemKind::POTION; }));
+        const int manas = static_cast<int>(bag.countIf([](const ItemPtr& i) { return i->getKind() == ItemKind::MANA_POTION; }));
+        DrawText(TextFormat("[A] Tan Cong | [S] Ky Nang | [I] Potion x%d | [M] Mana x%d | [TAB] Doi Muc Tieu | [ESC] Menu",
+                            potions, manas), 40, 610, 18, LIGHTGRAY);
+    }
     DrawText(TextFormat("BATTLE LOG: %s", m_battleLog.c_str()), 40, 650, 20, ORANGE);
 
     // ----- Menu ky nang -----
     if (m_isSelectingSkill)
     {
-        const int boxH = 90 + static_cast<int>(m_heroSkills.size()) * 35;
+        const int boxH = 90 + static_cast<int>(heroSkills().size()) * 35;
         DrawRectangle(360, 290, 560, boxH, Fade(DARKBLUE, 0.95f));
         DrawRectangleLines(360, 290, 560, boxH, SKYBLUE);
         DrawText("KY NANG (1-4 chon, SPACE de dung, ESC dong)", 380, 305, 16, YELLOW);
 
         const int mp = hero() ? hero()->getCurrentMp() : 0;
-        for (size_t i = 0; i < m_heroSkills.size(); ++i)
+        for (size_t i = 0; i < heroSkills().size(); ++i)
         {
-            const Skill& s = m_heroSkills[i];
+            const Skill& s = heroSkills()[i];
             Color txtColor = WHITE;
             if (mp < s.m_mpCost) txtColor = GRAY;
             else if (m_selectedSkillIndex == static_cast<int>(i)) txtColor = GREEN;
