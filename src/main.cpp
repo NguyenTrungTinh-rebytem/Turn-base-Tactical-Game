@@ -1,5 +1,6 @@
 #include "core/GameEngine.h"
 #include <iostream>
+#include <exception>
 
 int main() {
     try {

@@ -1,0 +1,7 @@
+# name,hp,mp,spd,a,ma,d,md,skill1,skill2
+Ogre,140,30,6,16,4,12,5,R_OGRE_1,R_OGRE_2
+Human,100,50,10,10,10,8,8,R_HUMAN_1,R_HUMAN_2
+Dwarf,120,40,5,12,6,14,10,R_DWARF_1,R_DWARF_2
+Elf,85,70,13,8,15,5,12,R_ELF_1,R_ELF_2
+Oni,115,45,9,15,8,9,6,R_ONI_1,R_ONI_2
+Beastman,105,35,14,13,5,7,5,R_BEAST_1,R_BEAST_2

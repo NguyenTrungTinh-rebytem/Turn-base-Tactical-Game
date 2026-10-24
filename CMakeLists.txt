@@ -25,3 +25,13 @@ find_package(raylib 4.0 REQUIRED)
 # 4. Tạo file thực thi
 add_executable(game ${SOURCES})
 target_link_libraries(game PRIVATE raylib)
+
+
+# 5. Copy data/ và assets/ cạnh game.exe sau mỗi lần build
+#    (game cũng tự tìm ở thư mục chạy hiện tại và ../ so với exe)
+add_custom_command(TARGET game POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/data $<TARGET_FILE_DIR:game>/data
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/assets $<TARGET_FILE_DIR:game>/assets
+)
