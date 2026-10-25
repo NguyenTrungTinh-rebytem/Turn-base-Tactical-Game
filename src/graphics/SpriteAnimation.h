@@ -28,6 +28,9 @@ public:
     // Tra ve false neu khong load duoc (van ve placeholder de test khong can asset).
     bool load(const std::string& path, int frameWidth, int frameHeight);
 
+    // Giai phong texture. Core goi truoc CloseWindow(). Goi nhieu lan van an toan.
+    void unload();
+
     void setClip(AnimState state, const AnimClip& clip);
     void play(AnimState state, bool restart = false);
     void update(float deltaTime);

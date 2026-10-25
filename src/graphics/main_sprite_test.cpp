@@ -1,3 +1,6 @@
+#ifdef GRAPHICS_STANDALONE_TEST
+// File test doc lap. Build chinh KHONG dinh nghia GRAPHICS_STANDALONE_TEST nen file nay rong.
+// Test: g++ -std=c++17 -DGRAPHICS_STANDALONE_TEST src/graphics/main_sprite_test.cpp src/graphics/SpriteAnimation.cpp -o test.exe -lraylib -lopengl32 -lgdi32 -lwinmm
 // Member 4 - Huynh Quang Khai | Sprint 1: Window + Sprite Sheet + Idle Animation
 // File test doc lap: chi can SpriteAnimation + Raylib. KHONG la main.cpp cua game.
 #include "raylib.h"
@@ -72,3 +75,6 @@ int test_sprite_main() {
     CloseWindow();
     return 0;
 }
+
+int main() { return test_sprite_main(); }
+#endif // GRAPHICS_STANDALONE_TEST

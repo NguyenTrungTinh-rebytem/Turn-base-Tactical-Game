@@ -1,3 +1,6 @@
+#ifdef GRAPHICS_STANDALONE_TEST
+// File test doc lap. Build chinh KHONG dinh nghia GRAPHICS_STANDALONE_TEST nen file nay rong.
+// Test: g++ -std=c++17 -DGRAPHICS_STANDALONE_TEST src/graphics/main_map_test.cpp src/graphics/SpriteAnimation.cpp src/graphics/BattleMap.cpp -o test.exe -lraylib -lopengl32 -lgdi32 -lwinmm
 // Member 4 - Huynh Quang Khai | Test Map + Slot 2D (doc lap, khong can Character)
 // Phim: 1 = Stage 1 (3 vs 3) | 2 = Stage 2 (3 vs Boss) | F1 = hien diem slot | ESC = thoat
 #include "raylib.h"
@@ -24,12 +27,17 @@ static std::vector<Actor> buildStage(const BattleMap& map, StageId stage) {
         actors.push_back(std::move(a));
     };
     const Color heroTints[3] = { WHITE, Color{ 180, 255, 180, 255 }, Color{ 255, 220, 150, 255 } };
-    for (int i = 0; i < 3; ++i) add(map.getPlayerSlot(i, 3), heroTints[i]);
+    const auto heroSlots = map.layoutPlayers({ 1.0f, 1.0f, 1.0f });
+    for (int i = 0; i < 3; ++i) add(heroSlots[i], heroTints[i]);
 
     if (stage == StageId::STAGE_1) {
-        for (int i = 0; i < 3; ++i) add(map.getEnemySlot(i, 3), Color{ 255, 150, 150, 255 });
+        const auto enemySlots = map.layoutEnemies({ 1.0f, 1.0f, 1.0f, 1.0f });   // 4 quai khong de nhau
+        for (const auto& s : enemySlots) add(s, Color{ 255, 150, 150, 255 });
     } else {
-        add(map.getEnemySlot(0, 1, 1.8f), Color{ 200, 90, 220, 255 });   // Boss to gap 1.8 lan
+        const auto bossSlots = map.layoutEnemies({ 1.3f, 1.0f, 1.0f });         // Boss 1.3 + 2 quan
+        add(bossSlots[0], Color{ 200, 90, 220, 255 });
+        add(bossSlots[1], Color{ 255, 150, 150, 255 });
+        add(bossSlots[2], Color{ 255, 150, 150, 255 });
     }
     return actors;
 }
@@ -71,3 +79,6 @@ int test_map_main(){
     CloseWindow();
     return 0;
 }
+
+int main() { return test_map_main(); }
+#endif // GRAPHICS_STANDALONE_TEST

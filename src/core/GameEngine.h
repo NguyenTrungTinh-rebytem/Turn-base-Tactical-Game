@@ -8,6 +8,8 @@
 #include "dsa/StatusEffect.h"
 #include "dsa/CombatObserver.h"
 #include "graphics/BattleMap.h"
+#include "graphics/BattleUI.h"
+#include "graphics/CombatantView.h"
 #include "graphics/SpriteAnimation.h"
 #include "entities/Character.h"
 #include "entities/Player.h"
@@ -59,6 +61,7 @@ private:
     void createHero();
     void spawnEnemies(int stage);
     void addCombatant(std::unique_ptr<Character> character);
+    void layoutViews();     
     int  finalStage() const;
     static Skill toBattleSkill(const SkillData& data, Element heroElement);
 
@@ -108,11 +111,12 @@ private:
     GameData m_gameData;
     TurnManager m_turnManager;
     BattleMap m_battleMap;
+    BattleUI  m_ui;
     SubjectCombat m_combatSubject;
 
     // ----- Entities (Engine so huu, cac module khac chi quan sat bang con tro tho) -----
     std::vector<std::unique_ptr<Character>> m_combatants;            // [0] = hero
-    std::vector<std::unique_ptr<SpriteAnimation>> m_sprites;         // song song voi m_combatants
+    std::vector<std::unique_ptr<CombatantView>> m_views;       // song song voi m_combatants
     std::unordered_map<const Character*, StatusEffectManager> m_statusEffects;
     std::unordered_map<const Character*, int> m_lastHp;              // de Observer tinh delta
     std::vector<Skill> m_heroSkills;

@@ -1,12 +1,18 @@
 // Member 4 - Huynh Quang Khai | src/graphics/SpriteAnimation.cpp
 #include "SpriteAnimation.h"
 
-SpriteAnimation::~SpriteAnimation() {
-    if (m_loaded) UnloadTexture(m_texture);
+SpriteAnimation::~SpriteAnimation() { unload(); }
+
+void SpriteAnimation::unload() {
+    if (m_loaded) {
+        if (IsWindowReady()) UnloadTexture(m_texture);   // sau CloseWindow() thi bo qua, khong crash
+        m_loaded = false;
+    }
+    m_texture = Texture2D{};
 }
 
 bool SpriteAnimation::load(const std::string& path, int frameWidth, int frameHeight) {
-    if (m_loaded) { UnloadTexture(m_texture); m_loaded = false; }
+    unload();
 
     m_frameWidth  = frameWidth;
     m_frameHeight = frameHeight;

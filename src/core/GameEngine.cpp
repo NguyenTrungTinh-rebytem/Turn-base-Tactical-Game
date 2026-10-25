@@ -132,7 +132,9 @@ void GameEngine::shutdown()
 {
     m_combatSubject.clearObservers();
     // Giai phong Texture (sprite) TRUOC khi dong cua so
-    m_sprites.clear();
+    m_views.clear();
+    m_ui.unloadAll(); 
+    m_battleMap.unloadAll();
     m_combatants.clear();
 
     if (m_isInitialized)
@@ -233,14 +235,29 @@ void GameEngine::addCombatant(std::unique_ptr<Character> character)
 {
     if (!character) return;
 
-    auto sprite = std::make_unique<SpriteAnimation>();
-    sprite->load(resolvePath(SPRITE_SHEET_PATH), FRAME_W, FRAME_H);   // thieu asset -> ve placeholder
-    sprite->play(AnimState::IDLE);
+    auto view = std::make_unique<CombatantView>(character.get(), resolvePath(SPRITE_SHEET_PATH),
+                                            FRAME_W, FRAME_H, BattleSlot{});
 
     m_lastHp[character.get()] = character->getCurrentHp();
     m_turnManager.addCharacter(character.get());
     m_combatants.push_back(std::move(character));
-    m_sprites.push_back(std::move(sprite));
+    m_views.push_back(std::move(view)); 
+}
+void GameEngine::layoutViews()
+{
+    if (m_views.empty()) return;
+
+    // Hero: luôn ở m_combatants[0]
+    m_views[0]->setSlot(m_battleMap.layoutPlayers({ 1.0f })[0]);
+
+    // Quái: Boss to 1.3, quái thường 1.0
+    std::vector<float> muls;
+    for (size_t i = 1; i < m_combatants.size(); ++i)
+        muls.push_back(dynamic_cast<const Boss*>(m_combatants[i].get()) ? 1.3f : 1.0f);
+
+    const auto slots = m_battleMap.layoutEnemies(muls);
+    for (size_t i = 0; i < slots.size(); ++i)
+        m_views[i + 1]->setSlot(slots[i]);
 }
 
 void GameEngine::createHero()
@@ -310,7 +327,7 @@ void GameEngine::loadStage(int stage)
     if (m_combatants.size() > 1)
     {
         m_combatants.resize(1);
-        m_sprites.resize(1);
+        m_views.resize(1);
     }
 
     m_turnManager.clear();
@@ -331,6 +348,7 @@ void GameEngine::loadStage(int stage)
     }
 
     spawnEnemies(stage);
+    layoutViews();     
 
     m_selectedTarget = (m_combatants.size() > 1) ? m_combatants[1].get() : nullptr;
     m_battleMap.setStage(stage == 1 ? StageId::STAGE_1 : StageId::STAGE_2);
@@ -343,7 +361,7 @@ void GameEngine::loadStage(int stage)
 void GameEngine::startNewGame()
 {
     m_combatants.clear();
-    m_sprites.clear();
+    m_views.clear();
     m_floatingTexts.clear();
 
     m_inventory = Inventory<std::string>();
@@ -694,7 +712,7 @@ void GameEngine::update(float deltaTime)
     if (!m_stateMachine.is(GameStateMachine::State::IN_BATTLE)) return;
 
     // Cap nhat sprite + chu bay
-    for (auto& sprite : m_sprites) sprite->update(deltaTime);
+    for (auto& v : m_views) v->update(deltaTime); m_ui.update(deltaTime);
     for (auto& t : m_floatingTexts) {
         t.m_pos.y -= 40.0f * deltaTime;
         t.m_life -= deltaTime;
@@ -814,8 +832,8 @@ void GameEngine::applySkillEffect(const Skill& skill, Character* target)
 void GameEngine::playAnimation(Character* character, AnimState state)
 {
     const int idx = indexOf(character);
-    if (idx >= 0 && static_cast<size_t>(idx) < m_sprites.size())
-        m_sprites[static_cast<size_t>(idx)]->play(state, true);
+    if (idx >= 0 && static_cast<size_t>(idx) < m_views.size())
+        m_views[static_cast<size_t>(idx)]->play(state, true);
 }
 
 // =====================================================================
@@ -903,11 +921,7 @@ bool GameEngine::isHero(const Character* character) const
 
 BattleSlot GameEngine::slotOf(int index) const
 {
-    if (index <= 0)
-        return m_battleMap.getPlayerSlot(0, 1);
-
-    const bool isBossUnit = dynamic_cast<const Boss*>(m_combatants[static_cast<size_t>(index)].get()) != nullptr;
-    return m_battleMap.getEnemySlot(index - 1, static_cast<int>(m_combatants.size()) - 1, isBossUnit ? 1.3f : 1.0f);
+    return m_views[static_cast<size_t>(index)]->getSlot();
 }
 
 // =====================================================================
@@ -952,17 +966,10 @@ void GameEngine::render()
 
 void GameEngine::renderCombatants()
 {
-    for (size_t i = 0; i < m_combatants.size(); ++i)
+    for (size_t i = 0; i < m_views.size(); ++i)
     {
-        const Character* c = m_combatants[i].get();
-        if (!c->isAlive()) continue;
-
-        const BattleSlot slot = slotOf(static_cast<int>(i));
-        m_battleMap.drawShadow(slot, static_cast<float>(FRAME_W));
-
-        const Vector2 topLeft = BattleMap::toTopLeft(slot, FRAME_W, FRAME_H);
-        const Color tint = (i == 0) ? WHITE : elementColor(c->getElement());
-        m_sprites[i]->drawFrame(topLeft, slot.m_flipX, slot.m_scale, tint);
+        const Color tint = (i == 0) ? WHITE : elementColor(m_combatants[i]->getElement());
+        m_views[i]->draw(m_battleMap, tint);   // đã gồm bóng, tự mờ dần khi chết
     }
 }
 
