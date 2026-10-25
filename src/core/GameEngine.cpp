@@ -4,6 +4,7 @@
 #include "core/UseItemCommand.h"
 #include <algorithm>
 #include <cmath>
+#include <numeric>
 #include <exception>
 #include <iostream>
 
@@ -132,7 +133,9 @@ void GameEngine::shutdown()
 {
     m_combatSubject.clearObservers();
     // Giai phong Texture (sprite) TRUOC khi dong cua so
-    m_sprites.clear();
+    m_views.clear();
+    m_ui.unloadAll();
+    m_battleMap.unloadAll();
     m_combatants.clear();
 
     if (m_isInitialized)
@@ -233,14 +236,42 @@ void GameEngine::addCombatant(std::unique_ptr<Character> character)
 {
     if (!character) return;
 
-    auto sprite = std::make_unique<SpriteAnimation>();
-    sprite->load(resolvePath(SPRITE_SHEET_PATH), FRAME_W, FRAME_H);   // thieu asset -> ve placeholder
-    sprite->play(AnimState::IDLE);
+    auto view = std::make_unique<CombatantView>(character.get(), resolvePath(SPRITE_SHEET_PATH),
+                                            FRAME_W, FRAME_H, BattleSlot{});
 
     m_lastHp[character.get()] = character->getCurrentHp();
     m_turnManager.addCharacter(character.get());
     m_combatants.push_back(std::move(character));
-    m_sprites.push_back(std::move(sprite));
+    m_views.push_back(std::move(view));
+}
+void GameEngine::layoutViews()
+{
+    if (m_views.empty()) return;
+
+    // Hero: luôn ở m_combatants[0]
+    m_views[0]->setSlot(m_battleMap.layoutPlayers({ 1.0f })[0]);
+
+    // Quái: Boss to 1.3, quái thường 1.0
+    std::vector<float> muls;
+    for (size_t i = 1; i < m_combatants.size(); ++i)
+        muls.push_back(dynamic_cast<const Boss*>(m_combatants[i].get()) ? 1.3f : 1.0f);
+
+    const auto slots = m_battleMap.layoutEnemies(muls);
+    for (size_t i = 0; i < slots.size() && i + 1 < m_views.size(); ++i)
+        m_views[i + 1]->setSlot(slots[i]);
+}
+
+std::vector<Character*> GameEngine::upcomingOrder() const
+{
+    std::vector<Character*> order;
+    for (Character* c : m_turnManager.getCharacters())
+        if (c && c->isAlive()) order.push_back(c);
+
+    // Cung quy tac voi priority_queue: toc do cao di truoc
+    std::stable_sort(order.begin(), order.end(), [](const Character* a, const Character* b) {
+        return a->getStats().m_spd > b->getStats().m_spd;
+    });
+    return order;
 }
 
 void GameEngine::createHero()
@@ -310,14 +341,14 @@ void GameEngine::loadStage(int stage)
     if (m_combatants.size() > 1)
     {
         m_combatants.resize(1);
-        m_sprites.resize(1);
+        m_views.resize(1);
     }
 
     m_turnManager.clear();
     m_commandStack.clear();
     m_statusEffects.clear();
     m_lastHp.clear();
-    m_floatingTexts.clear();
+    m_ui.unloadAll();
     m_isSelectingSkill = false;
     m_aiTurnTimer = 0.0f;
 
@@ -331,6 +362,7 @@ void GameEngine::loadStage(int stage)
     }
 
     spawnEnemies(stage);
+    layoutViews();
 
     m_selectedTarget = (m_combatants.size() > 1) ? m_combatants[1].get() : nullptr;
     m_battleMap.setStage(stage == 1 ? StageId::STAGE_1 : StageId::STAGE_2);
@@ -343,8 +375,8 @@ void GameEngine::loadStage(int stage)
 void GameEngine::startNewGame()
 {
     m_combatants.clear();
-    m_sprites.clear();
-    m_floatingTexts.clear();
+    m_views.clear();
+    m_ui.unloadAll();
 
     m_inventory = Inventory<std::string>();
     for (int i = 0; i < INITIAL_POTIONS; ++i)
@@ -693,16 +725,9 @@ void GameEngine::update(float deltaTime)
 {
     if (!m_stateMachine.is(GameStateMachine::State::IN_BATTLE)) return;
 
-    // Cap nhat sprite + chu bay
-    for (auto& sprite : m_sprites) sprite->update(deltaTime);
-    for (auto& t : m_floatingTexts) {
-        t.m_pos.y -= 40.0f * deltaTime;
-        t.m_life -= deltaTime;
-    }
-    m_floatingTexts.erase(
-        std::remove_if(m_floatingTexts.begin(), m_floatingTexts.end(),
-                       [](const FloatingText& t) { return t.m_life <= 0.0f; }),
-        m_floatingTexts.end());
+    // Cap nhat sprite + hieu ung UI (chu bay)
+    for (auto& v : m_views) v->update(deltaTime);
+    m_ui.update(deltaTime);
 
     // Dang cho nguoi choi xac nhan/undo: khong xet ket thuc tran (muc tieu co the hoi sinh khi undo)
     if (m_battlePhase != BattlePhase::PLAYER_CONFIRM)
@@ -814,8 +839,8 @@ void GameEngine::applySkillEffect(const Skill& skill, Character* target)
 void GameEngine::playAnimation(Character* character, AnimState state)
 {
     const int idx = indexOf(character);
-    if (idx >= 0 && static_cast<size_t>(idx) < m_sprites.size())
-        m_sprites[static_cast<size_t>(idx)]->play(state, true);
+    if (idx >= 0 && static_cast<size_t>(idx) < m_views.size())
+        m_views[static_cast<size_t>(idx)]->play(state, true);
 }
 
 // =====================================================================
@@ -847,15 +872,19 @@ void GameEngine::onHealthChanged(Character* character, int newHealth)
     m_lastHp[character] = newHealth;
 
     const int delta = newHealth - oldHp;
+    const int idx = indexOf(character);
+    if (delta == 0 || idx < 0 || static_cast<size_t>(idx) >= m_views.size()) return;
+
+    CombatantView& view = *m_views[static_cast<size_t>(idx)];
+    Vector2 pos = view.getHeadPos();
+    pos.x += static_cast<float>(GetRandomValue(-20, 20));
+    m_ui.spawnFloatingText(pos, delta, delta > 0);
+
     if (delta < 0)
     {
-        spawnFloatingText(character, std::to_string(delta), RED);
+        view.triggerHitFlash();
         if (newHealth > 0)
             playAnimation(character, AnimState::TAKE_DAMAGE);
-    }
-    else if (delta > 0)
-    {
-        spawnFloatingText(character, "+" + std::to_string(delta), GREEN);
     }
 }
 
@@ -863,21 +892,6 @@ void GameEngine::onCharacterDied(Character* character)
 {
     if (character)
         m_battleLog += "  >> " + character->getName() + " guc nga!";
-}
-
-void GameEngine::spawnFloatingText(const Character* character, const std::string& text, Color color)
-{
-    const int idx = indexOf(character);
-    if (idx < 0) return;
-
-    const BattleSlot slot = slotOf(idx);
-    FloatingText t;
-    t.m_pos = BattleMap::getHeadPos(slot, FRAME_H);
-    t.m_pos.x += static_cast<float>(GetRandomValue(-20, 20));
-    t.m_text = text;
-    t.m_color = color;
-    t.m_life = 1.0f;
-    m_floatingTexts.push_back(t);
 }
 
 // =====================================================================
@@ -903,11 +917,7 @@ bool GameEngine::isHero(const Character* character) const
 
 BattleSlot GameEngine::slotOf(int index) const
 {
-    if (index <= 0)
-        return m_battleMap.getPlayerSlot(0, 1);
-
-    const bool isBossUnit = dynamic_cast<const Boss*>(m_combatants[static_cast<size_t>(index)].get()) != nullptr;
-    return m_battleMap.getEnemySlot(index - 1, static_cast<int>(m_combatants.size()) - 1, isBossUnit ? 1.3f : 1.0f);
+    return m_views[static_cast<size_t>(index)]->getSlot();
 }
 
 // =====================================================================
@@ -933,7 +943,7 @@ void GameEngine::render()
         m_battleMap.draw();
         renderCombatants();
         renderBattleUI();
-        renderFloatingTexts();
+        m_ui.drawFloatingTexts();
         break;
 
     case GameStateMachine::State::VICTORY:
@@ -952,120 +962,66 @@ void GameEngine::render()
 
 void GameEngine::renderCombatants()
 {
-    for (size_t i = 0; i < m_combatants.size(); ++i)
+    // 2.5D: ve hang xa truoc, hang gan sau (sap theo y cua chan)
+    std::vector<size_t> order(m_views.size());
+    std::iota(order.begin(), order.end(), size_t{ 0 });
+    std::sort(order.begin(), order.end(), [&](size_t a, size_t b) {
+        return m_views[a]->getSlot().m_feetPos.y < m_views[b]->getSlot().m_feetPos.y;
+    });
+
+    for (size_t i : order)
     {
-        const Character* c = m_combatants[i].get();
-        if (!c->isAlive()) continue;
-
-        const BattleSlot slot = slotOf(static_cast<int>(i));
-        m_battleMap.drawShadow(slot, static_cast<float>(FRAME_W));
-
-        const Vector2 topLeft = BattleMap::toTopLeft(slot, FRAME_W, FRAME_H);
-        const Color tint = (i == 0) ? WHITE : elementColor(c->getElement());
-        m_sprites[i]->drawFrame(topLeft, slot.m_flipX, slot.m_scale, tint);
-    }
-}
-
-void GameEngine::renderFloatingTexts()
-{
-    for (const auto& t : m_floatingTexts)
-    {
-        const unsigned char alpha = static_cast<unsigned char>(255.0f * std::min(1.0f, t.m_life));
-        Color color = t.m_color;
-        color.a = alpha;
-        DrawText(t.m_text.c_str(), static_cast<int>(t.m_pos.x), static_cast<int>(t.m_pos.y), 28, color);
+        const Color tint = (i == 0) ? WHITE : elementColor(m_combatants[i]->getElement());
+        m_views[i]->draw(m_battleMap, tint);   // da gom bong + mo dan khi chet
     }
 }
 
 void GameEngine::renderBattleUI()
 {
-    // ----- HUD tung nhan vat (neo tren dau sprite) -----
+    // ----- HP/MP + con tro muc tieu + hieu ung tung nhan vat -----
     for (size_t i = 0; i < m_combatants.size(); ++i)
     {
         const Character* c = m_combatants[i].get();
         if (!c->isAlive()) continue;
 
-        const BattleSlot slot = slotOf(static_cast<int>(i));
-        const Vector2 head = BattleMap::getHeadPos(slot, FRAME_H);
-        const int x = static_cast<int>(head.x) - 60;
-        const int y = static_cast<int>(head.y) - 70;
+        const Vector2 head = m_views[i]->getHeadPos();
+        m_ui.drawHpMpBar(*c, head);
 
         if (c == m_selectedTarget)
-            DrawRectangleLines(x - 5, y - 5, 130, 82, GOLD);
+            m_ui.drawTargetCursor(m_views[i]->getSlot());
 
-        const Color titleColor = (c == m_currentCharacter) ? YELLOW : WHITE;
-        DrawText(TextFormat("%s [%s]", c->getName().c_str(), elementName(c->getElement())), x, y, 16, titleColor);
-
-        const int maxHp = std::max(1, c->getStats().m_hp);
-        const float hpRatio = std::clamp(static_cast<float>(c->getCurrentHp()) / static_cast<float>(maxHp), 0.0f, 1.0f);
-        DrawRectangle(x, y + 22, 120, 12, RED);
-        DrawRectangle(x, y + 22, static_cast<int>(120 * hpRatio), 12, GREEN);
-        DrawRectangleLines(x, y + 22, 120, 12, BLACK);
-        DrawText(TextFormat("%d/%d", c->getCurrentHp(), maxHp), x + 25, y + 23, 10, WHITE);
-
-        if (c->getStats().m_mp > 0) {
-            const float mpRatio = std::clamp(static_cast<float>(c->getCurrentMp()) / static_cast<float>(c->getStats().m_mp), 0.0f, 1.0f);
-            DrawRectangle(x, y + 38, 120, 8, DARKGRAY);
-            DrawRectangle(x, y + 38, static_cast<int>(120 * mpRatio), 8, BLUE);
-            DrawRectangleLines(x, y + 38, 120, 8, BLACK);
-        }
-
-        // Hieu ung dang co (StatusEffectManager)
+        // Hieu ung dang co (giu logic cu cua Core; BattleUI chua ve phan nay)
         auto fx = m_statusEffects.find(c);
         if (fx != m_statusEffects.end())
         {
-            int ex = x;
+            int ex = static_cast<int>(head.x) - 60;
+            const int ey = static_cast<int>(head.y) - 12;
             for (const StatusEffect& effect : fx->second.getEffects())
             {
                 const char* label = TextFormat("%s(%d)", statusName(effect.type), effect.durationTurns);
-                DrawText(label, ex, y + 50, 12, ORANGE);
+                DrawText(label, ex, ey, 12, ORANGE);
                 ex += MeasureText(label, 12) + 6;
             }
         }
     }
 
-    // ----- Bang dieu khien -----
-    DrawRectangle(20, 560, 1240, 140, Fade(BLACK, 0.8f));
-    DrawRectangleLines(20, 560, 1240, 140, RAYWHITE);
+    // ----- Danh sach luot (goc phai tren) -----
+    m_ui.drawTurnOrder(upcomingOrder(), m_currentCharacter);
 
-    DrawText(TextFormat("MAN %d", m_stage), 1160, 575, 20, SKYBLUE);
-    DrawText("DEN LUOT:", 40, 575, 20, YELLOW);
-    if (m_currentCharacter)
-    {
-        if (isHero(m_currentCharacter)) {
-            const char* suffix = (m_battlePhase == BattlePhase::PLAYER_CONFIRM) ? " (Cho xac nhan)" : "";
-            DrawText(TextFormat("%s%s", m_currentCharacter->getName().c_str(), suffix), 160, 575, 20, GREEN);
-        } else {
-            DrawText(TextFormat("%s (Dang suy nghi...)", m_currentCharacter->getName().c_str()), 160, 575, 20, RED);
-        }
-    }
+    // ----- Bang dieu khien -----
+    m_ui.drawControlPanel();
+    m_ui.drawTurnBanner(m_stage, m_currentCharacter,
+                        m_currentCharacter && isHero(m_currentCharacter),
+                        m_battlePhase == BattlePhase::PLAYER_CONFIRM);
 
     if (m_battlePhase == BattlePhase::PLAYER_CONFIRM)
-        DrawText("[ENTER] Ket thuc luot  |  [ESC/Z] Hoan tac (Undo)", 40, 610, 18, LIGHTGRAY);
+        m_ui.drawCommandHelp("[ENTER] Ket thuc luot  |  [ESC/Z] Hoan tac (Undo)");
     else
-        DrawText(TextFormat("[A] Tan Cong | [S] Ky Nang | [I] Potion x%d | [TAB] Doi Muc Tieu | [ESC] Menu",
-                            static_cast<int>(m_inventory.getItems().size())), 40, 610, 18, LIGHTGRAY);
-    DrawText(TextFormat("BATTLE LOG: %s", m_battleLog.c_str()), 40, 650, 20, ORANGE);
+        m_ui.drawCommandHelp(TextFormat("[A] Tan Cong | [S] Ky Nang | [I] Potion x%d | [TAB] Doi Muc Tieu | [ESC] Menu",
+                                        static_cast<int>(m_inventory.getItems().size())));
+    m_ui.drawBattleLog("BATTLE LOG: " + m_battleLog);
 
-    // ----- Menu ky nang -----
+    // ----- Menu ky nang (popup giua man hinh, ve cuoi cung de nam tren cung) -----
     if (m_isSelectingSkill)
-    {
-        const int boxH = 90 + static_cast<int>(m_heroSkills.size()) * 35;
-        DrawRectangle(360, 290, 560, boxH, Fade(DARKBLUE, 0.95f));
-        DrawRectangleLines(360, 290, 560, boxH, SKYBLUE);
-        DrawText("KY NANG (1-4 chon, SPACE de dung, ESC dong)", 380, 305, 16, YELLOW);
-
-        const int mp = hero() ? hero()->getCurrentMp() : 0;
-        for (size_t i = 0; i < m_heroSkills.size(); ++i)
-        {
-            const Skill& s = m_heroSkills[i];
-            Color txtColor = WHITE;
-            if (mp < s.m_mpCost) txtColor = GRAY;
-            else if (m_selectedSkillIndex == static_cast<int>(i)) txtColor = GREEN;
-
-            const char* suffix = (s.m_type == SkillType::HEAL) ? " HP" : "%";
-            DrawText(TextFormat("[%d] %s  (MP %d, %d%s)", static_cast<int>(i) + 1, s.m_name.c_str(), s.m_mpCost, s.m_power, suffix),
-                     390, 340 + static_cast<int>(i) * 35, 18, txtColor);
-        }
-    }
+        m_ui.drawSkillMenu(m_heroSkills, m_selectedSkillIndex, hero() ? hero()->getCurrentMp() : 0);
 }
