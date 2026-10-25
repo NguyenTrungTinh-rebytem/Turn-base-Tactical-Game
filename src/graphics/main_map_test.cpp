@@ -1,11 +1,12 @@
 #ifdef GRAPHICS_STANDALONE_TEST
 // File test doc lap. Build chinh KHONG dinh nghia GRAPHICS_STANDALONE_TEST nen file nay rong.
 // Test: g++ -std=c++17 -DGRAPHICS_STANDALONE_TEST src/graphics/main_map_test.cpp src/graphics/SpriteAnimation.cpp src/graphics/BattleMap.cpp -o test.exe -lraylib -lopengl32 -lgdi32 -lwinmm
-// Member 4 - Huynh Quang Khai | Test Map + Slot 2D (doc lap, khong can Character)
+// Member 4 - Huynh Quang Khai | Test Map + Slot 2.5D (doc lap, khong can Character)
 // Phim: 1 = Stage 1 (3 vs 3) | 2 = Stage 2 (3 vs Boss) | F1 = hien diem slot | ESC = thoat
 #include "raylib.h"
 #include "BattleMap.h"
 #include "SpriteAnimation.h"
+#include <algorithm>
 #include <memory>
 #include <vector>
 
@@ -61,8 +62,10 @@ int test_map_main(){
         BeginDrawing();
         ClearBackground(BLACK);
         map.draw();
-        for (Actor& actor : actors) {
-            Actor* a = &actor;
+        std::vector<Actor*> order;                       // 2.5D: ve hang xa truoc, hang gan sau
+        for (auto& a : actors) order.push_back(&a);
+        std::sort(order.begin(), order.end(), [](const Actor* l, const Actor* r) { return l->m_slot.m_feetPos.y < r->m_slot.m_feetPos.y; });
+        for (Actor* a : order) {
             map.drawShadow(a->m_slot, 64.0f);
             a->m_anim->drawFrame(BattleMap::toTopLeft(a->m_slot, 64, 64), a->m_slot.m_flipX, a->m_slot.m_scale, a->m_tint);
             if (showSlots) {

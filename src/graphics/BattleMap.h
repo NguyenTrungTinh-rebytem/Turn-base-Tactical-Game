@@ -1,17 +1,19 @@
 #pragma once
-// Member 4 - Huynh Quang Khai | src/graphics/BattleMap.h  (2D nhin ngang)
+// Member 4 - Huynh Quang Khai | src/graphics/BattleMap.h  (2.5D: phoi canh + chieu sau)
 #include "raylib.h"
 #include <string>
 #include <vector>
 
 enum class StageId { STAGE_1 = 0, STAGE_2 };
 
-// Vi tri dung cua 1 nhan vat tren san dau 2D
+// Vi tri dung cua 1 nhan vat tren san dau 2.5D
 struct BattleSlot {
     Vector2 m_feetPos{};      // diem cham dat (giua day chan)
     float   m_scale = 1.0f;
     bool    m_flipX = false;  // quai o ben phai quay mat sang trai
+    float   m_depth = 0.5f;   // 0 = hang xa .. 1 = hang gan
 };
+// Thu tu ve: sap xep theo m_feetPos.y TANG DAN (xa truoc, gan sau) de hang gan che hang xa.
 
 class BattleMap {
 public:
@@ -31,9 +33,10 @@ public:
     void draw() const;                                        // goi dau tien trong BeginDrawing()
     void drawShadow(const BattleSlot& slot, float frameWidth, float alpha = 1.0f) const;
 
-    // ---- Bo cuc ca doi hinh (KHUYEN DUNG): 1-4 don vi/phe, tu dong khong de nhau ----
-    // scaleMuls[i] = he so to cua don vi i (Boss = 1.3f). Ket qua cung thu tu.
-    // Index 0 = tuyen dau (gan giua man hinh nhat). Dong qua se thu nho dong deu de vua man hinh.
+    // ---- Bo cuc ca doi hinh (KHUYEN DUNG): 1-4 don vi/phe ----
+    // Xep le theo 2 hang: index chan = hang GAN (to, thap), index le = hang XA (nho, cao) => khong de nhau.
+    // scaleMuls[i] = he so to cua don vi i (Boss = 1.3f). Index 0 = tuyen dau (gan giua man hinh nhat).
+    // Dong qua se thu nho deu de vua man hinh.
     std::vector<BattleSlot> layoutPlayers(const std::vector<float>& scaleMuls) const;
     std::vector<BattleSlot> layoutEnemies(const std::vector<float>& scaleMuls) const;
 

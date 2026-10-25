@@ -17,7 +17,6 @@
 #include "entities/Boss.h"
 #include "entities/Inventory.h"
 #include "raylib.h"
-
 #include <memory>
 #include <random>
 #include <string>
@@ -28,7 +27,7 @@
 //   Data     -> GameData (CSV: hero, quai, skill)
 //   Entities -> Character/Player/Enemy/Boss, Inventory<T>
 //   DSA      -> TurnManager (vong luot), StatusEffectManager, SubjectCombat (Observer)
-//   Graphics -> BattleMap, SpriteAnimation
+//   Graphics -> BattleMap, BattleUI, CombatantView (SpriteAnimation)
 // GameEngine ke thua rieng ICombatObserver de tu nhan thong bao mau/chet.
 class GameEngine : private ICombatObserver
 {
@@ -53,7 +52,6 @@ private:
     void render();
     void renderBattleUI();
     void renderCombatants();
-    void renderFloatingTexts();
 
     // ----- thiet lap tran dau -----
     void startNewGame();
@@ -61,7 +59,8 @@ private:
     void createHero();
     void spawnEnemies(int stage);
     void addCombatant(std::unique_ptr<Character> character);
-    void layoutViews();     
+    void layoutViews();
+    std::vector<Character*> upcomingOrder() const;   // thu tu luot de hien thi (Turn Order)
     int  finalStage() const;
     static Skill toBattleSkill(const SkillData& data, Element heroElement);
 
@@ -103,7 +102,6 @@ private:
     Character* hero() const;
     BattleSlot slotOf(int index) const;
     std::string resolvePath(const std::string& relativePath) const;
-    void spawnFloatingText(const Character* character, const std::string& text, Color color);
 
     // ----- Core Managers -----
     GameStateMachine m_stateMachine;
@@ -130,13 +128,6 @@ private:
     bool m_dataLoaded = false;
 
     // ----- UI & Timer -----
-    struct FloatingText {
-        Vector2 m_pos{};
-        std::string m_text;
-        Color m_color = WHITE;
-        float m_life = 0.0f;
-    };
-    std::vector<FloatingText> m_floatingTexts;
     int m_selectedSkillIndex = 0;
     bool m_isSelectingSkill = false;
     float m_aiTurnTimer = 0.0f;

@@ -7,16 +7,17 @@
 namespace {
 // ---- Bo cuc (thiet ke cho cua so 1280x720) ----
 constexpr int   PANEL_X = 20, PANEL_Y = 560, PANEL_W = 1240, PANEL_H = 140;
-constexpr int   LOG_Y = PANEL_Y + 96;
+constexpr int   BANNER_Y = PANEL_Y + 15, HELP_Y = PANEL_Y + 50, LOG_Y = PANEL_Y + 90;
 constexpr float BAR_W = 120.0f, HP_H = 12.0f, MP_H = 8.0f;
 constexpr float TURN_BOX_W = 170.0f, TURN_BOX_H = 30.0f, TURN_GAP = 4.0f, TURN_MARGIN = 10.0f;
 constexpr int   TURN_MAX_SHOWN = 8;
-constexpr int   SKILL_ROW_H = 26, SKILL_MAX_VISIBLE = 4;
+constexpr int   SKILL_BOX_W = 560, SKILL_BOX_Y = 290, SKILL_ROW_H = 35, SKILL_MAX_VISIBLE = 4;
 constexpr float FLOAT_SPEED = 45.0f, FLOAT_LIFE = 1.0f;
 constexpr float FRAME_H_REF = 64.0f;     // chieu cao frame tham chieu cho con tro muc tieu
 
 // ---- Mau ----
 constexpr Color COL_PANEL      { 15, 15, 30, 220 };
+constexpr Color COL_SKILL_BOX  { 0, 40, 100, 240 };
 constexpr Color COL_PANEL_EDGE { 200, 170, 80, 255 };
 constexpr Color COL_BAR_BG     { 30, 30, 30, 220 };
 constexpr Color COL_HP_HIGH    { 60, 200, 80, 255 };
@@ -50,15 +51,6 @@ const char* elementName(Element e) {
     return "?";
 }
 
-const char* skillTypeName(SkillType t) {
-    switch (t) {
-        case SkillType::DAMAGE: return "DMG";
-        case SkillType::HEAL:   return "HEAL";
-        case SkillType::BUFF:   return "BUFF";
-        case SkillType::DEBUFF: return "DEBUFF";
-    }
-    return "";
-}
 } // namespace
 
 // ============ HP / MP tren dau nhan vat ============
@@ -115,16 +107,28 @@ void BattleUI::drawControlPanel() const {
     DrawRectangleLinesEx(panel, 2.0f, COL_PANEL_EDGE);
 }
 
-void BattleUI::drawBattleLog(const std::string& message) const {
-    if (message.empty()) return;
-    DrawText(message.c_str(), PANEL_X + 16, LOG_Y, 18, GOLD);
+void BattleUI::drawTurnBanner(int stage, const Character* current, bool isPlayerTurn, bool waitingConfirm) const {
+    DrawText(TextFormat("MAN %d", stage), PANEL_X + PANEL_W - 100, BANNER_Y, 20, SKYBLUE);
+    DrawText("DEN LUOT:", PANEL_X + 20, BANNER_Y, 20, YELLOW);
+    if (!current) return;
+    if (isPlayerTurn) {
+        DrawText(TextFormat("%s%s", current->getName().c_str(), waitingConfirm ? " (Cho xac nhan)" : ""),
+                 PANEL_X + 140, BANNER_Y, 20, GREEN);
+    } else {
+        DrawText(TextFormat("%s (Dang suy nghi...)", current->getName().c_str()), PANEL_X + 140, BANNER_Y, 20, RED);
+    }
 }
 
 void BattleUI::drawCommandHelp(const std::string& helpText) const {
     const char* text = helpText.empty()
-        ? "[A] Tan cong   [S] Ky nang   [I] Vat pham   [TAB] Doi muc tieu   [ESC] Quay lai"
+        ? "[A] Tan Cong | [S] Ky Nang | [I] Vat pham | [TAB] Doi Muc Tieu | [ESC] Menu"
         : helpText.c_str();
-    DrawText(text, PANEL_X + 16, PANEL_Y + 12, 18, LIGHTGRAY);
+    DrawText(text, PANEL_X + 20, HELP_Y, 18, LIGHTGRAY);
+}
+
+void BattleUI::drawBattleLog(const std::string& message) const {
+    if (message.empty()) return;
+    DrawText(message.c_str(), PANEL_X + 20, LOG_Y, 20, ORANGE);
 }
 
 void BattleUI::drawSkillMenu(const std::vector<Skill>& skills, int selectedIndex, int currentMp) const {
@@ -133,31 +137,29 @@ void BattleUI::drawSkillMenu(const std::vector<Skill>& skills, int selectedIndex
     selectedIndex = std::max(0, std::min(selectedIndex, total - 1));
 
     // Cuon de dong dang chon luon nam trong vung nhin thay
-    const int first = std::max(0, std::min(selectedIndex - SKILL_MAX_VISIBLE + 1, total - SKILL_MAX_VISIBLE));
-    const int last = std::min(total, first + SKILL_MAX_VISIBLE);
+    const int visible = std::min(total, SKILL_MAX_VISIBLE);
+    const int first = std::max(0, std::min(selectedIndex - visible + 1, total - visible));
 
-    int y = PANEL_Y + 40;
-    for (int i = first; i < last; ++i, y += SKILL_ROW_H) {
+    const int boxX = (GetScreenWidth() - SKILL_BOX_W) / 2;
+    const int boxH = 70 + visible * SKILL_ROW_H;
+    Rectangle box = { (float)boxX, (float)SKILL_BOX_Y, (float)SKILL_BOX_W, (float)boxH };
+    DrawRectangleRec(box, COL_SKILL_BOX);
+    DrawRectangleLinesEx(box, 2.0f, SKYBLUE);
+    DrawText("KY NANG (1-4 chon, SPACE de dung, ESC dong)", boxX + 20, SKILL_BOX_Y + 15, 16, YELLOW);
+
+    int y = SKILL_BOX_Y + 50;
+    for (int i = first; i < first + visible; ++i, y += SKILL_ROW_H) {
         const Skill& s = skills[static_cast<size_t>(i)];
-        const bool enoughMp = currentMp >= s.m_mpCost;
-        const bool selected = (i == selectedIndex);
-        const unsigned char alpha = enoughMp ? 255 : 110;   // thieu MP => mo
+        Color color = WHITE;
+        if (currentMp < s.m_mpCost) color = GRAY;               // thieu MP => mo
+        else if (i == selectedIndex) color = GREEN;
 
-        if (selected) {
-            DrawRectangleRec(Rectangle{ (float)PANEL_X + 10, (float)y - 2, 640.0f, (float)SKILL_ROW_H - 2 },
-                             Color{ 90, 70, 20, 200 });
-        }
-        Color nameColor = selected ? GOLD : RAYWHITE;
-        nameColor.a = alpha;
-        Color infoColor = enoughMp ? SKYBLUE : Color{ 200, 80, 80, alpha };
-
-        DrawText(TextFormat("%d. %s", i + 1, s.m_name.c_str()), PANEL_X + 20, y, 18, nameColor);
-        DrawText(TextFormat("[%s %s] Power %d", elementName(s.m_element), skillTypeName(s.m_type), s.m_power),
-                 PANEL_X + 330, y + 2, 14, Color{ 180, 180, 180, alpha });
-        DrawText(TextFormat("MP %d", s.m_mpCost), PANEL_X + 570, y + 2, 14, infoColor);
+        const char* suffix = (s.m_type == SkillType::HEAL) ? " HP" : "%";
+        DrawText(TextFormat("[%d] %s  (MP %d, %d%s)", i + 1, s.m_name.c_str(), s.m_mpCost, s.m_power, suffix),
+                 boxX + 30, y, 18, color);
     }
-    if (total > SKILL_MAX_VISIBLE)
-        DrawText(TextFormat("%d/%d", selectedIndex + 1, total), PANEL_X + 700, PANEL_Y + 40, 14, GRAY);
+    if (total > visible)
+        DrawText(TextFormat("%d/%d", selectedIndex + 1, total), boxX + SKILL_BOX_W - 60, SKILL_BOX_Y + 15, 14, GRAY);
 }
 
 void BattleUI::drawTargetCursor(const BattleSlot& slot) const {

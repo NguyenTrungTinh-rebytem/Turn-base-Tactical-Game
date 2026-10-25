@@ -21,10 +21,14 @@ public:
     // ---- Turn order (goc phai tren). upcoming = thu tu sap toi, current = dang di (co the nullptr) ----
     void drawTurnOrder(const std::vector<Character*>& upcoming, const Character* current) const;
 
-    // ---- Khung dieu khien phia duoi ----
-    void drawControlPanel() const;                                    // nen khung (ve truoc log/help/skill)
-    void drawBattleLog(const std::string& message) const;
+    // ---- Khung dieu khien phia duoi (thu tu ve: Panel -> Banner -> Help -> Log) ----
+    void drawControlPanel() const;                                    // nen khung
+    // "MAN n" + "DEN LUOT: <ten>". isPlayerTurn chi quyet dinh mau/chu, BattleUI khong biet logic game.
+    void drawTurnBanner(int stage, const Character* current, bool isPlayerTurn, bool waitingConfirm) const;
     void drawCommandHelp(const std::string& helpText = "") const;     // rong = dung chu mac dinh
+    void drawBattleLog(const std::string& message) const;
+
+    // Popup chon ky nang o giua man hinh (nam tren khung dieu khien). Skill thieu MP thi mo.
     void drawSkillMenu(const std::vector<Skill>& skills, int selectedIndex, int currentMp) const;
     void drawTargetCursor(const BattleSlot& slot) const;
 
