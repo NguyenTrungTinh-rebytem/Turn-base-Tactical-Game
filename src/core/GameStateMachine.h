@@ -6,6 +6,7 @@ public:
     enum class State
     {
         MENU,
+        CREATE_HERO, 
         IN_BATTLE,
         VICTORY,
         GAME_OVER
