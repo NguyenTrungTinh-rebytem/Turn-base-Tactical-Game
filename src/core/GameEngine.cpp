@@ -122,6 +122,10 @@ void GameEngine::initialize()
     }
     m_startMenu.loadBackground(resolvePath("assets/images/bg_menu.png"));   // thieu anh -> nen thu tuc
     m_startMenu.setStatusText(m_dataLoaded ? "Data: CSV OK" : "Data: CSV loi -> dung du lieu du phong", m_dataLoaded);
+    m_heroConfig = { HERO_NAME, HERO_RACE, HERO_CLASS, HERO_ELEMENT };
+    m_heroCreate.loadBackground(resolvePath("assets/images/bg_menu.png"));
+    m_heroCreate.loadPreviewSprite(resolvePath(SPRITE_SHEET_PATH), FRAME_W, FRAME_H);
+    setupHeroCreateScreen();
     m_combatSubject.addObserver(this);
     m_battleMap.setStage(StageId::STAGE_1);
 
@@ -137,6 +141,7 @@ void GameEngine::shutdown()
     m_views.clear();
     m_ui.unloadAll();
     m_startMenu.unloadAll();
+    m_heroCreate.unloadAll();
     m_battleMap.unloadAll();
     m_combatants.clear();
 
@@ -275,7 +280,38 @@ std::vector<Character*> GameEngine::upcomingOrder() const
     });
     return order;
 }
+void GameEngine::setupHeroCreateScreen()
+{
+    if (!m_dataLoaded) return;   // khong co du lieu -> bo qua man Tao Anh Hung
 
+    auto skillNames = [this](const std::vector<std::string>& ids) {
+        std::vector<std::string> names;
+        for (const auto& id : ids)
+        {
+            try { names.push_back(m_gameData.getSkill(id).m_name); }
+            catch (const std::exception&) { names.push_back(id); }
+        }
+        return names;
+    };
+
+    std::vector<HeroOption> races, classes;
+    for (const RaceData& r : m_gameData.getRaces())
+        races.push_back({ r.m_name, r.m_stats, skillNames(r.m_skillIds) });
+    for (const ClassData& c : m_gameData.getClasses())
+        classes.push_back({ c.m_name, c.m_stats, skillNames(c.m_skillIds) });
+
+    m_heroCreate.setOptions(races, classes);
+}
+
+void GameEngine::applyHeroSelection(const HeroSelection& selection)
+{
+    const auto& races = m_gameData.getRaces();
+    const auto& classes = m_gameData.getClasses();
+    if (selection.m_raceIndex < races.size())    m_heroConfig.m_race = races[selection.m_raceIndex].m_name;
+    if (selection.m_classIndex < classes.size()) m_heroConfig.m_class = classes[selection.m_classIndex].m_name;
+    m_heroConfig.m_name = selection.m_name;
+    m_heroConfig.m_element = selection.m_element;
+}
 void GameEngine::createHero()
 {
     Stats heroStats{ 120, 50, 25, 20, 5, 8, 15 };
@@ -285,9 +321,9 @@ void GameEngine::createHero()
     if (m_dataLoaded)
     {
         try {
-            heroStats = m_gameData.getBaseStats(HERO_RACE, HERO_CLASS);
-            for (const auto& id : m_gameData.getHeroSkillIds(HERO_RACE, HERO_CLASS))
-                m_heroSkills.push_back(toBattleSkill(m_gameData.getSkill(id), HERO_ELEMENT));
+            heroStats = m_gameData.getBaseStats(m_heroConfig.m_race, m_heroConfig.m_class);
+            for (const auto& id : m_gameData.getHeroSkillIds(m_heroConfig.m_race, m_heroConfig.m_class))
+    m_heroSkills.push_back(toBattleSkill(m_gameData.getSkill(id), m_heroConfig.m_element));
             fromData = true;
         }
         catch (const std::exception& e) {
@@ -306,7 +342,7 @@ void GameEngine::createHero()
         };
     }
 
-    addCombatant(std::make_unique<Player>(HERO_NAME, heroStats, HERO_ELEMENT));
+    addCombatant(std::make_unique<Player>(m_heroConfig.m_name, heroStats, m_heroConfig.m_element));
 }
 
 void GameEngine::spawnEnemies(int stage)
@@ -407,6 +443,11 @@ void GameEngine::processEvents()
                 m_stateMachine.changeState(GameStateMachine::State::MENU);
             }
         }
+        else 
+        if (m_stateMachine.is(GameStateMachine::State::CREATE_HERO))
+    {
+    m_stateMachine.changeState(GameStateMachine::State::MENU);
+    }
         else
         {
             m_isRunning = false;
@@ -423,9 +464,17 @@ void GameEngine::processEvents()
     switch (m_startMenu.handleInput())
     {
     case MenuAction::START_GAME:
+    if (m_heroCreate.hasOptions())
+    {
+        m_heroCreate.reset(m_heroConfig.m_name);
+        m_stateMachine.changeState(GameStateMachine::State::CREATE_HERO);
+    }
+    else   // chua co data CSV: vao tran luon voi hero mac dinh
+    {
         m_stateMachine.changeState(GameStateMachine::State::IN_BATTLE);
         startNewGame();
-        break;
+    }
+    break;
     case MenuAction::EXIT:
         m_isRunning = false;
         break;
@@ -433,7 +482,21 @@ void GameEngine::processEvents()
         break;
     }
     break;
-
+    case GameStateMachine::State::CREATE_HERO:
+    switch (m_heroCreate.handleInput())
+    {
+    case HeroCreateAction::CONFIRM:
+        applyHeroSelection(m_heroCreate.getSelection());
+        m_stateMachine.changeState(GameStateMachine::State::IN_BATTLE);
+        startNewGame();
+        break;
+    case HeroCreateAction::BACK:
+        m_stateMachine.changeState(GameStateMachine::State::MENU);
+        break;
+    case HeroCreateAction::NONE:
+        break;
+    }
+    break;
     case GameStateMachine::State::IN_BATTLE:
         if (m_battlePhase == BattlePhase::PLAYER_TURN || m_battlePhase == BattlePhase::PLAYER_CONFIRM)
             processPlayerInput();
@@ -734,6 +797,8 @@ void GameEngine::update(float deltaTime)
 {   
     if (m_stateMachine.is(GameStateMachine::State::MENU))
     m_startMenu.update(deltaTime);
+    if (m_stateMachine.is(GameStateMachine::State::CREATE_HERO))
+    m_heroCreate.update(deltaTime);
     if (!m_stateMachine.is(GameStateMachine::State::IN_BATTLE)) return;
 
     // Cap nhat sprite + hieu ung UI (chu bay)
@@ -945,7 +1010,9 @@ void GameEngine::render()
     case GameStateMachine::State::MENU:
         m_startMenu.draw();
         break;
-
+    case GameStateMachine::State::CREATE_HERO:
+    m_heroCreate.draw();
+    break;
     case GameStateMachine::State::IN_BATTLE:
         m_battleMap.draw();
         renderCombatants();

@@ -10,6 +10,7 @@
 #include "graphics/BattleMap.h"
 #include "graphics/BattleUI.h"
 #include "graphics/StartMenu.h" 
+#include "graphics/HeroCreateScreen.h"
 #include "graphics/CombatantView.h"
 #include "graphics/SpriteAnimation.h"
 #include "entities/Character.h"
@@ -63,6 +64,8 @@ private:
     void layoutViews();
     std::vector<Character*> upcomingOrder() const;   // thu tu luot de hien thi (Turn Order)
     int  finalStage() const;
+    void setupHeroCreateScreen();
+    void applyHeroSelection(const HeroSelection& selection);
     static Skill toBattleSkill(const SkillData& data, Element heroElement);
 
     // ----- input nguoi choi -----
@@ -112,6 +115,15 @@ private:
     BattleMap m_battleMap;
     BattleUI  m_ui;
     StartMenu m_startMenu;
+    HeroCreateScreen m_heroCreate;
+
+struct HeroConfig {                              // hero người chơi chọn
+    std::string m_name;
+    std::string m_race;
+    std::string m_class;
+    Element m_element = Element::KIM;
+};
+HeroConfig m_heroConfig;
     SubjectCombat m_combatSubject;
 
     // ----- Entities (Engine so huu, cac module khac chi quan sat bang con tro tho) -----
