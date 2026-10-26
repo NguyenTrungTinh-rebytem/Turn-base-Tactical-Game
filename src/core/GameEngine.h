@@ -9,6 +9,7 @@
 #include "dsa/CombatObserver.h"
 #include "graphics/BattleMap.h"
 #include "graphics/BattleUI.h"
+#include "graphics/StartMenu.h" 
 #include "graphics/CombatantView.h"
 #include "graphics/SpriteAnimation.h"
 #include "entities/Character.h"
@@ -110,6 +111,7 @@ private:
     TurnManager m_turnManager;
     BattleMap m_battleMap;
     BattleUI  m_ui;
+    StartMenu m_startMenu;
     SubjectCombat m_combatSubject;
 
     // ----- Entities (Engine so huu, cac module khac chi quan sat bang con tro tho) -----
