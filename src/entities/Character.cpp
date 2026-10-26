@@ -14,6 +14,7 @@ void Character::takeDamage(int amount, Element atkElement, bool isMagic) {
     
     int finalDamage = static_cast<int>(amount * elementMult) - def;
     if (finalDamage < 1) finalDamage = 1;
+    finalDamage = m_mods.applyIncoming(*this, finalDamage);   // buff/trang bi cua nguoi nhan
 
     m_currentHp -= finalDamage;
     if (m_currentHp < 0) m_currentHp = 0;
@@ -27,4 +28,9 @@ int Character::calcSkillDamage(const Skill* skill) const {
     if (!skill) return 0;
     int baseAtk = skill->m_isMagic ? m_stats.m_ma : m_stats.m_a;
     return baseAtk + skill->m_power;
+}
+
+int Character::dealSkillDamage(const Skill* skill, Character* target, int baseDamage) {
+    if (!skill || !target) return 0;
+    return m_mods.dealDamage(*this, *target, *skill, baseDamage);
 }

@@ -1,8 +1,9 @@
 #include "entities/Player.h"
 #include "data/Skill.h"
 
-Player::Player(const std::string& name, const Stats& stats, Element element)
-    : Character(name, stats, element)
+Player::Player(const std::string& name, const Stats& stats, Element element,
+               const std::string& raceName, const std::string& className)
+    : Character(name, stats, element), m_raceName(raceName), m_className(className)
 {
 }
 
@@ -13,5 +14,5 @@ void Player::executeSkill(Skill* skill, Character* target)
     if (m_currentMp < skill->m_mpCost) return;  // Không đủ MP: bỏ qua
 
     m_currentMp -= skill->m_mpCost;
-    target->takeDamage(calcSkillDamage(skill), skill->m_element, skill->m_isMagic);
+    dealSkillDamage(skill, target, calcSkillDamage(skill));
 }
