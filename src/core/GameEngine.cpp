@@ -120,7 +120,8 @@ void GameEngine::initialize()
         m_battleLog = std::string("Data load notice: ") + e.what();
         std::cerr << m_battleLog << std::endl;
     }
-
+    m_startMenu.loadBackground(resolvePath("assets/images/bg_menu.png"));   // thieu anh -> nen thu tuc
+    m_startMenu.setStatusText(m_dataLoaded ? "Data: CSV OK" : "Data: CSV loi -> dung du lieu du phong", m_dataLoaded);
     m_combatSubject.addObserver(this);
     m_battleMap.setStage(StageId::STAGE_1);
 
@@ -135,6 +136,7 @@ void GameEngine::shutdown()
     // Giai phong Texture (sprite) TRUOC khi dong cua so
     m_views.clear();
     m_ui.unloadAll();
+    m_startMenu.unloadAll();
     m_battleMap.unloadAll();
     m_combatants.clear();
 
@@ -418,12 +420,19 @@ void GameEngine::processEvents()
     switch (m_stateMachine.getState())
     {
     case GameStateMachine::State::MENU:
-        if (IsKeyPressed(KEY_ENTER))
-        {
-            m_stateMachine.changeState(GameStateMachine::State::IN_BATTLE);
-            startNewGame();
-        }
+    switch (m_startMenu.handleInput())
+    {
+    case MenuAction::START_GAME:
+        m_stateMachine.changeState(GameStateMachine::State::IN_BATTLE);
+        startNewGame();
         break;
+    case MenuAction::EXIT:
+        m_isRunning = false;
+        break;
+    case MenuAction::NONE:
+        break;
+    }
+    break;
 
     case GameStateMachine::State::IN_BATTLE:
         if (m_battlePhase == BattlePhase::PLAYER_TURN || m_battlePhase == BattlePhase::PLAYER_CONFIRM)
@@ -722,7 +731,9 @@ void GameEngine::executeAiTurn(Character* aiChar)
 }
 
 void GameEngine::update(float deltaTime)
-{
+{   
+    if (m_stateMachine.is(GameStateMachine::State::MENU))
+    m_startMenu.update(deltaTime);
     if (!m_stateMachine.is(GameStateMachine::State::IN_BATTLE)) return;
 
     // Cap nhat sprite + hieu ung UI (chu bay)
@@ -732,7 +743,8 @@ void GameEngine::update(float deltaTime)
     // Dang cho nguoi choi xac nhan/undo: khong xet ket thuc tran (muc tieu co the hoi sinh khi undo)
     if (m_battlePhase != BattlePhase::PLAYER_CONFIRM)
         checkBattleCondition();
-    if (!m_stateMachine.is(GameStateMachine::State::IN_BATTLE)) return;
+    if (!m_stateMachine.is(GameStateMachine::State::IN_BATTLE)) 
+    return;
 
     if (!m_currentCharacter)
     {
@@ -928,15 +940,10 @@ void GameEngine::render()
 {
     BeginDrawing();
     ClearBackground(RAYWHITE);
-
-    switch (m_stateMachine.getState())
+       switch (m_stateMachine.getState())
     {
     case GameStateMachine::State::MENU:
-        DrawText("2.5D RPG BATTLE ENGINE", 380, 220, 40, DARKBLUE);
-        DrawText("Press ENTER to Start Battle", 440, 320, 24, DARKGRAY);
-        DrawText("ESC to Exit", 560, 370, 20, GRAY);
-        DrawText(m_dataLoaded ? "Data: CSV OK" : "Data: CSV loi -> dung du lieu du phong", 440, 420, 18,
-                 m_dataLoaded ? DARKGREEN : MAROON);
+        m_startMenu.draw();
         break;
 
     case GameStateMachine::State::IN_BATTLE:
