@@ -69,7 +69,7 @@ bool HeroCreateScreen::loadBackground(const std::string& path) {
     if (path.empty() || !FileExists(path.c_str())) return false;
     m_background = LoadTexture(path.c_str());
     m_hasBackground = (m_background.id != 0);
-    if (m_hasBackground) SetTextureFilter(m_background, TEXTURE_FILTER_POINT);
+    if (m_hasBackground) SetTextureFilter(m_background, TEXTURE_FILTER_BILINEAR);
     return m_hasBackground;
 }
 

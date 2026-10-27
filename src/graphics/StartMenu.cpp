@@ -25,6 +25,7 @@ constexpr Color COL_TEXT         { 235, 232, 250, 255 };
 constexpr Color COL_TEXT_SEL     { 255, 240, 170, 255 };
 constexpr Color COL_OK           { 120, 230, 140, 255 };
 constexpr Color COL_ERR          { 255, 110, 110, 255 };
+constexpr Color COL_EMBER(unsigned char alpha) { return Color{ 255, 140, 70, alpha }; }   // tan lua (doi sang 190,255,120 neu muon dom dom xanh)
 
 float clamp01(float v) { return std::max(0.0f, std::min(1.0f, v)); }
 
@@ -53,7 +54,7 @@ bool StartMenu::loadBackground(const std::string& path) {
     if (path.empty() || !FileExists(path.c_str())) return false;   // thieu anh -> nen thu tuc
     m_background = LoadTexture(path.c_str());
     m_hasBackground = (m_background.id != 0);
-    if (m_hasBackground) SetTextureFilter(m_background, TEXTURE_FILTER_POINT);   // Pixel Art: khong lam mo
+    if (m_hasBackground) SetTextureFilter(m_background, TEXTURE_FILTER_BILINEAR);   // anh minh hoa (khong phai pixel art): lam muot khi phong/thu
     return m_hasBackground;
 }
 
@@ -73,7 +74,7 @@ void StartMenu::setStatusText(const std::string& text, bool isOk) {
 Rectangle StartMenu::buttonRect(size_t index) const {
     const float W = static_cast<float>(GetScreenWidth());
     const float H = static_cast<float>(GetScreenHeight());
-    return { (W - BUTTON_W) / 2.0f,
+    return { W * m_menuCenterX - BUTTON_W / 2.0f,
              H * BUTTONS_Y_RATIO + static_cast<float>(index) * (BUTTON_H + BUTTON_GAP),
              BUTTON_W, BUTTON_H };
 }
@@ -140,7 +141,7 @@ void StartMenu::drawBackground() const {
         const float x = hash01(i * 11 + 2) * W + std::sin(t) * 24.0f;
         const float y = H * (0.55f + 0.38f * hash01(i * 5 + 3)) + std::cos(t * 0.8f) * 14.0f;
         const float glow = 0.5f + 0.5f * std::sin(m_time * 2.0f + i);
-        DrawCircleV(Vector2{ x, y }, 2.0f + glow, Color{ 190, 255, 120, static_cast<unsigned char>(80 + 150 * glow) });
+        DrawCircleV(Vector2{ x, y }, 2.0f + glow, COL_EMBER(static_cast<unsigned char>(80 + 150 * glow)));
     }
 
     // Toi nhe phia tren/duoi de chu de doc
@@ -171,7 +172,7 @@ void StartMenu::drawProceduralBackground() const {
 void StartMenu::drawTitle() const {
     const float W = static_cast<float>(GetScreenWidth());
     const float H = static_cast<float>(GetScreenHeight());
-    const float cx = W / 2.0f;
+    const float cx = W * m_menuCenterX;
     const float bob = std::sin(m_time * 1.8f) * 4.0f;
     const float y = H * TITLE_Y_RATIO + bob;
 

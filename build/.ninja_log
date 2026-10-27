@@ -28,3 +28,8 @@
 104	2676	8147169296250805	CMakeFiles/game.dir/src/main.cpp.obj	b1163cf3d9299e02
 61	4242	8147169295825053	CMakeFiles/game.dir/src/core/GameEngine.cpp.obj	6f86db03f70f8943
 4243	5127	8147169337639510	game.exe	64a4dd8f8abffe14
+166	3002	8147808972430619	CMakeFiles/game.dir/src/graphics/StartMenu.cpp.obj	144b7da9025e01c6
+153	3028	8147808972244884	CMakeFiles/game.dir/src/graphics/Herocreatescreen.cpp.obj	5ecc558582347a6f
+192	3910	8147808972717544	CMakeFiles/game.dir/src/main.cpp.obj	b1163cf3d9299e02
+107	5588	8147808971684224	CMakeFiles/game.dir/src/core/GameEngine.cpp.obj	6f86db03f70f8943
+5588	7005	8147809026645761	game.exe	64a4dd8f8abffe14
