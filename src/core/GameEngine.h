@@ -11,6 +11,7 @@
 #include "graphics/BattleUI.h"
 #include "graphics/StartMenu.h" 
 #include "graphics/HeroCreateScreen.h"
+#include "graphics/WaveSelectScreen.h"    
 #include "graphics/CombatantView.h"
 #include "graphics/SpriteAnimation.h"
 #include "entities/Character.h"
@@ -56,7 +57,7 @@ private:
     void renderCombatants();
 
     // ----- thiet lap tran dau -----
-    void startNewGame();
+    void startNewGame(int startStage = 1);
     void loadStage(int stage);
     void createHero();
     void spawnEnemies(int stage);
@@ -65,6 +66,8 @@ private:
     std::vector<Character*> upcomingOrder() const;   // thu tu luot de hien thi (Turn Order)
     int  finalStage() const;
     void setupHeroCreateScreen();
+    void openWaveSelect();  
+    void markWaveCleared(int stage); 
     void applyHeroSelection(const HeroSelection& selection);
     static Skill toBattleSkill(const SkillData& data, Element heroElement);
 
@@ -116,6 +119,9 @@ private:
     BattleUI  m_ui;
     StartMenu m_startMenu;
     HeroCreateScreen m_heroCreate;
+    WaveSelectScreen m_waveSelect;
+    int m_unlockedWave = 1;                 // wave cao nhat da mo khoa (trong phien choi hien tai)
+    std::vector<bool> m_wavesCleared;       // m_wavesCleared[n] = da hoan thanh wave n
 
 struct HeroConfig {                              // hero người chơi chọn
     std::string m_name;

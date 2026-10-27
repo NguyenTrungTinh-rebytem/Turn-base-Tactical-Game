@@ -1,5 +1,5 @@
 # ninja log v7
-87	393	8146341161056206	CMakeFiles/game.dir/src/core/GameStateMachine.cpp.obj	6c21277ff3b31d2c
+151	1029	8148201934575777	CMakeFiles/game.dir/src/core/GameStateMachine.cpp.obj	6c21277ff3b31d2c
 394	564	8146341164120377	CMakeFiles/game.dir/src/graphics/main_map_test.cpp.obj	2b55d542ab1585b1
 564	747	8146341165820735	CMakeFiles/game.dir/src/graphics/main_sprite_test.cpp.obj	6d46e266278e8741
 117	1399	8146341161349221	CMakeFiles/game.dir/src/core/UseSkillCommand.cpp.obj	97bd3dd28d7c3393
@@ -18,13 +18,11 @@
 249	2710	8146341162666454	CMakeFiles/game.dir/src/graphics/BattleMap.cpp.obj	32aad90aebed3fbe
 263	2841	8146341162820148	CMakeFiles/game.dir/src/graphics/BattleUi.cpp.obj	8ddb094c058d4948
 131	3431	8146341161479754	CMakeFiles/game.dir/src/data/GameData.cpp.obj	92620661346df67f
-85	3811	8146986687270982	CMakeFiles/game.dir/src/main.cpp.obj	b1163cf3d9299e02
-62	5453	8146986686991539	CMakeFiles/game.dir/src/core/GameEngine.cpp.obj	6f86db03f70f8943
-5454	6684	8146986740995164	game.exe	4791e07d8af453b1
+44	1570	8148204752761046	CMakeFiles/game.dir/src/main.cpp.obj	b1163cf3d9299e02
+34	3204	8148204752605092	CMakeFiles/game.dir/src/core/GameEngine.cpp.obj	6f86db03f70f8943
+5588	7005	8147809026645761	game.exe	64a4dd8f8abffe14
 73	2840	8146986687186983	CMakeFiles/game.dir/src/graphics/Startmenu.cpp.obj	1234a7a82eabf17a
-71	255	8147169295919084	CMakeFiles/game.dir/src/core/GameStateMachine.cpp.obj	6c21277ff3b31d2c
-94	1784	8147169296148018	CMakeFiles/game.dir/src/graphics/StartMenu.cpp.obj	144b7da9025e01c6
-82	1936	8147169296044851	CMakeFiles/game.dir/src/graphics/Herocreatescreen.cpp.obj	5ecc558582347a6f
-104	2676	8147169296250805	CMakeFiles/game.dir/src/main.cpp.obj	b1163cf3d9299e02
-61	4242	8147169295825053	CMakeFiles/game.dir/src/core/GameEngine.cpp.obj	6f86db03f70f8943
-4243	5127	8147169337639510	game.exe	64a4dd8f8abffe14
+166	3002	8147808972430619	CMakeFiles/game.dir/src/graphics/StartMenu.cpp.obj	144b7da9025e01c6
+153	3028	8147808972244884	CMakeFiles/game.dir/src/graphics/Herocreatescreen.cpp.obj	5ecc558582347a6f
+30	1104	8148205991503342	CMakeFiles/game.dir/src/graphics/Waveselectscreen.cpp.obj	4a9ccaf1687e1780
+1105	2024	8148206002270838	game.exe	2e35ae7accbb3be4
