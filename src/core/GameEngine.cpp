@@ -128,8 +128,9 @@ void GameEngine::initialize()
     m_heroCreate.loadPreviewSprite(resolvePath(SPRITE_SHEET_PATH), FRAME_W, FRAME_H);
     setupHeroCreateScreen();
     m_combatSubject.addObserver(this);
-    m_battleMap.setStage(StageId::STAGE_1);
-
+    m_battleMap.setStage(m_stage == 1 ? StageId::STAGE_1 : StageId::STAGE_2,
+    resolvePath(m_stage == 1 ? "assets/images/bg_wave1.png"
+                           : "assets/images/bg_wave2.png"));
     m_stateMachine.changeState(GameStateMachine::State::MENU);
     m_isRunning = true;
     m_isInitialized = true;
@@ -445,7 +446,9 @@ void GameEngine::loadStage(int stage)
     layoutViews();
 
     m_selectedTarget = (m_combatants.size() > 1) ? m_combatants[1].get() : nullptr;
-    m_battleMap.setStage(stage == 1 ? StageId::STAGE_1 : StageId::STAGE_2);
+    m_battleMap.setStage(m_stage == 1 ? StageId::STAGE_1 : StageId::STAGE_2,
+    resolvePath(m_stage == 1 ? "assets/images/bg_wave1.png"
+                           : "assets/images/bg_wave2.png"));
 
     m_currentCharacter = nullptr;   // update() se goi advanceTurn() de lay luot dau tien
     m_battlePhase = BattlePhase::AI_THINKING;
