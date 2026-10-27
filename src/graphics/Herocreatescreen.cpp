@@ -1,6 +1,7 @@
 // Member 4 - Huynh Quang Khai | src/graphics/HeroCreateScreen.cpp
 #include "HeroCreateScreen.h"
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 
 namespace {
@@ -54,9 +55,28 @@ const char* statsLine(const Stats& s) {
     return TextFormat("HP %d  MP %d  ATK %d  MATK %d  DEF %d  MDEF %d  SPD %d",
                       s.m_hp, s.m_mp, s.m_a, s.m_ma, s.m_d, s.m_md, s.m_spd);
 }
+std::string lowerCase(std::string s) {
+    for (char& ch : s) ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+    return s;
+}
+
+// Ten trong CSV ("Ogre", "Swordman"...) -> enum cua luat ket hop
+bool raceFromName(const std::string& name, RaceType& out) {
+    const std::string key = lowerCase(name);
+    for (int i = 0; i < RACE_COUNT; ++i)
+        if (key == raceToString(static_cast<RaceType>(i))) { out = static_cast<RaceType>(i); return true; }
+    return false;
+}
+
+bool classFromName(const std::string& name, ClassType& out) {
+    const std::string key = lowerCase(name);
+    for (int i = 0; i < CLASS_COUNT; ++i)
+        if (key == classToString(static_cast<ClassType>(i))) { out = static_cast<ClassType>(i); return true; }
+    return false;
+}
 } // namespace
 
-HeroCreateScreen::HeroCreateScreen() { m_sprite.play(AnimState::IDLE); }
+HeroCreateScreen::HeroCreateScreen() { m_sprite.play(AnimState::IDLE); m_layered.play(LayerAnim::IDLE); }
 HeroCreateScreen::~HeroCreateScreen() { unloadAll(); }
 
 // ============ Tai nguyen ============
@@ -69,7 +89,7 @@ bool HeroCreateScreen::loadBackground(const std::string& path) {
     if (path.empty() || !FileExists(path.c_str())) return false;
     m_background = LoadTexture(path.c_str());
     m_hasBackground = (m_background.id != 0);
-    if (m_hasBackground) SetTextureFilter(m_background, TEXTURE_FILTER_BILINEAR);
+    if (m_hasBackground) SetTextureFilter(m_background, TEXTURE_FILTER_POINT);
     return m_hasBackground;
 }
 
@@ -81,6 +101,8 @@ bool HeroCreateScreen::loadPreviewSprite(const std::string& path, int frameWidth
 
 void HeroCreateScreen::unloadAll() {
     m_sprite.unload();
+    m_layered.unload();
+    LayerTextureCache::clear();
     if (m_hasBackground) {
         if (IsWindowReady()) UnloadTexture(m_background);
         m_hasBackground = false;
@@ -105,6 +127,8 @@ void HeroCreateScreen::setOptions(const std::vector<HeroOption>& races, const st
 
     m_raceIdx = std::min(m_raceIdx, m_races.empty() ? size_t{ 0 } : m_races.size() - 1);
     m_classIdx = std::min(m_classIdx, m_classes.empty() ? size_t{ 0 } : m_classes.size() - 1);
+    enforceValidCombo(ROW_RACE, +1, false);
+    syncLayeredSprite();
 }
 
 void HeroCreateScreen::reset(const std::string& defaultName) {
@@ -114,6 +138,9 @@ void HeroCreateScreen::reset(const std::string& defaultName) {
     m_hoverButton = -1;
     m_message.clear();
     m_messageTimer = 0.0f;
+    enforceValidCombo(ROW_RACE, +1, false);   // mac dinh Ogre + Mage bi cam -> sang Lop hop le dau tien
+    m_layered.play(LayerAnim::IDLE, true);
+    syncLayeredSprite();
     m_backspaceHold = m_backspaceRepeat = 0.0f;
     // Xoa ky tu con ton trong hang doi (vd phim vua bam o man hinh truoc)
     while (GetCharPressed() > 0) {}
@@ -131,6 +158,46 @@ HeroSelection HeroCreateScreen::getSelection() const {
 Stats HeroCreateScreen::totalStats() const {
     if (!hasOptions()) return Stats{};
     return m_races[m_raceIdx].m_stats + m_classes[m_classIdx].m_stats;   // Base = Race + Class
+}
+
+// ============ Luat Chung toc x Lop ============
+bool HeroCreateScreen::currentCombo(RaceType& race, ClassType& pClass) const {
+    if (!hasOptions()) return false;
+    return raceFromName(m_races[m_raceIdx].m_name, race) && classFromName(m_classes[m_classIdx].m_name, pClass);
+}
+
+bool HeroCreateScreen::isCurrentComboValid() const {
+    RaceType r; ClassType c;
+    if (!currentCombo(r, c)) return true;   // ten la (du lieu moi) -> khong chan
+    return isValidCombination(r, c);
+}
+
+// Hang vua doi giu nguyen; hang CON LAI nhay toi lua chon hop le gan nhat theo chieu dang bam.
+// Nhu vay moi Chung toc / Lop deu chon duoc, khong bi "khoa" mot hang.
+void HeroCreateScreen::enforceValidCombo(int editedRow, int direction, bool notify) {
+    if (!hasOptions() || isCurrentComboValid()) return;
+    const bool fixClass = (editedRow == ROW_RACE);
+    size_t& idx = fixClass ? m_classIdx : m_raceIdx;
+    const size_t n = fixClass ? m_classes.size() : m_races.size();
+    const size_t step = direction >= 0 ? 1 : n - 1;
+    const std::string oldRace = m_races[m_raceIdx].m_name;
+    const std::string oldClass = m_classes[m_classIdx].m_name;
+
+    for (size_t i = 0; i < n && !isCurrentComboValid(); ++i)
+        idx = (idx + step) % n;
+
+    if (notify && isCurrentComboValid()) {
+        m_message = fixClass
+            ? m_races[m_raceIdx].m_name + " khong the lam " + oldClass + " - da doi Lop sang " + m_classes[m_classIdx].m_name
+            : oldRace + " khong the lam " + m_classes[m_classIdx].m_name + " - da doi Chung toc sang " + m_races[m_raceIdx].m_name;
+        m_messageTimer = 2.5f;
+    }
+}
+
+void HeroCreateScreen::syncLayeredSprite() {
+    RaceType r; ClassType c;
+    if (!currentCombo(r, c)) return;
+    m_layered.setLoadout(r, c);   // chi nap lai lop thay doi (doi Race -> than, doi Class -> giap)
 }
 
 // ============ Bo cuc ============
@@ -166,13 +233,26 @@ void HeroCreateScreen::changeValue(int row, int delta) {
     size_t* target = (row == ROW_RACE) ? &m_raceIdx : (row == ROW_CLASS) ? &m_classIdx : &m_elementIdx;
     const int next = (static_cast<int>(*target) + delta % n + n) % n;   // xoay vong
     *target = static_cast<size_t>(next);
+    if (row == ROW_RACE || row == ROW_CLASS) {
+        enforceValidCombo(row, delta, true);
+        syncLayeredSprite();
+    }
 }
 
 void HeroCreateScreen::randomize() {
     if (!hasOptions()) return;
     m_raceIdx = static_cast<size_t>(GetRandomValue(0, static_cast<int>(m_races.size()) - 1));
-    m_classIdx = static_cast<size_t>(GetRandomValue(0, static_cast<int>(m_classes.size()) - 1));
+    // Chon ngau nhien trong cac Lop HOP LE voi Chung toc vua chon
+    std::vector<size_t> validClasses;
+    for (size_t i = 0; i < m_classes.size(); ++i) {
+        m_classIdx = i;
+        if (isCurrentComboValid()) validClasses.push_back(i);
+    }
+    m_classIdx = validClasses.empty()
+        ? 0
+        : validClasses[static_cast<size_t>(GetRandomValue(0, static_cast<int>(validClasses.size()) - 1))];
     m_elementIdx = static_cast<size_t>(GetRandomValue(0, static_cast<int>(ELEMENT_COUNT) - 1));
+    syncLayeredSprite();
 }
 
 // ============ Input ============
@@ -208,6 +288,11 @@ HeroCreateAction HeroCreateScreen::tryConfirm() {
         m_message = "Hay nhap ten anh hung!";
         m_messageTimer = 2.0f;
         m_focus = ROW_NAME;
+        return HeroCreateAction::NONE;
+    }
+    if (!isCurrentComboValid()) {   // phong ho: khong de lot to hop bi cam
+        m_message = "To hop Chung toc / Lop khong hop le!";
+        m_messageTimer = 2.0f;
         return HeroCreateAction::NONE;
     }
     return HeroCreateAction::CONFIRM;
@@ -257,6 +342,7 @@ HeroCreateAction HeroCreateScreen::handleInput() {
 void HeroCreateScreen::update(float deltaTime) {
     m_time += deltaTime;
     m_sprite.update(deltaTime);
+    m_layered.update(deltaTime);
     if (m_messageTimer > 0.0f) m_messageTimer = std::max(0.0f, m_messageTimer - deltaTime);
 }
 
@@ -351,7 +437,14 @@ void HeroCreateScreen::drawPreview() const {
     const Vector2 sprPos = { PANEL_X + 20.0f, PANEL_Y + 25.0f };
     DrawRectangleRec(Rectangle{ sprPos.x, sprPos.y, sprSize, sprSize }, Color{ 28, 24, 56, 255 });
     DrawRectangleLinesEx(Rectangle{ sprPos.x, sprPos.y, sprSize, sprSize }, 2.0f, COL_EDGE);
-    m_sprite.drawFrame(sprPos, false, sprScale, WHITE);
+    if (m_layered.hasTextures()) {
+        // O sprite 128x128 phong nguyen so nguyen (x2) de pixel khong bi lech; phan thua la trong suot
+        const float ls = std::max(1.0f, std::round(sprSize / static_cast<float>(SPRITE_FRAME_SIZE)));
+        const float off = (SPRITE_FRAME_SIZE * ls - sprSize) / 2.0f;
+        m_layered.draw(Vector2{ sprPos.x - off, sprPos.y - off }, false, ls, WHITE);
+    } else {
+        m_sprite.drawFrame(sprPos, false, sprScale, WHITE);   // chua co anh ghep lop -> placeholder cu
+    }
 
     const float cx = sprPos.x + sprSize / 2.0f;
     const std::string name = trimmed(m_name).empty() ? std::string("(chua dat ten)") : trimmed(m_name);
