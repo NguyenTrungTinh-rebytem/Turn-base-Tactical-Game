@@ -5,6 +5,7 @@
 // Khong include GameData/GameEngine => de test doc lap.
 #include "raylib.h"
 #include "SpriteAnimation.h"
+#include "LayeredSprite.h"   // ve nhan vat ghep lop (than theo Chung toc + giap theo Lop)
 #include "data/Stats.h"
 #include "data/Element.h"
 #include <string>
@@ -71,6 +72,12 @@ private:
     void handleTextInput();
     Stats totalStats() const;
 
+    // --- Luat Chung toc x Lop + sprite ghep lop ---
+    bool currentCombo(RaceType& race, ClassType& pClass) const;   // false neu ten khong khop enum
+    bool isCurrentComboValid() const;
+    void enforceValidCombo(int editedRow, int direction, bool notify);   // sua hang CON LAI cho hop le
+    void syncLayeredSprite();
+
     void drawBackground() const;
     void drawSelectors() const;
     void drawPreview() const;
@@ -90,7 +97,8 @@ private:
     std::string  m_message;
     float        m_messageTimer = 0.0f;
 
-    SpriteAnimation m_sprite;
+    SpriteAnimation m_sprite;     // placeholder khi chua co anh ghep lop
+    LayeredSprite   m_layered;    // xem truoc nhan vat that (than + giap)
     Texture2D    m_background{};
     bool         m_hasBackground = false;
 };
