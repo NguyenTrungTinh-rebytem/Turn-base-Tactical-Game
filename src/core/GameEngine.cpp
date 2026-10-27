@@ -124,6 +124,7 @@ void GameEngine::initialize()
     m_startMenu.setStatusText(m_dataLoaded ? "Data: CSV OK" : "Data: CSV loi -> dung du lieu du phong", m_dataLoaded);
     m_heroConfig = { HERO_NAME, HERO_RACE, HERO_CLASS, HERO_ELEMENT };
     m_heroCreate.loadBackground(resolvePath("assets/images/bg_menu.png"));
+    m_waveSelect.loadBackground(resolvePath("assets/images/bg_menu.png"));
     m_heroCreate.loadPreviewSprite(resolvePath(SPRITE_SHEET_PATH), FRAME_W, FRAME_H);
     setupHeroCreateScreen();
     m_combatSubject.addObserver(this);
@@ -142,6 +143,7 @@ void GameEngine::shutdown()
     m_ui.unloadAll();
     m_startMenu.unloadAll();
     m_heroCreate.unloadAll();
+    m_waveSelect.unloadAll();
     m_battleMap.unloadAll();
     m_combatants.clear();
 
@@ -264,10 +266,10 @@ void GameEngine::layoutViews()
 {
     if (m_views.empty()) return;
 
-    // Hero: luÃ´n á»Ÿ m_combatants[0]
+    // Hero: luôn ở m_combatants[0]
     m_views[0]->setSlot(m_battleMap.layoutPlayers({ 1.0f })[0]);
 
-    // QuÃ¡i: Boss to 1.3, quÃ¡i thÆ°á»ng 1.0
+    // Quái: Boss to 1.3, quái thường 1.0
     std::vector<float> muls;
     for (size_t i = 1; i < m_combatants.size(); ++i)
         muls.push_back(dynamic_cast<const Boss*>(m_combatants[i].get()) ? 1.3f : 1.0f);
@@ -288,6 +290,46 @@ std::vector<Character*> GameEngine::upcomingOrder() const
         return a->getStats().m_spd > b->getStats().m_spd;
     });
     return order;
+}
+void GameEngine::markWaveCleared(int stage)
+{
+    if (stage < 1) return;
+    if (m_wavesCleared.size() <= static_cast<size_t>(stage))
+        m_wavesCleared.resize(static_cast<size_t>(stage) + 1, false);
+    m_wavesCleared[static_cast<size_t>(stage)] = true;
+    m_unlockedWave = std::max(m_unlockedWave, std::min(stage + 1, finalStage()));   // xong wave n -> mo wave n+1
+}
+
+void GameEngine::openWaveSelect()
+{
+    std::vector<WaveInfo> waves;
+    for (int stage = 1; stage <= finalStage(); ++stage)
+    {
+        WaveInfo w;
+        w.m_number = stage;
+        w.m_title = "WAVE " + std::to_string(stage);
+
+        const std::vector<MonsterData> monsters = m_gameData.getMonstersByStage(stage);
+        for (const MonsterData& m : monsters)
+        {
+            w.m_enemies.push_back({ m.m_name, m.m_element });
+            if (m.m_isBoss) w.m_isBoss = true;
+        }
+
+        // Wave 1 chi xuat hien ngau nhien STAGE1_ENEMY_COUNT quai trong so quai co the gap (xem spawnEnemies)
+        const int appear = (stage == 1) ? std::min(static_cast<int>(monsters.size()), STAGE1_ENEMY_COUNT)
+                                        : static_cast<int>(monsters.size());
+        w.m_description = w.m_isBoss ? std::string("Tran chien voi Boss")
+                                     : "Xuat hien ngau nhien " + std::to_string(appear) + " quai";
+        w.m_locked = stage > m_unlockedWave;
+        w.m_cleared = static_cast<size_t>(stage) < m_wavesCleared.size() && m_wavesCleared[static_cast<size_t>(stage)];
+        waves.push_back(std::move(w));
+    }
+
+    m_waveSelect.setWaves(waves);
+    m_waveSelect.setHeroSummary(m_heroConfig.m_name + " - " + m_heroConfig.m_race + " " + m_heroConfig.m_class);
+    m_waveSelect.reset(0);
+    m_stateMachine.changeState(GameStateMachine::State::WAVE_SELECT);
 }
 void GameEngine::setupHeroCreateScreen()
 {
@@ -419,7 +461,7 @@ void GameEngine::loadStage(int stage)
     m_battleLog = "MAN " + std::to_string(stage) + " bat dau!";
 }
 
-void GameEngine::startNewGame()
+void GameEngine::startNewGame(int startStage)
 {
     m_combatants.clear();
     m_views.clear();
@@ -430,7 +472,7 @@ void GameEngine::startNewGame()
         m_inventory.addItem(POTION_NAME);
 
     createHero();
-    loadStage(1);
+    loadStage(startStage); 
     advanceTurn();
 
     m_battleLog = "Tran dau bat dau! Den luot: " + (m_currentCharacter ? m_currentCharacter->getName() : std::string("None"));
@@ -456,6 +498,10 @@ void GameEngine::processEvents()
         if (m_stateMachine.is(GameStateMachine::State::CREATE_HERO))
     {
     m_stateMachine.changeState(GameStateMachine::State::MENU);
+    }
+    else if (m_stateMachine.is(GameStateMachine::State::WAVE_SELECT))
+    {
+    m_stateMachine.changeState(GameStateMachine::State::CREATE_HERO);   // ESC o man Chon Wave = ve Tao Hero
     }
         else
         {
@@ -495,14 +541,33 @@ void GameEngine::processEvents()
     switch (m_heroCreate.handleInput())
     {
     case HeroCreateAction::CONFIRM:
-        applyHeroSelection(m_heroCreate.getSelection());
+    applyHeroSelection(m_heroCreate.getSelection());
+    if (m_dataLoaded && finalStage() > 1)
+        openWaveSelect();   // co nhieu wave -> cho nguoi choi chon
+    else
+    {
         m_stateMachine.changeState(GameStateMachine::State::IN_BATTLE);
         startNewGame();
-        break;
+    }
+    break;
     case HeroCreateAction::BACK:
         m_stateMachine.changeState(GameStateMachine::State::MENU);
         break;
     case HeroCreateAction::NONE:
+        break;
+    }
+    break;
+    case GameStateMachine::State::WAVE_SELECT:
+    switch (m_waveSelect.handleInput())
+    {
+    case WaveSelectAction::START:
+        m_stateMachine.changeState(GameStateMachine::State::IN_BATTLE);
+        startNewGame(m_waveSelect.getSelectedWave());
+        break;
+    case WaveSelectAction::BACK:
+        m_stateMachine.changeState(GameStateMachine::State::CREATE_HERO);
+        break;
+    case WaveSelectAction::NONE:
         break;
     }
     break;
@@ -808,6 +873,8 @@ void GameEngine::update(float deltaTime)
     m_startMenu.update(deltaTime);
     if (m_stateMachine.is(GameStateMachine::State::CREATE_HERO))
     m_heroCreate.update(deltaTime);
+    if (m_stateMachine.is(GameStateMachine::State::WAVE_SELECT))
+    m_waveSelect.update(deltaTime);
     if (!m_stateMachine.is(GameStateMachine::State::IN_BATTLE)) return;
 
     // Cap nhat sprite + hieu ung UI (chu bay)
@@ -860,6 +927,7 @@ void GameEngine::checkBattleCondition()
     }
 
     // Tat ca quai da chet
+    markWaveCleared(m_stage);
     if (m_stage < finalStage())
         loadStage(m_stage + 1);
     else
@@ -1021,6 +1089,9 @@ void GameEngine::render()
         break;
     case GameStateMachine::State::CREATE_HERO:
     m_heroCreate.draw();
+    break;
+    case GameStateMachine::State::WAVE_SELECT:
+    m_waveSelect.draw();
     break;
     case GameStateMachine::State::IN_BATTLE:
         m_battleMap.draw();

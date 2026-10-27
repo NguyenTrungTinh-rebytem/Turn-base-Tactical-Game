@@ -1,16 +1,19 @@
 #pragma once
-// Member 4 - Huynh Quang Khai | src/graphics/BattleMap.h  (phien ban 2D nhin ngang)
+// Member 4 - Huynh Quang Khai | src/graphics/BattleMap.h  (2.5D: phoi canh + chieu sau)
 #include "raylib.h"
 #include <string>
+#include <vector>
 
 enum class StageId { STAGE_1 = 0, STAGE_2 };
 
-// Vi tri dung cua 1 nhan vat tren san dau 2D
+// Vi tri dung cua 1 nhan vat tren san dau 2.5D
 struct BattleSlot {
     Vector2 m_feetPos{};      // diem cham dat (giua day chan)
     float   m_scale = 1.0f;
     bool    m_flipX = false;  // quai o ben phai quay mat sang trai
+    float   m_depth = 0.5f;   // 0 = hang xa .. 1 = hang gan
 };
+// Thu tu ve: sap xep theo m_feetPos.y TANG DAN (xa truoc, gan sau) de hang gan che hang xa.
 
 class BattleMap {
 public:
@@ -19,23 +22,34 @@ public:
     BattleMap(const BattleMap&) = delete;
     BattleMap& operator=(const BattleMap&) = delete;
 
-    // Doi stage. Co anh nen thi nap, khong co thi ve nen thu tuc (placeholder).
+    // Doi stage. Co anh nen thi nap, khong co thi ve nen thu tuc (mau khac nhau theo Stage).
     void setStage(StageId stage, const std::string& backgroundPath = "");
     StageId getStage() const { return m_stage; }
     bool hasBackground() const { return m_hasBackground; }
 
-    void draw() const;                                        // goi dau tien trong BeginDrawing()
-    void drawShadow(const BattleSlot& slot, float frameWidth) const;
+    // Giai phong texture nen. Core goi trong shutdown(), TRUOC CloseWindow(). An toan khi goi nhieu lan.
+    void unloadAll();
 
-    // index 0 = dung gan giua man hinh nhat (tuyen dau). scaleMul > 1 cho Boss.
+    void draw() const;                                        // goi dau tien trong BeginDrawing()
+    void drawShadow(const BattleSlot& slot, float frameWidth, float alpha = 1.0f) const;
+
+    // ---- Bo cuc ca doi hinh (KHUYEN DUNG): 1-4 don vi/phe ----
+    // Xep le theo 2 hang: index chan = hang GAN (to, thap), index le = hang XA (nho, cao) => khong de nhau.
+    // scaleMuls[i] = he so to cua don vi i (Boss = 1.3f). Index 0 = tuyen dau (gan giua man hinh nhat).
+    // Dong qua se thu nho deu de vua man hinh.
+    std::vector<BattleSlot> layoutPlayers(const std::vector<float>& scaleMuls) const;
+    std::vector<BattleSlot> layoutEnemies(const std::vector<float>& scaleMuls) const;
+
+    // ---- API cu (van dung duoc): chi biet scale cua chinh no, cac don vi khac coi nhu 1.0 ----
     BattleSlot getPlayerSlot(int index, int count, float scaleMul = 1.0f) const;
     BattleSlot getEnemySlot(int index, int count, float scaleMul = 1.0f) const;
 
     static Vector2 toTopLeft(const BattleSlot& slot, int frameW, int frameH);
-    static Vector2 getHeadPos(const BattleSlot& slot, int frameH);   // cho BattleUI::setAnchor()
+    static Vector2 getHeadPos(const BattleSlot& slot, int frameH);
 
 private:
-    BattleSlot makeSlot(int index, int count, bool isPlayer, float scaleMul) const;
+    std::vector<BattleSlot> layoutSide(const std::vector<float>& scaleMuls, bool isPlayer) const;
+    BattleSlot pickSlot(int index, int count, bool isPlayer, float scaleMul) const;
     float groundY() const;
     void drawProceduralBackground() const;
 
