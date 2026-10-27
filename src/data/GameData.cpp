@@ -129,6 +129,7 @@ void GameData::loadAll(const std::string& dataDir) {
     m_classes.clear();
     m_skills.clear();
     m_monsters.clear();
+    m_skillElements = SkillElementConfig{};
 
     std::string dir = dataDir;
     if (!dir.empty() && dir.back() != '/' && dir.back() != '\\') dir += '/';
@@ -136,6 +137,8 @@ void GameData::loadAll(const std::string& dataDir) {
     loadRaces(dir + "races.csv");
     loadClasses(dir + "classes.csv");
     loadSkills(dir + "skills.csv");
+    m_skillElementsPath = dir + "skill_elements.csv";
+    loadSkillElements(m_skillElementsPath);
     loadMonsters(dir + "monsters.csv");
     validate();
     m_loaded = true;
@@ -177,6 +180,32 @@ void GameData::loadSkills(const std::string& path) {
         s.m_effectTurns = toInt(path, row, 8);
         m_skills.push_back(s);
     }
+}
+
+// File nguyen to la TUY CHON: thieu file hoac thieu dong -> m_hasElement = false (khong nem loi).
+void GameData::loadSkillElements(const std::string& path) {
+    m_skillElements.loadFromFile(path);
+    for (auto& s : m_skills) {
+        const auto element = m_skillElements.getElement(s.m_id);
+        s.m_hasElement = element.has_value();
+        s.m_element = element.value_or(Element::KIM);
+    }
+}
+
+bool GameData::setSkillElement(const std::string& skillId, Element element) {
+    for (auto& s : m_skills) {
+        if (s.m_id != skillId) continue;
+        s.m_element = element;
+        s.m_hasElement = true;
+        m_skillElements.setElement(skillId, element);
+        return true;
+    }
+    return false;
+}
+
+bool GameData::saveSkillElements() const {
+    if (m_skillElementsPath.empty()) return false;
+    return m_skillElements.saveToFile(m_skillElementsPath);
 }
 
 void GameData::loadMonsters(const std::string& path) {
