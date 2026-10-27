@@ -214,7 +214,9 @@ int GameEngine::finalStage() const
 Skill GameEngine::toBattleSkill(const SkillData& data, Element heroElement)
 {
     // TODO(Data): khi GameData co buildSkill(id) thi thay ham nay.
-    // CSV chua co cot element/isMagic nen Core suy ra tam tu hieu ung.
+    // Nguyen to: lay tu data/skill_elements.csv (GameData::setSkillElement de sua).
+    // Skill chua duoc gan nguyen to -> Core suy ra tam tu hieu ung (du phong nhu cu).
+    // isMagic: CSV chua co cot nay nen van suy ra tu owner.
     Skill skill;
     skill.m_id = data.m_id;
     skill.m_name = data.m_name;
@@ -226,13 +228,20 @@ Skill GameEngine::toBattleSkill(const SkillData& data, Element heroElement)
     skill.m_effect = data.m_effect;
     skill.m_effectTurns = data.m_effectTurns;
 
-    switch (data.m_effect)
+    if (data.m_hasElement)
     {
-    case EffectType::BURN:     skill.m_element = Element::HOA;  break;
-    case EffectType::SLOW:     skill.m_element = Element::THUY; break;
-    case EffectType::STUN:     skill.m_element = Element::THO;  break;
-    case EffectType::WEAKNESS: skill.m_element = Element::MOC;  break;
-    default:                   skill.m_element = heroElement;   break;
+        skill.m_element = data.m_element;
+    }
+    else
+    {
+        switch (data.m_effect)
+        {
+        case EffectType::BURN:     skill.m_element = Element::HOA;  break;
+        case EffectType::SLOW:     skill.m_element = Element::THUY; break;
+        case EffectType::STUN:     skill.m_element = Element::THO;  break;
+        case EffectType::WEAKNESS: skill.m_element = Element::MOC;  break;
+        default:                   skill.m_element = heroElement;   break;
+        }
     }
 
     skill.m_isMagic = (data.m_ownerType == SkillOwnerType::CLASS)

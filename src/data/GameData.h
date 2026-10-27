@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "DataTypes.h"
+#include "SkillElementConfig.h"
 // Loi doc/kiem tra du lieu. what() chua ten file + dong + nguyen nhan.
 class DataLoadError : public std::runtime_error {
 public:
@@ -44,16 +45,25 @@ public:
 
     bool isLoaded() const { return m_loaded; }
 
+    // ---- Nguyen to cua skill (chinh sua duoc) ----
+    // Doi nguyen to cua 1 skill ngay trong bo nho. false neu khong co skill do.
+    bool setSkillElement(const std::string& skillId, Element element);
+    // Ghi nguyen to hien tai ra data/skill_elements.csv (duong dan lay luc loadAll). false neu ghi that bai.
+    bool saveSkillElements() const;
+
 private:
     void loadRaces(const std::string& path);
     void loadClasses(const std::string& path);
     void loadSkills(const std::string& path);
     void loadMonsters(const std::string& path);
     void validate() const;
+    void loadSkillElements(const std::string& path);   // tuy chon: thieu file -> giu mac dinh Kim
 
     std::vector<RaceData> m_races;
     std::vector<ClassData> m_classes;
     std::vector<SkillData> m_skills;
     std::vector<MonsterData> m_monsters;
+    SkillElementConfig m_skillElements;
+    std::string m_skillElementsPath;
     bool m_loaded = false;
 };

@@ -20,6 +20,8 @@ struct SkillData {
     int m_mpCost = 0;
     EffectType m_effect = EffectType::NONE;
     int m_effectTurns = 0;
+    Element m_element = Element::KIM;   // nguyen to cua skill (nap tu skill_elements.csv)
+    bool m_hasElement = false;          // true neu skill co dong trong skill_elements.csv (false -> Core tu suy ra du phong)
 };
 
 struct RaceData {
