@@ -98,9 +98,27 @@ build CMakeFiles/game.dir/src/core/UseSkillCommand.cpp.obj: CXX_COMPILER__game_u
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\core
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
+build CMakeFiles/game.dir/src/data/CharacterRules.cpp.obj: CXX_COMPILER__game_unscanned_ D$:/Turn-base-Tactical-Game/src/data/CharacterRules.cpp || cmake_object_order_depends_target_game
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\game.dir\src\data\CharacterRules.cpp.obj.d
+  FLAGS = -std=gnu++17
+  INCLUDES = -ID:/Turn-base-Tactical-Game/src -ID:/Turn-base-Tactical-Game/src/core -ID:/Turn-base-Tactical-Game/src/data -ID:/Turn-base-Tactical-Game/src/dsa -ID:/Turn-base-Tactical-Game/src/entities -ID:/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\game.dir
+  OBJECT_FILE_DIR = CMakeFiles\game.dir\src\data
+  TARGET_SUPPORT_DIR = CMakeFiles\game.dir
+
 build CMakeFiles/game.dir/src/data/GameData.cpp.obj: CXX_COMPILER__game_unscanned_ D$:/Turn-base-Tactical-Game/src/data/GameData.cpp || cmake_object_order_depends_target_game
   DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
   DEP_FILE = CMakeFiles\game.dir\src\data\GameData.cpp.obj.d
+  FLAGS = -std=gnu++17
+  INCLUDES = -ID:/Turn-base-Tactical-Game/src -ID:/Turn-base-Tactical-Game/src/core -ID:/Turn-base-Tactical-Game/src/data -ID:/Turn-base-Tactical-Game/src/dsa -ID:/Turn-base-Tactical-Game/src/entities -ID:/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\game.dir
+  OBJECT_FILE_DIR = CMakeFiles\game.dir\src\data
+  TARGET_SUPPORT_DIR = CMakeFiles\game.dir
+
+build CMakeFiles/game.dir/src/data/SkillElementConfig.cpp.obj: CXX_COMPILER__game_unscanned_ D$:/Turn-base-Tactical-Game/src/data/SkillElementConfig.cpp || cmake_object_order_depends_target_game
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\game.dir\src\data\SkillElementConfig.cpp.obj.d
   FLAGS = -std=gnu++17
   INCLUDES = -ID:/Turn-base-Tactical-Game/src -ID:/Turn-base-Tactical-Game/src/core -ID:/Turn-base-Tactical-Game/src/data -ID:/Turn-base-Tactical-Game/src/dsa -ID:/Turn-base-Tactical-Game/src/entities -ID:/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
@@ -206,6 +224,24 @@ build CMakeFiles/game.dir/src/graphics/Herocreatescreen.cpp.obj: CXX_COMPILER__g
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
+build CMakeFiles/game.dir/src/graphics/LayeredSprite.cpp.obj: CXX_COMPILER__game_unscanned_ D$:/Turn-base-Tactical-Game/src/graphics/LayeredSprite.cpp || cmake_object_order_depends_target_game
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\game.dir\src\graphics\LayeredSprite.cpp.obj.d
+  FLAGS = -std=gnu++17
+  INCLUDES = -ID:/Turn-base-Tactical-Game/src -ID:/Turn-base-Tactical-Game/src/core -ID:/Turn-base-Tactical-Game/src/data -ID:/Turn-base-Tactical-Game/src/dsa -ID:/Turn-base-Tactical-Game/src/entities -ID:/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\game.dir
+  OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\game.dir
+
+build CMakeFiles/game.dir/src/graphics/PrepMenuScreen.cpp.obj: CXX_COMPILER__game_unscanned_ D$:/Turn-base-Tactical-Game/src/graphics/PrepMenuScreen.cpp || cmake_object_order_depends_target_game
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\game.dir\src\graphics\PrepMenuScreen.cpp.obj.d
+  FLAGS = -std=gnu++17
+  INCLUDES = -ID:/Turn-base-Tactical-Game/src -ID:/Turn-base-Tactical-Game/src/core -ID:/Turn-base-Tactical-Game/src/data -ID:/Turn-base-Tactical-Game/src/dsa -ID:/Turn-base-Tactical-Game/src/entities -ID:/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\game.dir
+  OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\game.dir
+
 build CMakeFiles/game.dir/src/graphics/SpriteAnimation.cpp.obj: CXX_COMPILER__game_unscanned_ D$:/Turn-base-Tactical-Game/src/graphics/SpriteAnimation.cpp || cmake_object_order_depends_target_game
   DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
   DEP_FILE = CMakeFiles\game.dir\src\graphics\SpriteAnimation.cpp.obj.d
@@ -268,7 +304,7 @@ build CMakeFiles/game.dir/src/main.cpp.obj: CXX_COMPILER__game_unscanned_ D$:/Tu
 #############################################
 # Link the executable game.exe
 
-build game.exe: CXX_EXECUTABLE_LINKER__game_ CMakeFiles/game.dir/src/core/AttackCommand.cpp.obj CMakeFiles/game.dir/src/core/CommandStack.cpp.obj CMakeFiles/game.dir/src/core/GameEngine.cpp.obj CMakeFiles/game.dir/src/core/GameStateMachine.cpp.obj CMakeFiles/game.dir/src/core/UseItemCommand.cpp.obj CMakeFiles/game.dir/src/core/UseSkillCommand.cpp.obj CMakeFiles/game.dir/src/data/GameData.cpp.obj CMakeFiles/game.dir/src/dsa/CombatObserver.cpp.obj CMakeFiles/game.dir/src/dsa/StatusEffect.cpp.obj CMakeFiles/game.dir/src/dsa/TurnManager.cpp.obj CMakeFiles/game.dir/src/entities/Boss.cpp.obj CMakeFiles/game.dir/src/entities/Character.cpp.obj CMakeFiles/game.dir/src/entities/Enemy.cpp.obj CMakeFiles/game.dir/src/entities/Player.cpp.obj CMakeFiles/game.dir/src/graphics/BattleMap.cpp.obj CMakeFiles/game.dir/src/graphics/BattleUi.cpp.obj CMakeFiles/game.dir/src/graphics/CombatantView.cpp.obj CMakeFiles/game.dir/src/graphics/Herocreatescreen.cpp.obj CMakeFiles/game.dir/src/graphics/SpriteAnimation.cpp.obj CMakeFiles/game.dir/src/graphics/StartMenu.cpp.obj CMakeFiles/game.dir/src/graphics/Waveselectscreen.cpp.obj CMakeFiles/game.dir/src/graphics/main_map_test.cpp.obj CMakeFiles/game.dir/src/graphics/main_sprite_test.cpp.obj CMakeFiles/game.dir/src/main.cpp.obj | C$:/msys64/ucrt64/lib/libraylib.dll.a
+build game.exe: CXX_EXECUTABLE_LINKER__game_ CMakeFiles/game.dir/src/core/AttackCommand.cpp.obj CMakeFiles/game.dir/src/core/CommandStack.cpp.obj CMakeFiles/game.dir/src/core/GameEngine.cpp.obj CMakeFiles/game.dir/src/core/GameStateMachine.cpp.obj CMakeFiles/game.dir/src/core/UseItemCommand.cpp.obj CMakeFiles/game.dir/src/core/UseSkillCommand.cpp.obj CMakeFiles/game.dir/src/data/CharacterRules.cpp.obj CMakeFiles/game.dir/src/data/GameData.cpp.obj CMakeFiles/game.dir/src/data/SkillElementConfig.cpp.obj CMakeFiles/game.dir/src/dsa/CombatObserver.cpp.obj CMakeFiles/game.dir/src/dsa/StatusEffect.cpp.obj CMakeFiles/game.dir/src/dsa/TurnManager.cpp.obj CMakeFiles/game.dir/src/entities/Boss.cpp.obj CMakeFiles/game.dir/src/entities/Character.cpp.obj CMakeFiles/game.dir/src/entities/Enemy.cpp.obj CMakeFiles/game.dir/src/entities/Player.cpp.obj CMakeFiles/game.dir/src/graphics/BattleMap.cpp.obj CMakeFiles/game.dir/src/graphics/BattleUi.cpp.obj CMakeFiles/game.dir/src/graphics/CombatantView.cpp.obj CMakeFiles/game.dir/src/graphics/Herocreatescreen.cpp.obj CMakeFiles/game.dir/src/graphics/LayeredSprite.cpp.obj CMakeFiles/game.dir/src/graphics/PrepMenuScreen.cpp.obj CMakeFiles/game.dir/src/graphics/SpriteAnimation.cpp.obj CMakeFiles/game.dir/src/graphics/StartMenu.cpp.obj CMakeFiles/game.dir/src/graphics/Waveselectscreen.cpp.obj CMakeFiles/game.dir/src/graphics/main_map_test.cpp.obj CMakeFiles/game.dir/src/graphics/main_sprite_test.cpp.obj CMakeFiles/game.dir/src/main.cpp.obj | C$:/msys64/ucrt64/lib/libraylib.dll.a
   LINK_LIBRARIES = C:/msys64/ucrt64/lib/libraylib.dll.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\game.dir
   POST_BUILD = C:\Windows\system32\cmd.exe /C "cd /D D:\Turn-base-Tactical-Game\build && D:\mingw64\bin\cmake.exe -E copy_directory D:/Turn-base-Tactical-Game/data D:/Turn-base-Tactical-Game/build/data && D:\mingw64\bin\cmake.exe -E copy_directory D:/Turn-base-Tactical-Game/assets D:/Turn-base-Tactical-Game/build/assets"

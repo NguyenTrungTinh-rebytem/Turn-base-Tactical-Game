@@ -11,6 +11,7 @@
 #include "graphics/BattleUI.h"
 #include "graphics/StartMenu.h" 
 #include "graphics/HeroCreateScreen.h"
+#include "graphics/PrepMenuScreen.h"
 #include "graphics/WaveSelectScreen.h"    
 #include "graphics/CombatantView.h"
 #include "graphics/SpriteAnimation.h"
@@ -67,6 +68,8 @@ private:
     int  finalStage() const;
     void setupHeroCreateScreen();
     void openWaveSelect();  
+    void leavePrepMenu();
+    void openPrepMenu(int wave);
     void markWaveCleared(int stage); 
     void applyHeroSelection(const HeroSelection& selection);
     static Skill toBattleSkill(const SkillData& data, Element heroElement);
@@ -120,6 +123,8 @@ private:
     StartMenu m_startMenu;
     HeroCreateScreen m_heroCreate;
     WaveSelectScreen m_waveSelect;
+    PrepMenuScreen m_prepMenu;
+    int m_pendingWave = 1;
     int m_unlockedWave = 1;                 // wave cao nhat da mo khoa (trong phien choi hien tai)
     std::vector<bool> m_wavesCleared;       // m_wavesCleared[n] = da hoan thanh wave n
 

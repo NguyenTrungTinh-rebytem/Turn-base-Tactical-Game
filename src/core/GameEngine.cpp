@@ -32,6 +32,38 @@ namespace
     constexpr float STAGE_CLEAR_HEAL_RATE = 0.3f;   // hoi 30% HP khi qua man
     const char* const POTION_NAME = "Potion";
 
+    // ---- Menu truoc tran: van ban hien thi ----
+    const char* skillTypeText(SkillType t)
+    {
+        switch (t) {
+            case SkillType::DAMAGE: return "Sat thuong";
+            case SkillType::HEAL:   return "Hoi mau";
+            case SkillType::BUFF:   return "Tang cuong";
+            case SkillType::DEBUFF: return "Lam yeu";
+        }
+        return "";
+    }
+
+    std::string effectText(EffectType e, int turns)
+    {
+        const char* name = nullptr;
+        switch (e) {
+            case EffectType::ATK_BOOST: name = "Tang cong"; break;
+            case EffectType::DEF_BOOST: name = "Tang thu";  break;
+            case EffectType::REGEN:     name = "Hoi phuc";  break;
+            case EffectType::STUN:      name = "Choang";    break;
+            case EffectType::BURN:      name = "Bong";      break;
+            case EffectType::SLOW:      name = "Lam cham";  break;
+            case EffectType::WEAKNESS:  name = "Suy yeu";   break;
+            case EffectType::NONE:      break;
+        }
+        if (!name) return "";
+        return std::string(name) + " " + std::to_string(turns) + " luot";
+    }
+
+    // < 0 = khong gioi han. Sau nay GateClock se thay ham nay.
+    int deadlineTurnsForStage(int /*stage*/) { return -1; }
+
     // ----- He so hieu ung (StatusEffectManager chi dem luot, Core ap dung vao sat thuong) -----
     constexpr float ATK_BOOST_BONUS = 0.25f;
     constexpr float DEF_BOOST_REDUCE = 0.25f;
@@ -125,6 +157,7 @@ void GameEngine::initialize()
     m_heroConfig = { HERO_NAME, HERO_RACE, HERO_CLASS, HERO_ELEMENT };
     m_heroCreate.loadBackground(resolvePath("assets/images/bg_menu.png"));
     m_waveSelect.loadBackground(resolvePath("assets/images/bg_menu.png"));
+    m_prepMenu.loadBackground(resolvePath("assets/images/bg_menu.png"));
     m_heroCreate.loadPreviewSprite(resolvePath(SPRITE_SHEET_PATH), FRAME_W, FRAME_H);
     setupHeroCreateScreen();
     m_combatSubject.addObserver(this);
@@ -145,6 +178,7 @@ void GameEngine::shutdown()
     m_startMenu.unloadAll();
     m_heroCreate.unloadAll();
     m_waveSelect.unloadAll();
+    m_prepMenu.unloadAll();
     m_battleMap.unloadAll();
     m_combatants.clear();
 
@@ -332,6 +366,66 @@ void GameEngine::openWaveSelect()
     m_waveSelect.reset(0);
     m_stateMachine.changeState(GameStateMachine::State::WAVE_SELECT);
 }
+void GameEngine::leavePrepMenu()
+{
+    if (m_dataLoaded && finalStage() > 1)
+        m_stateMachine.changeState(GameStateMachine::State::WAVE_SELECT);
+    else
+        m_stateMachine.changeState(GameStateMachine::State::CREATE_HERO);
+}
+
+void GameEngine::openPrepMenu(int wave)
+{
+    m_pendingWave = wave;
+    PrepInfo info;
+
+    // Tab 1: Doi hinh
+    info.m_hero.m_name = m_heroConfig.m_name;
+    info.m_hero.m_race = m_heroConfig.m_race;
+    info.m_hero.m_class = m_heroConfig.m_class;
+    info.m_hero.m_element = m_heroConfig.m_element;
+    info.m_hero.m_stats = Stats{ 120, 50, 25, 20, 5, 8, 15 };   // du phong
+    info.m_teammateSlots = 2;
+
+    // Tab 2: Ky nang
+    try {
+        info.m_hero.m_stats = m_gameData.getBaseStats(m_heroConfig.m_race, m_heroConfig.m_class);
+        for (const auto& id : m_gameData.getHeroSkillIds(m_heroConfig.m_race, m_heroConfig.m_class))
+        {
+            const Skill s = toBattleSkill(m_gameData.getSkill(id), m_heroConfig.m_element);
+            info.m_skills.push_back({ s.m_name, s.m_element, skillTypeText(s.m_type), s.m_power,
+                                      s.m_mpCost, effectText(s.m_effect, s.m_effectTurns) });
+        }
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Prep menu data error: " << e.what() << std::endl;
+    }
+
+    // Tab 3: Tui do
+    info.m_items.push_back({ POTION_NAME, INITIAL_POTIONS });
+
+    // Tab 4: Thong tin cong
+    info.m_gate.m_title = "WAVE " + std::to_string(wave);
+    info.m_gate.m_deadlineTurns = deadlineTurnsForStage(wave);
+    for (const MonsterData& m : m_gameData.getMonstersByStage(wave))
+    {
+        if (m.m_isBoss) {
+            info.m_gate.m_hasBoss = true;
+            info.m_gate.m_bossName = m.m_name;
+            info.m_gate.m_bossElement = m.m_element;
+            info.m_gate.m_bossHp = m.m_stats.m_hp;
+        } else {
+            info.m_gate.m_enemies.push_back({ m.m_name, m.m_element });
+        }
+    }
+    info.m_gate.m_description = info.m_gate.m_hasBoss
+        ? std::string("Tran chien voi Boss\nHa gac cong de tien len")
+        : std::string("Quet sach quai canh cong\nXuat hien ngau nhien");
+
+    m_prepMenu.setInfo(info);
+    m_prepMenu.reset(0);
+    m_stateMachine.changeState(GameStateMachine::State::PREP_MENU);
+}
 void GameEngine::setupHeroCreateScreen()
 {
     if (!m_dataLoaded) return;   // khong co du lieu -> bo qua man Tao Anh Hung
@@ -506,6 +600,10 @@ void GameEngine::processEvents()
     {
     m_stateMachine.changeState(GameStateMachine::State::CREATE_HERO);   // ESC o man Chon Wave = ve Tao Hero
     }
+    else if (m_stateMachine.is(GameStateMachine::State::PREP_MENU))
+    {
+    leavePrepMenu();
+    }
         else
         {
             m_isRunning = false;
@@ -547,6 +645,8 @@ void GameEngine::processEvents()
     applyHeroSelection(m_heroCreate.getSelection());
     if (m_dataLoaded && finalStage() > 1)
         openWaveSelect();   // co nhieu wave -> cho nguoi choi chon
+        else if (m_dataLoaded)
+    openPrepMenu(1); 
     else
     {
         m_stateMachine.changeState(GameStateMachine::State::IN_BATTLE);
@@ -564,13 +664,26 @@ void GameEngine::processEvents()
     switch (m_waveSelect.handleInput())
     {
     case WaveSelectAction::START:
-        m_stateMachine.changeState(GameStateMachine::State::IN_BATTLE);
-        startNewGame(m_waveSelect.getSelectedWave());
+        openPrepMenu(m_waveSelect.getSelectedWave());
         break;
     case WaveSelectAction::BACK:
         m_stateMachine.changeState(GameStateMachine::State::CREATE_HERO);
         break;
     case WaveSelectAction::NONE:
+        break;
+    }
+    break;
+    case GameStateMachine::State::PREP_MENU:
+    switch (m_prepMenu.handleInput())
+    {
+    case PrepMenuAction::START:
+        m_stateMachine.changeState(GameStateMachine::State::IN_BATTLE);
+        startNewGame(m_pendingWave);
+        break;
+    case PrepMenuAction::BACK:
+        leavePrepMenu();
+        break;
+    case PrepMenuAction::NONE:
         break;
     }
     break;
@@ -878,6 +991,8 @@ void GameEngine::update(float deltaTime)
     m_heroCreate.update(deltaTime);
     if (m_stateMachine.is(GameStateMachine::State::WAVE_SELECT))
     m_waveSelect.update(deltaTime);
+    if (m_stateMachine.is(GameStateMachine::State::PREP_MENU))
+    m_prepMenu.update(deltaTime);
     if (!m_stateMachine.is(GameStateMachine::State::IN_BATTLE)) return;
 
     // Cap nhat sprite + hieu ung UI (chu bay)
@@ -1095,6 +1210,9 @@ void GameEngine::render()
     break;
     case GameStateMachine::State::WAVE_SELECT:
     m_waveSelect.draw();
+    break;
+    case GameStateMachine::State::PREP_MENU:
+    m_prepMenu.draw();
     break;
     case GameStateMachine::State::IN_BATTLE:
         m_battleMap.draw();
