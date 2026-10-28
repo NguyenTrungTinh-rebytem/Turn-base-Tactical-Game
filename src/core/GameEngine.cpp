@@ -181,6 +181,8 @@ void GameEngine::initialize()
     m_battleMap.setStage(m_stage == 1 ? StageId::STAGE_1 : StageId::STAGE_2,
     resolvePath(m_stage == 1 ? "assets/images/bg_wave1.png"
                            : "assets/images/bg_wave2.png"));
+    m_waveManager.reset();
+    m_waveManager.unlockWave(1);
     m_stateMachine.changeState(GameStateMachine::State::MENU);
     m_isRunning = true;
     m_isInitialized = true;
@@ -359,7 +361,9 @@ void GameEngine::markWaveCleared(int stage)
     if (m_wavesCleared.size() <= static_cast<size_t>(stage))
         m_wavesCleared.resize(static_cast<size_t>(stage) + 1, false);
     m_wavesCleared[static_cast<size_t>(stage)] = true;
-    m_unlockedWave = std::max(m_unlockedWave, std::min(stage + 1, finalStage()));   // xong wave n -> mo wave n+1
+    m_waveManager.completeCurrentWave();
+    m_waveManager.unlockWave(std::min(stage + 1, finalStage()));
+    m_unlockedWave = std::max(m_unlockedWave, std::min(stage + 1, finalStage()));
 }
 
 void GameEngine::openWaveSelect()
@@ -383,7 +387,7 @@ void GameEngine::openWaveSelect()
                                         : static_cast<int>(monsters.size());
         w.m_description = w.m_isBoss ? std::string("Tran chien voi Boss")
                                      : "Xuat hien ngau nhien " + std::to_string(appear) + " quai";
-        w.m_locked = stage > m_unlockedWave;
+        w.m_locked = !m_waveManager.isWaveUnlocked(stage);
         w.m_cleared = static_cast<size_t>(stage) < m_wavesCleared.size() && m_wavesCleared[static_cast<size_t>(stage)];
         waves.push_back(std::move(w));
     }
@@ -584,6 +588,8 @@ void GameEngine::spawnEnemies(int stage)
 void GameEngine::loadStage(int stage)
 {
     m_stage = stage;
+    m_waveManager.addWave(stage);
+    m_waveManager.startNextWave();
 
     // Giu lai hero (m_combatants[0]), bo het quai cu
     if (m_combatants.size() > 1)
@@ -832,7 +838,7 @@ void GameEngine::processPlayerInput()
             if (castSkill(static_cast<size_t>(m_selectedSkillIndex)))
             {
                 m_isSelectingSkill = false;
-                confirmTurn();   // skill khong hoan tac duoc (khong co API hoan MP) -> ket thuc luot ngay
+                m_battlePhase = BattlePhase::PLAYER_CONFIRM; // ENTER xac nhan; ESC/Z Undo
             }
         }
         return;
@@ -918,8 +924,15 @@ bool GameEngine::castSkill(size_t skillIndex)
     }
     Character* target = offensive ? m_selectedTarget : h;
 
-    auto executeAction = [this, h, target, skill, offensive]() {
-        const int hpBefore = target->getCurrentHp();
+    // Snapshot combat state before executing. Undo must restore MP, HP and status effects.
+    auto previousHp = std::make_shared<int>(target->getCurrentHp());
+    auto previousMp = std::make_shared<int>(h->getCurrentMp());
+    auto previousEffects = std::make_shared<StatusEffectManager>(m_statusEffects[target]);
+    auto executeAction = [this, h, target, skill, offensive, previousHp, previousMp, previousEffects]() {
+        *previousHp = target->getCurrentHp();
+        *previousMp = h->getCurrentMp();
+        *previousEffects = m_statusEffects[target];
+        const int hpBefore = *previousHp;
 
         if (offensive)
         {
@@ -951,8 +964,20 @@ bool GameEngine::castSkill(size_t skillIndex)
             m_battleLog = h->getName() + " dung " + skill.m_name + "!";
     };
 
-    // Skill khong the hoan tac (khong hoan lai duoc MP) -> undoAction rong
-    return queuePlayerCommand(std::make_unique<UseSkillCommand>(executeAction, []() {}));
+    auto undoAction = [this, h, target, previousHp, previousMp, previousEffects]() {
+        const int hpDelta = *previousHp - target->getCurrentHp();
+        if (hpDelta > 0) target->heal(hpDelta);
+        else if (hpDelta < 0) target->takeDamage(-hpDelta);
+
+        const int mpDelta = *previousMp - h->getCurrentMp();
+        if (mpDelta > 0) h->restoreMp(mpDelta);
+        else if (mpDelta < 0) h->consumeMp(-mpDelta);
+
+        m_statusEffects[target] = *previousEffects;
+        syncHealth(target);
+        syncHealth(h);
+    };
+    return queuePlayerCommand(std::make_unique<UseSkillCommand>(executeAction, undoAction));
 }
 
 void GameEngine::confirmTurn()
@@ -1020,8 +1045,10 @@ void GameEngine::advanceTurn()
 
 void GameEngine::executeAiTurn(Character* aiChar)
 {
-    Character* h = hero();
-    if (!aiChar || !aiChar->isAlive() || !h || !h->isAlive()) return;
+    std::vector<Character*> targets;
+    if (hero()) targets.push_back(hero());
+    Character* h = CombatAI::selectTarget(targets);
+    if (!aiChar || !aiChar->isAlive() || !h) return;
 
     // Don thuong dung executeSkill() cua tung lop (Enemy/Boss) -> dung da hinh:
     // Boss tu nhan he so sat thuong 125% trong Boss::executeSkill.
@@ -1139,16 +1166,8 @@ float GameEngine::damageMultiplier(const Character* attacker, const Character* t
 
 void GameEngine::spendMpWithoutDamage(const Skill& skill)
 {
-    // Character khong co API tru MP rieng; cach duy nhat la executeSkill().
-    // Goi len chinh hero voi power = 0 roi hoi lai dung luong HP vua mat.
-    // TODO(Entities): them Character::spendMp(int) de bo workaround nay.
-    Character* h = hero();
-    Skill free = skill;
-    free.m_power = 0;
-    const int hpBefore = h->getCurrentHp();
-    h->executeSkill(&free, h);
-    const int lost = hpBefore - h->getCurrentHp();
-    if (lost > 0) h->heal(lost);
+    // Non-damaging skills still consume MP, without simulating an attack.
+    if (Character* h = hero()) h->consumeMp(skill.m_mpCost);
 }
 
 void GameEngine::applySkillEffect(const Skill& skill, Character* target)

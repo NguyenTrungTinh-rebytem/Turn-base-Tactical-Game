@@ -5,9 +5,11 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # 1. Thu nhặt toàn bộ file mã nguồn (.cpp)
-file(GLOB_RECURSE SOURCES 
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
     "src/*.cpp"
 )
+# Graphics standalone demo entry points must not be linked into the game.
+list(FILTER SOURCES EXCLUDE REGEX "src/graphics/main_.*_test\\.cpp$")
 
 # 2. Bổ sung các thư mục Include để giải quyết lỗi #include
 include_directories(
@@ -45,5 +47,6 @@ add_executable(test_entities EXCLUDE_FROM_ALL
     tests/test_entities.cpp
     ${ENTITY_SOURCES}
     src/data/GameData.cpp
+    src/data/SkillElementConfig.cpp
 )
 add_test(NAME test_entities COMMAND test_entities ${CMAKE_CURRENT_SOURCE_DIR}/data)

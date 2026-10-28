@@ -5,6 +5,8 @@
 #include "data/GameData.h"
 #include "data/Skill.h"
 #include "dsa/TurnManager.h"
+#include "dsa/CombatAI.h"
+#include "dsa/WaveManager.h"
 #include "dsa/StatusEffect.h"
 #include "dsa/CombatObserver.h"
 #include "graphics/BattleMap.h"
@@ -119,6 +121,7 @@ private:
     CommandStack m_commandStack;
     GameData m_gameData;
     TurnManager m_turnManager;
+    WaveManager m_waveManager;
     BattleMap m_battleMap;
     BattleUI  m_ui;
     TurnOrderBar m_turnOrderBar;
