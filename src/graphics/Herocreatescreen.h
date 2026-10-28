@@ -63,6 +63,7 @@ public:
     void draw() const;
 
     HeroSelection getSelection() const;
+    void setSlotLabel(const std::string& label) { m_slotLabel = label; }
 
 private:
     enum Btn { BTN_BACK = 0, BTN_CONFIRM, BTN_COUNT };
@@ -80,6 +81,7 @@ private:
     void drawButtons() const;
     void unloadPresetTextures();
 
+    std::string m_slotLabel = "CHON ANH HUNG";
     std::vector<HeroOption> m_races;
     std::vector<HeroOption> m_classes;
     Stats        m_statMax{};                // gia tri lon nhat moi chi so (chuan hoa thanh bar)

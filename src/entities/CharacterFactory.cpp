@@ -38,7 +38,9 @@ Skill CharacterFactory::toBattleSkill(const SkillData& data, Element heroElement
     skill.m_effect = data.m_effect;
     skill.m_effectTurns = data.m_effectTurns;
 
-    switch (data.m_effect)
+    if (data.m_hasElement) {
+        skill.m_element = data.m_element;
+    } else switch (data.m_effect)
     {
     case EffectType::BURN:     skill.m_element = Element::HOA;  break;
     case EffectType::SLOW:     skill.m_element = Element::THUY; break;

@@ -1,0 +1,6 @@
+D:/CODE/Turn-base-Tactical-Game/build-ucrt64/CMakeFiles/game.dir
+D:/CODE/Turn-base-Tactical-Game/build-ucrt64/CMakeFiles/test_entities.dir
+D:/CODE/Turn-base-Tactical-Game/build-ucrt64/CMakeFiles/test_core_integration.dir
+D:/CODE/Turn-base-Tactical-Game/build-ucrt64/CMakeFiles/test.dir
+D:/CODE/Turn-base-Tactical-Game/build-ucrt64/CMakeFiles/edit_cache.dir
+D:/CODE/Turn-base-Tactical-Game/build-ucrt64/CMakeFiles/rebuild_cache.dir

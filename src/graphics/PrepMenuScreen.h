@@ -49,13 +49,14 @@ struct PrepGateInfo {
 
 struct PrepInfo {
     PrepHeroInfo               m_hero;
+    std::vector<PrepHeroInfo> m_members; // nhan vat thuc su da duoc chon vao 3 o
     std::vector<PrepSkillInfo> m_skills;
     std::vector<PrepItemInfo>  m_items;
     PrepGateInfo               m_gate;
     int                        m_teammateSlots = 2;   // so o dong doi con trong
 };
 
-enum class PrepMenuAction { NONE = 0, START, BACK };
+enum class PrepMenuAction { NONE = 0, START, BACK, EDIT_MEMBER_1, EDIT_MEMBER_2, EDIT_MEMBER_3 };
 
 class PrepMenuScreen {
 public:
