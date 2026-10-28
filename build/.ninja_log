@@ -19,8 +19,8 @@
 175	1921	8148258847408156	CMakeFiles/game.dir/src/graphics/BattleUi.cpp.obj	8ddb094c058d4948
 55	2306	8148258846193043	CMakeFiles/game.dir/src/data/GameData.cpp.obj	92620661346df67f
 101	9181	8148609298799452	CMakeFiles/game.dir/src/main.cpp.obj	b1163cf3d9299e02
-33	3725	8148614575214408	CMakeFiles/game.dir/src/core/GameEngine.cpp.obj	6f86db03f70f8943
-3726	4528	8148614612291403	game.exe	10d20eec6fd55d9f
+32	3574	8148979399468052	CMakeFiles/game.dir/src/core/GameEngine.cpp.obj	6f86db03f70f8943
+3575	4493	8148979434894448	game.exe	10d20eec6fd55d9f
 73	2840	8146986687186983	CMakeFiles/game.dir/src/graphics/Startmenu.cpp.obj	1234a7a82eabf17a
 166	3002	8147808972430619	CMakeFiles/game.dir/src/graphics/StartMenu.cpp.obj	144b7da9025e01c6
 222	2195	8148258847870492	CMakeFiles/game.dir/src/graphics/Herocreatescreen.cpp.obj	5ecc558582347a6f
@@ -31,7 +31,5 @@
 84	6161	8148524882295878	CMakeFiles/game.dir/src/graphics/PrepMenuScreen.cpp.obj	de6aead025ae6eb8
 96	5797	8148524882393526	CMakeFiles/game.dir/src/graphics/Skilltooltip.cpp.obj	9c6831af135b3ace
 43	1216	8148543109632923	CMakeFiles/game.dir/src/graphics/Turnorderbar.cpp.obj	8935dfc63b66457d
-10	3804	8148625445009276	CMakeFiles/game.dir/src/core/GameEngine.cpp.obj	6f86db03f70f8943
-39	963	8148625535829512	game.exe	10d20eec6fd55d9f
-22	3602	8148628039625932	CMakeFiles/game.dir/src/core/GameEngine.cpp.obj	6f86db03f70f8943
-3603	4397	8148628075439841	game.exe	10d20eec6fd55d9f
+28	3448	8148979860799490	CMakeFiles/game.dir/src/core/GameEngine.cpp.obj	6f86db03f70f8943
+3449	4291	8148979895038628	game.exe	10d20eec6fd55d9f

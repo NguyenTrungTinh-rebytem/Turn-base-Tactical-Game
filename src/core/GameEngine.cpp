@@ -12,7 +12,8 @@
 
 namespace
 {   
-    constexpr float BOSS_SCALE_MUL = 2.2f;   // boss to gap may lan quai thuong
+    constexpr float BOSS_SCALE_MUL = 3.2f;   // boss to gap may lan quai thuong
+    constexpr int   BOSS_FRAME     = 192;    // sheet boss: moi frame 192x192
     constexpr int SCREEN_WIDTH = 1280;
     constexpr int SCREEN_HEIGHT = 720;
 
@@ -20,6 +21,7 @@ namespace
     constexpr int FRAME_W = 64;
     constexpr int FRAME_H = 64;
     const char* const SPRITE_SHEET_PATH = "assets/images/test_sheet.png";
+    
     // Sprite sheet rieng cho tung quai (theo id trong monsters.csv). Id la -> dung SPRITE_SHEET_PATH.
     std::string monsterSpritePath(const std::string& monsterId)
     {
@@ -29,7 +31,7 @@ namespace
         { "M_SLIME_THUY", "assets/images/slime_sheet.png"  },
         { "M_IMP_HOA",    "assets/images/imp_sheet.png"    },
         { "M_GOLEM_THO",  "assets/images/golem_sheet.png"  },
-        { "B_DRAGON_HOA", "assets/images/dragon_sheet.png" },
+        { "B_DRAGON_HOA", "assets/images/boss_dragon_sheet.png" },
     };
     const auto it = SPRITES.find(monsterId);
     return it != SPRITES.end() ? it->second : std::string(SPRITE_SHEET_PATH);
@@ -303,11 +305,15 @@ void GameEngine::addCombatant(std::unique_ptr<Character> character, const std::s
     if (!character) return;
 
     // Thieu file anh rieng -> dung sheet mac dinh de game khong bi mat hinh
+    int frameW = FRAME_W, frameH = FRAME_H;
     std::string sheet = resolvePath(spritePath.empty() ? SPRITE_SHEET_PATH : spritePath);
-    if (!FileExists(sheet.c_str())) sheet = resolvePath(SPRITE_SHEET_PATH);
+    if (!FileExists(sheet.c_str()))
+        sheet = resolvePath(SPRITE_SHEET_PATH);
+    else if (dynamic_cast<const Boss*>(character.get()))
+        frameW = frameH = BOSS_FRAME;            // boss dung sheet khung lon (192x192)
 
     auto view = std::make_unique<CombatantView>(character.get(), sheet,
-                                            FRAME_W, FRAME_H, BattleSlot{});
+                                            frameW, frameH, BattleSlot{});
 
     m_lastHp[character.get()] = character->getCurrentHp();
     m_turnManager.addCharacter(character.get());
@@ -324,7 +330,8 @@ void GameEngine::layoutViews()
     // Quái: Boss to 1.3, quái thường 1.0
     std::vector<float> muls;
     for (size_t i = 1; i < m_combatants.size(); ++i)
-        muls.push_back(dynamic_cast<const Boss*>(m_combatants[i].get()) ? BOSS_SCALE_MUL : 1.0f);
+        muls.push_back(dynamic_cast<const Boss*>(m_combatants[i].get())
+                   ? BOSS_SCALE_MUL * static_cast<float>(FRAME_W) / BOSS_FRAME : 1.0f);
 
     const auto slots = m_battleMap.layoutEnemies(muls);
     for (size_t i = 0; i < slots.size() && i + 1 < m_views.size(); ++i)
