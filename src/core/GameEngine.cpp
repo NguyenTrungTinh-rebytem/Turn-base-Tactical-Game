@@ -31,38 +31,34 @@ namespace
     constexpr int   STAGE1_ENEMY_COUNT = 3;
     constexpr float STAGE_CLEAR_HEAL_RATE = 0.3f;   // hoi 30% HP khi qua man
     const char* const POTION_NAME = "Potion";
-
-    // ---- Menu truoc tran: van ban hien thi ----
-    const char* skillTypeText(SkillType t)
-    {
-        switch (t) {
-            case SkillType::DAMAGE: return "Sat thuong";
-            case SkillType::HEAL:   return "Hoi mau";
-            case SkillType::BUFF:   return "Tang cuong";
-            case SkillType::DEBUFF: return "Lam yeu";
-        }
-        return "";
+    const char* skillTypeText(SkillType t) {
+    switch (t) {
+        case SkillType::DAMAGE: return "Sat thuong";
+        case SkillType::HEAL:   return "Hoi mau";
+        case SkillType::BUFF:   return "Buff";
+        case SkillType::DEBUFF: return "Debuff";
     }
+    return "";
+}
 
-    std::string effectText(EffectType e, int turns)
-    {
-        const char* name = nullptr;
-        switch (e) {
-            case EffectType::ATK_BOOST: name = "Tang cong"; break;
-            case EffectType::DEF_BOOST: name = "Tang thu";  break;
-            case EffectType::REGEN:     name = "Hoi phuc";  break;
-            case EffectType::STUN:      name = "Choang";    break;
-            case EffectType::BURN:      name = "Bong";      break;
-            case EffectType::SLOW:      name = "Lam cham";  break;
-            case EffectType::WEAKNESS:  name = "Suy yeu";   break;
-            case EffectType::NONE:      break;
-        }
-        if (!name) return "";
-        return std::string(name) + " " + std::to_string(turns) + " luot";
+std::string effectText(EffectType e, int turns) {
+    const char* name = "";
+    switch (e) {
+        case EffectType::ATK_BOOST: name = "Tang cong";  break;
+        case EffectType::DEF_BOOST: name = "Tang thu";   break;
+        case EffectType::REGEN:     name = "Hoi mau";    break;
+        case EffectType::STUN:      name = "Choang";     break;
+        case EffectType::BURN:      name = "Chay";       break;
+        case EffectType::SLOW:      name = "Lam cham";   break;
+        case EffectType::WEAKNESS:  name = "Suy yeu";    break;
+        case EffectType::NONE:      return "";
     }
+    return std::string(name) + " " + std::to_string(turns) + " luot";
+}
 
-    // < 0 = khong gioi han. Sau nay GateClock se thay ham nay.
-    int deadlineTurnsForStage(int /*stage*/) { return -1; }
+int deadlineTurnsForStage(int /*stage*/) {
+    return -1;   // < 0 = khong gioi han; khi co dong ho cong thi sua o day
+}
 
     // ----- He so hieu ung (StatusEffectManager chi dem luot, Core ap dung vao sat thuong) -----
     constexpr float ATK_BOOST_BONUS = 0.25f;
@@ -394,13 +390,12 @@ void GameEngine::openPrepMenu(int wave)
         {
             const Skill s = toBattleSkill(m_gameData.getSkill(id), m_heroConfig.m_element);
             info.m_skills.push_back({ s.m_name, s.m_element, skillTypeText(s.m_type), s.m_power,
-                                      s.m_mpCost, effectText(s.m_effect, s.m_effectTurns) });
+                                      s.m_mpCost, effectText(s.m_effect, s.m_effectTurns), s.m_isMagic });
         }
-    }
+    }                                  
     catch (const std::exception& e) {
         std::cerr << "Prep menu data error: " << e.what() << std::endl;
     }
-
     // Tab 3: Tui do
     info.m_items.push_back({ POTION_NAME, INITIAL_POTIONS });
 

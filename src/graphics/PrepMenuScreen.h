@@ -23,6 +23,7 @@ struct PrepSkillInfo {
     int         m_power = 0;     // % (vd 130)
     int         m_mpCost = 0;
     std::string m_effectText;    // "Chay 2 luot", rong = khong co
+    bool        m_isMagic = false; // true = sat thuong tinh theo MA (cho dong "Uoc tinh" cua tooltip)
 };
 
 struct PrepItemInfo {
@@ -96,6 +97,7 @@ private:
     int      m_tab = TAB_PARTY;
     int      m_hoverTab = -1;
     int      m_hoverButton = -1;
+    mutable int m_hoverSkill = -1;   // dong skill dang tro chuot (draw() cap nhat moi frame)
     float    m_time = 0.0f;
 
     Texture2D m_background{};
