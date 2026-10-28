@@ -8,6 +8,7 @@ public:
         MENU,
         CREATE_HERO, 
         WAVE_SELECT,
+        PREP_MENU,  
         IN_BATTLE,
         VICTORY,
         GAME_OVER

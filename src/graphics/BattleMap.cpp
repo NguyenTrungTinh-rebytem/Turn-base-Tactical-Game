@@ -5,12 +5,14 @@
 
 namespace {
 constexpr float HORIZON_RATIO = 0.42f;  // duong chan troi o 42% chieu cao
-constexpr float FEET_FAR   = 0.62f;     // dong chan hang xa  (ti le chieu cao man hinh)
-constexpr float FEET_NEAR  = 0.76f;     // dong chan hang gan (< 0.78 de khong dung khung dieu khien phia duoi)
-constexpr float SCALE_FAR  = 2.6f;      // sprite 64px -> ~166px
-constexpr float SCALE_NEAR = 3.2f;      // sprite 64px -> ~205px
+constexpr float FEET_FAR   = 0.60f;     // dong chan hang xa  (ti le chieu cao man hinh)
+constexpr float FEET_NEAR  = 0.72f;     // dong chan hang gan (< 0.78 de khong dung khung dieu khien phia duoi)
+constexpr float SCALE_FAR  = 1.6f;      // sprite 64px -> ~166px
+constexpr float SCALE_NEAR = 2.0f;      // sprite 64px -> ~205px
 constexpr float REF_FRAME_PX = 64.0f;
-constexpr float FRONT_X    = 0.38f;     // tuyen dau cach mep ngoai 38% chieu rong
+constexpr float FRONT_X    = 0.36f;     // tuyen dau cach mep ngoai 38% chieu rong
+constexpr float FRONT_X_PLAYER = 0.42f;  // tuyen dau cua phe nguoi choi (de khong che menu dieu khien)
+constexpr float FRONT_X_ENEMY = 0.36f;   // tuyen dau cua phe dich (de khong che menu dieu khien)
 constexpr float EDGE_X     = 0.09f;     // don vi xa nhat cach mep >= 9%
 constexpr float STEP_X     = 0.085f;    // moi don vi lui ra mep them 8.5% chieu rong
 constexpr float GAP_FACTOR = 0.80f;     // 2 don vi CUNG hang: khoang cach tam >= 80% tong nua do rong
@@ -108,7 +110,7 @@ std::vector<BattleSlot> BattleMap::layoutSide(const std::vector<float>& scaleMul
         if (i >= 2)   // cung hang voi i-2
             offset[i] = std::max(offset[i], offset[i - 2] + 0.5f * (widthOf(i) + widthOf(i - 2)) * GAP_FACTOR);
     }
-
+    const float frontX = isPlayer ? FRONT_X_PLAYER : FRONT_X_ENEMY;
     const float available = W * (FRONT_X - EDGE_X);
     const float k = (n > 1 && offset[n - 1] > available) ? available / offset[n - 1] : 1.0f;
 
