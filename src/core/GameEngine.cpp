@@ -1,4 +1,6 @@
 #include "core/GameEngine.h"
+#include <string>
+#include <unordered_map>
 #include "core/AttackCommand.h"
 #include "core/UseSkillCommand.h"
 #include "core/UseItemCommand.h"
@@ -9,7 +11,8 @@
 #include <iostream>
 
 namespace
-{
+{   
+    constexpr float BOSS_SCALE_MUL = 2.2f;   // boss to gap may lan quai thuong
     constexpr int SCREEN_WIDTH = 1280;
     constexpr int SCREEN_HEIGHT = 720;
 
@@ -17,7 +20,20 @@ namespace
     constexpr int FRAME_W = 64;
     constexpr int FRAME_H = 64;
     const char* const SPRITE_SHEET_PATH = "assets/images/test_sheet.png";
-
+    // Sprite sheet rieng cho tung quai (theo id trong monsters.csv). Id la -> dung SPRITE_SHEET_PATH.
+    std::string monsterSpritePath(const std::string& monsterId)
+    {
+    static const std::unordered_map<std::string, std::string> SPRITES = {
+        { "M_GOBLIN_KIM", "assets/images/goblin_sheet.png" },
+        { "M_WOLF_MOC",   "assets/images/wolf_sheet.png"   },
+        { "M_SLIME_THUY", "assets/images/slime_sheet.png"  },
+        { "M_IMP_HOA",    "assets/images/imp_sheet.png"    },
+        { "M_GOLEM_THO",  "assets/images/golem_sheet.png"  },
+        { "B_DRAGON_HOA", "assets/images/dragon_sheet.png" },
+    };
+    const auto it = SPRITES.find(monsterId);
+    return it != SPRITES.end() ? it->second : std::string(SPRITE_SHEET_PATH);
+    }
     // ----- Hero mac dinh (lay tu CSV: races.csv + classes.csv) -----
     const char* const HERO_NAME = "Chien Binh";
     const char* const HERO_RACE = "Human";
@@ -171,6 +187,7 @@ void GameEngine::shutdown()
     // Giai phong Texture (sprite) TRUOC khi dong cua so
     m_views.clear();
     m_ui.unloadAll();
+    m_turnOrderBar.reset();
     m_startMenu.unloadAll();
     m_heroCreate.unloadAll();
     m_waveSelect.unloadAll();
@@ -281,11 +298,15 @@ Skill GameEngine::toBattleSkill(const SkillData& data, Element heroElement)
     return skill;
 }
 
-void GameEngine::addCombatant(std::unique_ptr<Character> character)
+void GameEngine::addCombatant(std::unique_ptr<Character> character, const std::string& spritePath)
 {
     if (!character) return;
 
-    auto view = std::make_unique<CombatantView>(character.get(), resolvePath(SPRITE_SHEET_PATH),
+    // Thieu file anh rieng -> dung sheet mac dinh de game khong bi mat hinh
+    std::string sheet = resolvePath(spritePath.empty() ? SPRITE_SHEET_PATH : spritePath);
+    if (!FileExists(sheet.c_str())) sheet = resolvePath(SPRITE_SHEET_PATH);
+
+    auto view = std::make_unique<CombatantView>(character.get(), sheet,
                                             FRAME_W, FRAME_H, BattleSlot{});
 
     m_lastHp[character.get()] = character->getCurrentHp();
@@ -303,7 +324,7 @@ void GameEngine::layoutViews()
     // Quái: Boss to 1.3, quái thường 1.0
     std::vector<float> muls;
     for (size_t i = 1; i < m_combatants.size(); ++i)
-        muls.push_back(dynamic_cast<const Boss*>(m_combatants[i].get()) ? 1.3f : 1.0f);
+        muls.push_back(dynamic_cast<const Boss*>(m_combatants[i].get()) ? BOSS_SCALE_MUL : 1.0f);
 
     const auto slots = m_battleMap.layoutEnemies(muls);
     for (size_t i = 0; i < slots.size() && i + 1 < m_views.size(); ++i)
@@ -500,9 +521,11 @@ void GameEngine::spawnEnemies(int stage)
         for (const auto& m : monsters)
         {
             if (m.m_isBoss)
-                addCombatant(std::make_unique<Boss>(m.m_name, m.m_stats, m.m_element));
+                addCombatant(std::make_unique<Boss>(m.m_name, m.m_stats, m.m_element),
+                             monsterSpritePath(m.m_id));      // <-- THEM tham so thu 2
             else
-                addCombatant(std::make_unique<Enemy>(m.m_name, m.m_stats, m.m_element));
+                addCombatant(std::make_unique<Enemy>(m.m_name, m.m_stats, m.m_element),
+                             monsterSpritePath(m.m_id));      // <-- THEM tham so thu 2
         }
     }
     else
@@ -511,7 +534,6 @@ void GameEngine::spawnEnemies(int stage)
         addCombatant(std::make_unique<Boss>("Ma Vuong", Stats{ 200, 40, 30, 25, 12, 10, 8 }, Element::HOA));
     }
 }
-
 void GameEngine::loadStage(int stage)
 {
     m_stage = stage;
@@ -1276,7 +1298,7 @@ void GameEngine::renderBattleUI()
     }
 
     // ----- Danh sach luot (goc phai tren) -----
-    m_ui.drawTurnOrder(upcomingOrder(), m_currentCharacter);
+       m_turnOrderBar.draw(upcomingOrder(), m_currentCharacter);
 
     // ----- Bang dieu khien -----
     m_ui.drawControlPanel();

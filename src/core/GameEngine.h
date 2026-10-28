@@ -14,6 +14,7 @@
 #include "graphics/PrepMenuScreen.h"
 #include "graphics/WaveSelectScreen.h"    
 #include "graphics/CombatantView.h"
+#include "graphics/TurnOrderBar.h"
 #include "graphics/SpriteAnimation.h"
 #include "entities/Character.h"
 #include "entities/Player.h"
@@ -62,7 +63,7 @@ private:
     void loadStage(int stage);
     void createHero();
     void spawnEnemies(int stage);
-    void addCombatant(std::unique_ptr<Character> character);
+    void addCombatant(std::unique_ptr<Character> character, const std::string& spritePath = "");
     void layoutViews();
     std::vector<Character*> upcomingOrder() const;   // thu tu luot de hien thi (Turn Order)
     int  finalStage() const;
@@ -120,6 +121,7 @@ private:
     TurnManager m_turnManager;
     BattleMap m_battleMap;
     BattleUI  m_ui;
+    TurnOrderBar m_turnOrderBar;
     StartMenu m_startMenu;
     HeroCreateScreen m_heroCreate;
     WaveSelectScreen m_waveSelect;
