@@ -35,3 +35,15 @@ add_custom_command(TARGET game POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_CURRENT_SOURCE_DIR}/assets $<TARGET_FILE_DIR:game>/assets
 )
+
+
+# 6. Test T08 (Factory/Party/Item/Inventory) - KHONG can Raylib, khong nam trong build mac dinh
+#    Chay: cmake --build build --target test_entities && ctest --test-dir build --output-on-failure
+enable_testing()
+file(GLOB ENTITY_SOURCES "src/entities/*.cpp")
+add_executable(test_entities EXCLUDE_FROM_ALL
+    tests/test_entities.cpp
+    ${ENTITY_SOURCES}
+    src/data/GameData.cpp
+)
+add_test(NAME test_entities COMMAND test_entities ${CMAKE_CURRENT_SOURCE_DIR}/data)
