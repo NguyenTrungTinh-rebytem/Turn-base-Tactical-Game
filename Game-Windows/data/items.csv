@@ -1,0 +1,29 @@
+# DATA VAT PHAM - doc truc tiep luc chay game (sua file nay, KHONG can bien dich lai).
+# Dong dau tien (khong phai '#') la HEADER: doc theo TEN cot, doi thu tu cot hoac them cot moi deu duoc.
+#   Cot bat buoc : id, name, category, effect, value
+#   Cot tuy chon : nameVi, value2, duration, maxCarry, description   (o trong = 0 / rong)
+#   o co dau phay hay dat trong "nhay kep".   Muon them vat pham: them 1 dong moi (effect da co san trong code).
+# category : CONSUMABLE | BOOSTER | HELD
+# CONSUMABLE: HEAL_HP_PCT | RESTORE_MP_PCT | REVIVE_PCT                    value = %
+# BOOSTER   : BOOST_DAMAGE_UP | BOOST_DAMAGE_REDUCE (value = %, duration = so luot)
+#             BOOST_EXTRA_TURN (value = so luot them) | BOOST_CRIT_RATE (value = % ty le chi mang)
+# HELD      : HELD_REGEN | HELD_LIFESTEAL | HELD_SURVIVE | HELD_DAMAGE_REDUCE | HELD_BERSERK (value2 = % HP mat)
+#             HELD_EXECUTE (value2 = nguong % HP muc tieu) | HELD_CRIT_DAMAGE | HELD_COUNTER
+# maxCarry  : so luong toi da mang theo (0 = khong gioi han)
+id,name,nameVi,category,effect,value,value2,duration,maxCarry,description
+ITM_HP_MINOR,Minor Health Potion,Bình HP Nhỏ,CONSUMABLE,HEAL_HP_PCT,30,0,0,0,Hồi ngay 30% HP tối đa.
+ITM_HP_MAJOR,Major Health Potion,Bình HP Lớn,CONSUMABLE,HEAL_HP_PCT,70,0,0,0,Hồi ngay 70% HP tối đa.
+ITM_ENERGY,Energy Capsule,Bình Năng Lượng,CONSUMABLE,RESTORE_MP_PCT,50,0,0,0,Phục hồi 50% điểm Mana/Năng lượng.
+ITM_PHOENIX,Phoenix Feather,Lông Phượng Hoàng,CONSUMABLE,REVIVE_PCT,25,0,0,3,Hồi sinh 1 đồng đội bị ngất với 25% HP. Mang tối đa 2-3 cái/chuyến đi.
+ITM_POWER_SERUM,Power Serum,Huyết Thanh Sức Mạnh,BOOSTER,BOOST_DAMAGE_UP,40,0,2,0,Tăng 40% Sát thương cho nhân vật trong 2 lượt tiếp theo.
+ITM_IRON_SHIELD,Iron Shielding,Thuốc Bọc Thép,BOOSTER,BOOST_DAMAGE_REDUCE,50,0,2,0,Giảm 50% Sát thương nhận vào trong 2 lượt.
+ITM_HASTE,Haste Tonic,Thuốc Tốc Độ,BOOSTER,BOOST_EXTRA_TURN,1,0,0,0,Cho phép nhận thêm 1 lượt hành động ngay lập tức (Extra Turn).
+ITM_PRECISION,Precision Lens,Kính Chính Xác,BOOSTER,BOOST_CRIT_RATE,100,0,0,0,Tăng 100% Tỷ lệ Chí mạng (Crit Rate) cho đòn đánh tiếp theo.
+ITM_LEFTOVER,Leftover Band,Băng Nhẫn Bền Bỉ,HELD,HELD_REGEN,8,0,0,0,Hồi 8% HP tối đa cho nhân vật ở cuối mỗi lượt.
+ITM_VAMPIRIC,Vampiric Charm,Bùa Hút Máu,HELD,HELD_LIFESTEAL,15,0,0,0,Hồi máu cho nhân vật bằng 15% lượng sát thương gây ra.
+ITM_SASH,Survival Sash,Khăn Sinh Tử,HELD,HELD_SURVIVE,1,0,0,0,"Nếu đang đầy 100% HP mà nhận đòn dứt điểm, giữ lại đúng 1 HP. Kích hoạt 1 lần/trận."
+ITM_GUARDIAN,Guardian Armor,Giáp Hộ Mệnh,HELD,HELD_DAMAGE_REDUCE,15,0,0,0,Giảm 15% mọi sát thương nhận vào từ đối thủ.
+ITM_BERSERK,Berserk Core,Lõi Cuồng Nộ,HELD,HELD_BERSERK,30,5,0,0,"Tăng 30% Sát thương gây ra, nhưng mất 5% HP tối đa sau khi đánh."
+ITM_EXECUTIONER,Executioner's Ring,Nhẫn Đồ Tể,HELD,HELD_EXECUTE,40,30,0,0,Gây thêm 40% Sát thương nếu mục tiêu có HP dưới 30%.
+ITM_HEAVY_STONE,Heavy Strike Stone,Đá Trọng Kích,HELD,HELD_CRIT_DAMAGE,50,0,0,0,Tăng 50% Sát thương Chí mạng (Crit Damage).
+ITM_COUNTER,Counter Helmet,Mũ Phản Đòn,HELD,HELD_COUNTER,15,0,0,0,Phản lại 15% sát thương khi bị tấn công cận chiến.
