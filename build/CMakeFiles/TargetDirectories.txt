@@ -1,3 +1,0 @@
-D:/Turn-base-Tactical-Game/build/CMakeFiles/game.dir
-D:/Turn-base-Tactical-Game/build/CMakeFiles/edit_cache.dir
-D:/Turn-base-Tactical-Game/build/CMakeFiles/rebuild_cache.dir

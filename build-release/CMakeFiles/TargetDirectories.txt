@@ -1,5 +1,0 @@
-D:/CODE/Turn-base-Tactical-Game/build-release/CMakeFiles/game.dir
-D:/CODE/Turn-base-Tactical-Game/build-release/CMakeFiles/test_entities.dir
-D:/CODE/Turn-base-Tactical-Game/build-release/CMakeFiles/test.dir
-D:/CODE/Turn-base-Tactical-Game/build-release/CMakeFiles/edit_cache.dir
-D:/CODE/Turn-base-Tactical-Game/build-release/CMakeFiles/rebuild_cache.dir
