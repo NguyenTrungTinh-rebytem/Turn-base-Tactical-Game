@@ -1,5 +1,6 @@
 // src/graphics/PrepMenuScreen.cpp
 #include "PrepMenuScreen.h"
+#include "SkillTooltip.h"
 #include <algorithm>
 #include <cmath>
 
@@ -42,6 +43,18 @@ const char* elementName(Element e) {
         case Element::THO:  return "Tho";
     }
     return "?";
+}
+SkillTipInfo toTipInfo(const PrepSkillInfo& s) {
+    SkillTipInfo t;
+    t.m_name = s.m_name;
+    t.m_element = s.m_element;
+    t.m_typeText = s.m_typeText;
+    t.m_power = s.m_power;
+    t.m_mpCost = s.m_mpCost;
+    t.m_effectText = s.m_effectText;
+    t.m_isMagic = s.m_isMagic;
+    t.m_isHeal = (s.m_typeText.find("Hoi") != std::string::npos);   // "Hoi mau"
+    return t;
 }
 const char* tabLabel(int i) {
     static const char* labels[] = { "DOI HINH", "KY NANG", "TUI DO", "THONG TIN CONG" };
@@ -160,6 +173,7 @@ void PrepMenuScreen::update(float deltaTime) { m_time += deltaTime; }
 
 // ============ Ve ============
 void PrepMenuScreen::draw() const {
+    m_hoverSkill = -1;
     drawBackground();
     const float cx = GetScreenWidth() / 2.0f;
     drawCenteredText("CHUAN BI TRAN DAU", cx, 26.0f, 40, COL_TITLE);
@@ -185,6 +199,13 @@ void PrepMenuScreen::draw() const {
     drawButtons();
     drawCenteredText("[Q/E hoac LEFT/RIGHT] Doi tab   [1-4] Chon tab   [ENTER] Vao tran   [ESC] Quay lai",
                      cx, 702.0f, 16, Color{ 200, 195, 225, 220 });
+
+    // Tooltip ky nang: ve CUOI CUNG de nam tren moi thu
+    if (m_tab == TAB_SKILLS && m_hoverSkill >= 0 &&
+        static_cast<size_t>(m_hoverSkill) < m_info.m_skills.size()) {
+        SkillTooltip::draw(toTipInfo(m_info.m_skills[static_cast<size_t>(m_hoverSkill)]),
+                           GetMousePosition(), &m_info.m_hero.m_stats);
+    }
 }
 
 void PrepMenuScreen::drawBackground() const {
@@ -270,8 +291,10 @@ void PrepMenuScreen::drawSkillsTab(const Rectangle& area) const {
     for (size_t i = 0; i < m_info.m_skills.size() && i < MAX_SKILL_ROWS; ++i) {
         const PrepSkillInfo& s = m_info.m_skills[i];
         const Rectangle r = { area.x + 24.0f, y, area.width - 48.0f, rowH };
-        DrawRectangleRec(r, Color{ 28, 24, 58, 235 });
-        DrawRectangleLinesEx(r, 2.0f, COL_EDGE);
+        const bool rowHover = CheckCollisionPointRec(GetMousePosition(), r);
+        if (rowHover) m_hoverSkill = static_cast<int>(i);
+        DrawRectangleRec(r, rowHover ? Color{ 40, 34, 80, 245 } : Color{ 28, 24, 58, 235 });
+        DrawRectangleLinesEx(r, 2.0f, rowHover ? COL_EDGE_SEL : COL_EDGE);
         DrawRectangle(static_cast<int>(r.x), static_cast<int>(r.y), 6, static_cast<int>(r.height), elementColor(s.m_element));
 
         DrawText(s.m_name.c_str(), static_cast<int>(r.x + 24), static_cast<int>(r.y + 10), 22, COL_TEXT);

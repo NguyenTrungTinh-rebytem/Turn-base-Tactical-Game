@@ -1,5 +1,5 @@
 # ninja log v7
-151	1029	8148201934575777	CMakeFiles/game.dir/src/core/GameStateMachine.cpp.obj	6c21277ff3b31d2c
+95	297	8148485593099853	CMakeFiles/game.dir/src/core/GameStateMachine.cpp.obj	6c21277ff3b31d2c
 394	564	8146341164120377	CMakeFiles/game.dir/src/graphics/main_map_test.cpp.obj	2b55d542ab1585b1
 564	747	8146341165820735	CMakeFiles/game.dir/src/graphics/main_sprite_test.cpp.obj	6d46e266278e8741
 117	1399	8146341161349221	CMakeFiles/game.dir/src/core/UseSkillCommand.cpp.obj	97bd3dd28d7c3393
@@ -15,12 +15,12 @@
 94	1672	8148258846583821	CMakeFiles/game.dir/src/dsa/TurnManager.cpp.obj	e4902a383661743d
 26	1614	8148258845770324	CMakeFiles/game.dir/src/core/AttackCommand.cpp.obj	67fa886738a70316
 188	1770	8148258847576313	CMakeFiles/game.dir/src/graphics/CombatantView.cpp.obj	73652ed1a95472b6
-41	921	8148266450730988	CMakeFiles/game.dir/src/graphics/BattleMap.cpp.obj	32aad90aebed3fbe
+106	1170	8148485593191141	CMakeFiles/game.dir/src/graphics/BattleMap.cpp.obj	32aad90aebed3fbe
 175	1921	8148258847408156	CMakeFiles/game.dir/src/graphics/BattleUi.cpp.obj	8ddb094c058d4948
 55	2306	8148258846193043	CMakeFiles/game.dir/src/data/GameData.cpp.obj	92620661346df67f
-253	2655	8148258848221889	CMakeFiles/game.dir/src/main.cpp.obj	b1163cf3d9299e02
-36	4322	8148258845998313	CMakeFiles/game.dir/src/core/GameEngine.cpp.obj	6f86db03f70f8943
-922	1647	8148266459651375	game.exe	830cbc328037fb5c
+130	2108	8148485593447888	CMakeFiles/game.dir/src/main.cpp.obj	b1163cf3d9299e02
+35	3766	8148486982062744	CMakeFiles/game.dir/src/core/GameEngine.cpp.obj	6f86db03f70f8943
+3767	4560	8148487019408008	game.exe	acc784d68461d69c
 73	2840	8146986687186983	CMakeFiles/game.dir/src/graphics/Startmenu.cpp.obj	1234a7a82eabf17a
 166	3002	8147808972430619	CMakeFiles/game.dir/src/graphics/StartMenu.cpp.obj	144b7da9025e01c6
 222	2195	8148258847870492	CMakeFiles/game.dir/src/graphics/Herocreatescreen.cpp.obj	5ecc558582347a6f
@@ -28,9 +28,9 @@
 46	920	8148258846088873	CMakeFiles/game.dir/src/data/CharacterRules.cpp.obj	aa28061adec0be72
 65	1930	8148258846286004	CMakeFiles/game.dir/src/data/SkillElementConfig.cpp.obj	f0ee8b8ac00ea2c2
 239	1958	8148258848055520	CMakeFiles/game.dir/src/graphics/LayeredSprite.cpp.obj	5b6486c08756b87a
-95	297	8148485593099853	CMakeFiles/game.dir/src/core/GameStateMachine.cpp.obj	6c21277ff3b31d2c
-106	1170	8148485593191141	CMakeFiles/game.dir/src/graphics/BattleMap.cpp.obj	32aad90aebed3fbe
 116	1464	8148485593296780	CMakeFiles/game.dir/src/graphics/PrepMenuScreen.cpp.obj	de6aead025ae6eb8
-130	2108	8148485593447888	CMakeFiles/game.dir/src/main.cpp.obj	b1163cf3d9299e02
-35	3766	8148486982062744	CMakeFiles/game.dir/src/core/GameEngine.cpp.obj	6f86db03f70f8943
-3767	4560	8148487019408008	game.exe	acc784d68461d69c
+96	5797	8148524882393526	CMakeFiles/game.dir/src/graphics/Skilltooltip.cpp.obj	9c6831af135b3ace
+84	6161	8148524882295878	CMakeFiles/game.dir/src/graphics/PrepMenuScreen.cpp.obj	de6aead025ae6eb8
+110	6976	8148524882554243	CMakeFiles/game.dir/src/main.cpp.obj	b1163cf3d9299e02
+11	3686	8148533344121448	CMakeFiles/game.dir/src/core/GameEngine.cpp.obj	6f86db03f70f8943
+3687	5356	8148533380905739	game.exe	7c86ef18e31b0d7
