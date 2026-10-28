@@ -1,0 +1,207 @@
+diff --git a/src/core/GameEngine.cpp b/src/core/GameEngine.cpp
+index 98a63cc..6259b4b 100644
+--- a/src/core/GameEngine.cpp
++++ b/src/core/GameEngine.cpp
+@@ -1,4 +1,7 @@
+ #include "core/GameEngine.h"
++#include "data/HeroPresetConfig.h"
++#include "data/CharacterRules.h"
++#include <cctype>
+ #include "core/AttackCommand.h"
+ #include "core/UseSkillCommand.h"
+ #include "core/UseItemCommand.h"
+@@ -214,7 +217,9 @@ int GameEngine::finalStage() const
+ Skill GameEngine::toBattleSkill(const SkillData& data, Element heroElement)
+ {
+     // TODO(Data): khi GameData co buildSkill(id) thi thay ham nay.
+-    // CSV chua co cot element/isMagic nen Core suy ra tam tu hieu ung.
++    // Nguyen to: lay tu data/skill_elements.csv (GameData::setSkillElement de sua).
++    // Skill chua duoc gan nguyen to -> Core suy ra tam tu hieu ung (du phong nhu cu).
++    // isMagic: CSV chua co cot nay nen van suy ra tu owner.
+     Skill skill;
+     skill.m_id = data.m_id;
+     skill.m_name = data.m_name;
+@@ -226,13 +231,20 @@ Skill GameEngine::toBattleSkill(const SkillData& data, Element heroElement)
+     skill.m_effect = data.m_effect;
+     skill.m_effectTurns = data.m_effectTurns;
+ 
+-    switch (data.m_effect)
++    if (data.m_hasElement)
+     {
+-    case EffectType::BURN:     skill.m_element = Element::HOA;  break;
+-    case EffectType::SLOW:     skill.m_element = Element::THUY; break;
+-    case EffectType::STUN:     skill.m_element = Element::THO;  break;
+-    case EffectType::WEAKNESS: skill.m_element = Element::MOC;  break;
+-    default:                   skill.m_element = heroElement;   break;
++        skill.m_element = data.m_element;
++    }
++    else
++    {
++        switch (data.m_effect)
++        {
++        case EffectType::BURN:     skill.m_element = Element::HOA;  break;
++        case EffectType::SLOW:     skill.m_element = Element::THUY; break;
++        case EffectType::STUN:     skill.m_element = Element::THO;  break;
++        case EffectType::WEAKNESS: skill.m_element = Element::MOC;  break;
++        default:                   skill.m_element = heroElement;   break;
++        }
+     }
+ 
+     skill.m_isMagic = (data.m_ownerType == SkillOwnerType::CLASS)
+@@ -343,6 +355,51 @@ void GameEngine::setupHeroCreateScreen()
+         classes.push_back({ c.m_name, c.m_stats, skillNames(c.m_skillIds) });
+ 
+     m_heroCreate.setOptions(races, classes);
++
++    // ----- Tuong co san: data/heroes.csv (thieu file -> danh sach mac dinh) -----
++    std::vector<HeroPresetData> presetData;
++    if (loadHeroPresets(resolvePath("data/heroes.csv"), presetData) == 0)
++        presetData = defaultHeroPresets();
++
++    auto lower = [](std::string text) {
++        for (char& ch : text) ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
++        return text;
++    };
++    auto findOption = [&lower](const std::vector<HeroOption>& list, const std::string& name) -> int {
++        for (size_t i = 0; i < list.size(); ++i)
++            if (lower(list[i].m_name) == lower(name)) return static_cast<int>(i);
++        return -1;
++    };
++
++    std::vector<HeroPreset> presets;
++    for (const HeroPresetData& d : presetData)
++    {
++        const int raceIndex = findOption(races, d.m_race);
++        const int classIndex = findOption(classes, d.m_class);
++        if (raceIndex < 0 || classIndex < 0)
++        {
++            std::cerr << "heroes.csv: bo qua '" << d.m_id << "' (khong tim thay " << d.m_race << " / " << d.m_class << ")" << std::endl;
++            continue;
++        }
++
++        // Neu ten Race/Class la cac ten chuan thi kiem tra to hop hop le (Ogre khong lam Mage...).
++        for (int r = 0; r < RACE_COUNT; ++r)
++            for (int c = 0; c < CLASS_COUNT; ++c)
++                if (lower(d.m_race) == raceToString(static_cast<RaceType>(r)) &&
++                    lower(d.m_class) == classToString(static_cast<ClassType>(c)) &&
++                    !isValidCombination(static_cast<RaceType>(r), static_cast<ClassType>(c)))
++                    std::cerr << "heroes.csv: canh bao '" << d.m_id << "' la to hop Race/Class khong hop le" << std::endl;
++
++        HeroPreset p;
++        p.m_id = d.m_id;
++        p.m_name = d.m_name;
++        p.m_raceIndex = static_cast<size_t>(raceIndex);
++        p.m_classIndex = static_cast<size_t>(classIndex);
++        p.m_element = d.m_element;
++        p.m_idleSpritePath = resolvePath("assets/images/hero_" + d.m_id + "_idle.png");
++        presets.push_back(p);
++    }
++    m_heroCreate.setPresets(presets);
+ }
+ 
+ void GameEngine::applyHeroSelection(const HeroSelection& selection)
+diff --git a/src/data/DataTypes.h b/src/data/DataTypes.h
+index d7c5c61..b5e74c8 100644
+--- a/src/data/DataTypes.h
++++ b/src/data/DataTypes.h
+@@ -20,6 +20,8 @@ struct SkillData {
+     int m_mpCost = 0;
+     EffectType m_effect = EffectType::NONE;
+     int m_effectTurns = 0;
++    Element m_element = Element::KIM;   // nguyen to cua skill (nap tu skill_elements.csv)
++    bool m_hasElement = false;          // true neu skill co dong trong skill_elements.csv (false -> Core tu suy ra du phong)
+ };
+ 
+ struct RaceData {
+diff --git a/src/data/GameData.cpp b/src/data/GameData.cpp
+index a4de31e..ce31dce 100644
+--- a/src/data/GameData.cpp
++++ b/src/data/GameData.cpp
+@@ -129,6 +129,7 @@ void GameData::loadAll(const std::string& dataDir) {
+     m_classes.clear();
+     m_skills.clear();
+     m_monsters.clear();
++    m_skillElements = SkillElementConfig{};
+ 
+     std::string dir = dataDir;
+     if (!dir.empty() && dir.back() != '/' && dir.back() != '\\') dir += '/';
+@@ -136,6 +137,8 @@ void GameData::loadAll(const std::string& dataDir) {
+     loadRaces(dir + "races.csv");
+     loadClasses(dir + "classes.csv");
+     loadSkills(dir + "skills.csv");
++    m_skillElementsPath = dir + "skill_elements.csv";
++    loadSkillElements(m_skillElementsPath);
+     loadMonsters(dir + "monsters.csv");
+     validate();
+     m_loaded = true;
+@@ -179,6 +182,32 @@ void GameData::loadSkills(const std::string& path) {
+     }
+ }
+ 
++// File nguyen to la TUY CHON: thieu file hoac thieu dong -> m_hasElement = false (khong nem loi).
++void GameData::loadSkillElements(const std::string& path) {
++    m_skillElements.loadFromFile(path);
++    for (auto& s : m_skills) {
++        const auto element = m_skillElements.getElement(s.m_id);
++        s.m_hasElement = element.has_value();
++        s.m_element = element.value_or(Element::KIM);
++    }
++}
++
++bool GameData::setSkillElement(const std::string& skillId, Element element) {
++    for (auto& s : m_skills) {
++        if (s.m_id != skillId) continue;
++        s.m_element = element;
++        s.m_hasElement = true;
++        m_skillElements.setElement(skillId, element);
++        return true;
++    }
++    return false;
++}
++
++bool GameData::saveSkillElements() const {
++    if (m_skillElementsPath.empty()) return false;
++    return m_skillElements.saveToFile(m_skillElementsPath);
++}
++
+ void GameData::loadMonsters(const std::string& path) {
+     for (const auto& row : readCsv(path, 12)) {
+         MonsterData m;
+diff --git a/src/data/GameData.h b/src/data/GameData.h
+index 0411412..bbcac09 100644
+--- a/src/data/GameData.h
++++ b/src/data/GameData.h
+@@ -3,6 +3,7 @@
+ #include <string>
+ #include <vector>
+ #include "DataTypes.h"
++#include "SkillElementConfig.h"
+ // Loi doc/kiem tra du lieu. what() chua ten file + dong + nguyen nhan.
+ class DataLoadError : public std::runtime_error {
+ public:
+@@ -44,16 +45,25 @@ public:
+ 
+     bool isLoaded() const { return m_loaded; }
+ 
++    // ---- Nguyen to cua skill (chinh sua duoc) ----
++    // Doi nguyen to cua 1 skill ngay trong bo nho. false neu khong co skill do.
++    bool setSkillElement(const std::string& skillId, Element element);
++    // Ghi nguyen to hien tai ra data/skill_elements.csv (duong dan lay luc loadAll). false neu ghi that bai.
++    bool saveSkillElements() const;
++
+ private:
+     void loadRaces(const std::string& path);
+     void loadClasses(const std::string& path);
+     void loadSkills(const std::string& path);
+     void loadMonsters(const std::string& path);
+     void validate() const;
++    void loadSkillElements(const std::string& path);   // tuy chon: thieu file -> giu mac dinh Kim
+ 
+     std::vector<RaceData> m_races;
+     std::vector<ClassData> m_classes;
+     std::vector<SkillData> m_skills;
+     std::vector<MonsterData> m_monsters;
++    SkillElementConfig m_skillElements;
++    std::string m_skillElementsPath;
+     bool m_loaded = false;
+ };

@@ -1,0 +1,13 @@
+# id,name,race,class,element
+# id dung dat ten anh: assets/images/hero_<id>_idle.png (+ attack/hurt/death/victory). Thieu anh -> hien placeholder.
+# race/class phai trung ten trong races.csv / classes.csv.
+lyra,Lyra,Elf,Mage,HOA
+kael,Kael,Human,Assassin,MOC
+sylwen,Sylwen,Elf,Enchanter,THUY
+kurogane,Kurogane,Oni,Swordman,HOA
+fenrir,Fenrir,Beastman,Swordman,MOC
+grumm,Grumm,Ogre,Tanker,THO
+thorin,Thorin,Dwarf,Paladin,KIM
+aldric,Aldric,Human,Paladin,THUY
+roland,Roland,Human,Swordman,KIM
+brokk,Brokk,Dwarf,Tanker,THO

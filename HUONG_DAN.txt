@@ -1,0 +1,15 @@
+CACH CAP NHAT (chay trong thu muc goc project, noi co CMakeLists.txt):
+
+1) Dua ve ban main moi nhat cua nhom cho 4 file da bi ghi de nham:
+     git checkout -- src/core/GameEngine.cpp src/data/GameData.h src/data/GameData.cpp src/data/DataTypes.h
+   (neu da commit nham: git checkout origin/main -- <4 file tren>)
+
+2) Chep de thu muc src, data, assets trong zip nay vao project (chi co FILE MOI + Herocreatescreen.*). Danh sach 10 tuong nam trong data/heroes.csv.
+
+3) Ap 4 thay doi nho vao 4 file tren bang patch (giu nguyen code moi cua nhom):
+     git apply --ignore-whitespace hero_select.patch
+   Neu bao loi, chay: git apply --ignore-whitespace --reject hero_select.patch
+   roi gui cho Claude noi dung file .rej.
+
+4) Xoa thu muc build, cmake -S . -B build -G Ninja, cmake --build build.
+5) Neu co src/graphics/LayeredSprite.h/.cpp thi xoa (man moi khong dung).
