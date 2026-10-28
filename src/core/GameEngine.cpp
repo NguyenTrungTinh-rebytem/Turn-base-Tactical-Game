@@ -4,6 +4,8 @@
 #include "core/AttackCommand.h"
 #include "core/UseSkillCommand.h"
 #include "core/UseItemCommand.h"
+#include "core/CharacterSnapshot.h"
+#include "entities/CharacterFactory.h"
 #include <algorithm>
 #include <cmath>
 #include <numeric>
@@ -47,11 +49,10 @@ namespace
 
     // ----- Gameplay -----
     constexpr float AI_TURN_DELAY = 1.2f;
-    constexpr int   POTION_HEAL = 40;
     constexpr int   INITIAL_POTIONS = 3;
     constexpr int   STAGE1_ENEMY_COUNT = 3;
     constexpr float STAGE_CLEAR_HEAL_RATE = 0.3f;   // hoi 30% HP khi qua man
-    const char* const POTION_NAME = "Potion";
+    const char* const POTION_NAME = "ITM_HP_MINOR";
     const char* skillTypeText(SkillType t) {
     switch (t) {
         case SkillType::DAMAGE: return "Sat thuong";
@@ -169,9 +170,19 @@ void GameEngine::initialize()
         m_battleLog = std::string("Data load notice: ") + e.what();
         std::cerr << m_battleLog << std::endl;
     }
+    {
+        std::string itemError;
+        m_itemsLoaded = m_itemDatabase.tryLoad(resolvePath("data"), &itemError);
+        if (!m_itemsLoaded) std::cerr << "Item data: " << itemError << std::endl;
+        else {
+            for (const ItemData& item : m_itemDatabase.getItems())
+                if (item.m_category == ItemCategory::HELD) m_gearIds.push_back(item.m_id);
+        }
+    }
     m_startMenu.loadBackground(resolvePath("assets/images/bg_menu.png"));   // thieu anh -> nen thu tuc
     m_startMenu.setStatusText(m_dataLoaded ? "Data: CSV OK" : "Data: CSV loi -> dung du lieu du phong", m_dataLoaded);
     m_heroConfig = { HERO_NAME, HERO_RACE, HERO_CLASS, HERO_ELEMENT };
+    m_partyConfigs.clear();
     m_heroCreate.loadBackground(resolvePath("assets/images/bg_menu.png"));
     m_waveSelect.loadBackground(resolvePath("assets/images/bg_menu.png"));
     m_prepMenu.loadBackground(resolvePath("assets/images/bg_menu.png"));
@@ -201,6 +212,8 @@ void GameEngine::shutdown()
     m_prepMenu.unloadAll();
     m_battleMap.unloadAll();
     m_combatants.clear();
+    m_party.clear();
+    m_baseSpeed.clear();
 
     if (m_isInitialized)
     {
@@ -320,27 +333,29 @@ void GameEngine::addCombatant(std::unique_ptr<Character> character, const std::s
     auto view = std::make_unique<CombatantView>(character.get(), sheet,
                                             frameW, frameH, BattleSlot{});
 
+    m_baseSpeed[character.get()] = character->getSpeed();
     m_lastHp[character.get()] = character->getCurrentHp();
     m_turnManager.addCharacter(character.get());
-    m_combatants.push_back(std::move(character));
+    m_combatants.push_back(std::shared_ptr<Character>(std::move(character)));
     m_views.push_back(std::move(view));
 }
 void GameEngine::layoutViews()
 {
-    if (m_views.empty()) return;
+    const std::size_t members = m_party.size();
+    if (m_views.empty() || members == 0) return;
 
-    // Hero: luÃ´n á»Ÿ m_combatants[0]
-    m_views[0]->setSlot(m_battleMap.layoutPlayers({ 1.0f })[0]);
+    std::vector<float> playerScales(members, 1.0f);
+    const auto playerSlots = m_battleMap.layoutPlayers(playerScales);
+    for (std::size_t i = 0; i < members && i < m_views.size(); ++i)
+        m_views[i]->setSlot(playerSlots[i]);
 
-    // QuÃ¡i: Boss to 1.3, quÃ¡i thÆ°á»ng 1.0
-    std::vector<float> muls;
-    for (size_t i = 1; i < m_combatants.size(); ++i)
-        muls.push_back(dynamic_cast<const Boss*>(m_combatants[i].get())
-                   ? BOSS_SCALE_MUL * static_cast<float>(FRAME_W) / BOSS_FRAME : 1.0f);
-
-    const auto slots = m_battleMap.layoutEnemies(muls);
-    for (size_t i = 0; i < slots.size() && i + 1 < m_views.size(); ++i)
-        m_views[i + 1]->setSlot(slots[i]);
+    std::vector<float> enemyScales;
+    for (std::size_t i = members; i < m_combatants.size(); ++i)
+        enemyScales.push_back(dynamic_cast<const Boss*>(m_combatants[i].get())
+            ? BOSS_SCALE_MUL * static_cast<float>(FRAME_W) / BOSS_FRAME : 1.0f);
+    const auto enemySlots = m_battleMap.layoutEnemies(enemyScales);
+    for (std::size_t i = 0; i < enemySlots.size() && i + members < m_views.size(); ++i)
+        m_views[i + members]->setSlot(enemySlots[i]);
 }
 
 std::vector<Character*> GameEngine::upcomingOrder() const
@@ -416,7 +431,17 @@ void GameEngine::openPrepMenu(int wave)
     info.m_hero.m_class = m_heroConfig.m_class;
     info.m_hero.m_element = m_heroConfig.m_element;
     info.m_hero.m_stats = Stats{ 120, 50, 25, 20, 5, 8, 15 };   // du phong
-    info.m_teammateSlots = 2;
+    info.m_teammateSlots = static_cast<int>(Party::MAX_SIZE) - static_cast<int>(m_partyConfigs.size());
+    for (const HeroConfig& config : m_partyConfigs) {
+        PrepHeroInfo member;
+        member.m_name = config.m_name;
+        member.m_race = config.m_race;
+        member.m_class = config.m_class;
+        member.m_element = config.m_element;
+        try { member.m_stats = m_gameData.getBaseStats(config.m_race, config.m_class); }
+        catch (const std::exception&) { member.m_stats = Stats{120,50,25,20,5,8,15}; }
+        info.m_members.push_back(member);
+    }
 
     // Tab 2: Ky nang
     try {
@@ -432,7 +457,12 @@ void GameEngine::openPrepMenu(int wave)
         std::cerr << "Prep menu data error: " << e.what() << std::endl;
     }
     // Tab 3: Tui do
-    info.m_items.push_back({ POTION_NAME, INITIAL_POTIONS });
+    if (m_itemsLoaded) {
+        const auto& all = m_itemDatabase.getItems();
+        for (const ItemData& item : all)
+            info.m_items.push_back({ item.m_name, item.m_id == POTION_NAME ? INITIAL_POTIONS :
+                                                 item.m_category == ItemCategory::HELD ? 1 : 1 });
+    }
 
     // Tab 4: Thong tin cong
     info.m_gate.m_title = "WAVE " + std::to_string(wave);
@@ -520,42 +550,106 @@ void GameEngine::applyHeroSelection(const HeroSelection& selection)
 {
     const auto& races = m_gameData.getRaces();
     const auto& classes = m_gameData.getClasses();
-    if (selection.m_raceIndex < races.size())    m_heroConfig.m_race = races[selection.m_raceIndex].m_name;
-    if (selection.m_classIndex < classes.size()) m_heroConfig.m_class = classes[selection.m_classIndex].m_name;
-    m_heroConfig.m_name = selection.m_name;
-    m_heroConfig.m_element = selection.m_element;
+    HeroConfig config;
+    if (selection.m_raceIndex < races.size()) config.m_race = races[selection.m_raceIndex].m_name;
+    if (selection.m_classIndex < classes.size()) config.m_class = classes[selection.m_classIndex].m_name;
+    config.m_name = selection.m_name;
+    config.m_element = selection.m_element;
+    if (config.m_race.empty() || config.m_class.empty() || config.m_name.empty()) return;
+
+    // Ten phai rieng biet de hien thi ro trong log, HP bar va thu tu luot.
+    for (std::size_t i = 0; i < m_partyConfigs.size(); ++i) {
+        if (static_cast<int>(i) != m_editingPartySlot && m_partyConfigs[i].m_name == config.m_name) {
+            config.m_name += " " + std::to_string(m_editingPartySlot + 1);
+            break;
+        }
+    }
+    if (m_editingPartySlot == 0) m_heroConfig = config;
+    if (m_editingPartySlot < static_cast<int>(m_partyConfigs.size()))
+        m_partyConfigs[static_cast<std::size_t>(m_editingPartySlot)] = config;
+    else if (m_partyConfigs.size() < Party::MAX_SIZE)
+        m_partyConfigs.push_back(config);
 }
+
+void GameEngine::openPartyMemberSelection(int slot)
+{
+    // Chon lan luot de khong co o trong chen giua doi hinh.
+    const int maxFilled = static_cast<int>(m_partyConfigs.size());
+    m_editingPartySlot = std::max(0, std::min(slot, maxFilled));
+    m_selectingFromPrep = true;
+    m_heroCreate.reset();
+    m_heroCreate.setSlotLabel(m_editingPartySlot == 0
+        ? "CHON THU LINH (1/3)"
+        : "CHON DONG DOI " + std::to_string(m_editingPartySlot + 1) + "/3");
+    m_stateMachine.changeState(GameStateMachine::State::CREATE_HERO);
+}
+
 void GameEngine::createHero()
 {
-    Stats heroStats{ 120, 50, 25, 20, 5, 8, 15 };
     m_heroSkills.clear();
+    m_party.clear();
+    auto addPartyHero = [this](std::unique_ptr<Player> player) {
+        if (!player) return;
+        addCombatant(std::move(player));
+        m_party.addMember(std::dynamic_pointer_cast<Player>(m_combatants.back()));
+    };
 
-    bool fromData = false;
-    if (m_dataLoaded)
-    {
-        try {
-            heroStats = m_gameData.getBaseStats(m_heroConfig.m_race, m_heroConfig.m_class);
-            for (const auto& id : m_gameData.getHeroSkillIds(m_heroConfig.m_race, m_heroConfig.m_class))
-    m_heroSkills.push_back(toBattleSkill(m_gameData.getSkill(id), m_heroConfig.m_element));
-            fromData = true;
-        }
-        catch (const std::exception& e) {
-            std::cerr << "Hero data error: " << e.what() << std::endl;
-            m_heroSkills.clear();
+    if (m_dataLoaded) {
+        const std::vector<HeroConfig> configs = m_partyConfigs.empty()
+            ? std::vector<HeroConfig>{m_heroConfig} : m_partyConfigs;
+        for (const HeroConfig& config : configs) {
+            try {
+                addPartyHero(CharacterFactory::createHero(m_gameData, config.m_name,
+                    config.m_race, config.m_class, config.m_element));
+            } catch (const std::exception& e) {
+                std::cerr << "Hero factory error (" << config.m_name << "): " << e.what() << std::endl;
+            }
         }
     }
-
-    if (!fromData)
-    {
-        // Du phong khi chua co CSV
-        m_heroSkills = {
-            Skill{ "S01", "Chem Manh", SkillOwnerType::CLASS, "Warrior", SkillType::DAMAGE, 130, 5, EffectType::NONE, 0, Element::KIM, false },
-            Skill{ "S02", "Hoa Cau", SkillOwnerType::CLASS, "Mage", SkillType::DAMAGE, 150, 12, EffectType::BURN, 2, Element::HOA, true },
-            Skill{ "S03", "Hoi Mau", SkillOwnerType::CLASS, "Priest", SkillType::HEAL, 30, 10, EffectType::REGEN, 2, Element::THUY, true }
+    if (m_party.isEmpty()) {
+        auto player = std::make_unique<Player>(m_heroConfig.m_name,
+            Stats{120, 50, 25, 20, 5, 8, 15}, m_heroConfig.m_element);
+        const std::vector<Skill> defaultSkills = {
+            Skill{"S01", "Chem Manh", SkillOwnerType::CLASS, "Warrior", SkillType::DAMAGE, 130, 5, EffectType::NONE, 0, Element::KIM, false},
+            Skill{"S02", "Hoa Cau", SkillOwnerType::CLASS, "Mage", SkillType::DAMAGE, 150, 12, EffectType::BURN, 2, Element::HOA, true},
+            Skill{"S03", "Hoi Mau", SkillOwnerType::CLASS, "Priest", SkillType::HEAL, 30, 10, EffectType::REGEN, 2, Element::THUY, true}
         };
+        for (const Skill& skill : defaultSkills) player->addSkill(skill);
+        addPartyHero(std::move(player));
     }
+    refreshCurrentSkills();
+}
 
-    addCombatant(std::make_unique<Player>(m_heroConfig.m_name, heroStats, m_heroConfig.m_element));
+void GameEngine::refreshCurrentSkills()
+{
+    const auto* player = dynamic_cast<const Player*>(hero());
+    m_heroSkills = player ? player->getSkills() : std::vector<Skill>{};
+    m_selectedSkillIndex = 0;
+}
+
+void GameEngine::seedItems()
+{
+    if (!m_itemsLoaded) return;
+    auto seed = [this](const char* id, int count) {
+        if (!m_itemDatabase.findItem(id)) return;
+        for (int i = 0; i < count; ++i)
+            m_party.addItem(ItemFactory::createItem(m_itemDatabase, id));
+    };
+    seed(POTION_NAME, INITIAL_POTIONS);
+    seed("ITM_HP_MAJOR", 1);
+    seed("ITM_ENERGY", 2);
+    seed("ITM_PHOENIX", 2);
+    seed("ITM_POWER_SERUM", 1);
+    seed("ITM_IRON_SHIELD", 1);
+    seed("ITM_HASTE", 1);
+    seed("ITM_PRECISION", 1);
+    for (const std::string& id : m_gearIds) seed(id.c_str(), 1);
+    if (!m_gearIds.empty() && m_prepGearIndex > 0) {
+        const std::string& id = m_gearIds[static_cast<std::size_t>(m_prepGearIndex - 1)];
+        const auto& items = m_party.getInventory().getItems();
+        auto it = std::find_if(items.begin(), items.end(), [&](const ItemPtr& p) { return p->getId() == id; });
+        if (it != items.end()) m_party.equipGear(0, *it);
+    }
 }
 
 void GameEngine::spawnEnemies(int stage)
@@ -591,12 +685,11 @@ void GameEngine::loadStage(int stage)
     m_waveManager.addWave(stage);
     m_waveManager.startNextWave();
 
-    // Giu lai hero (m_combatants[0]), bo het quai cu
-    if (m_combatants.size() > 1)
-    {
-        m_combatants.resize(1);
-        m_views.resize(1);
-    }
+    // Giu lai moi thanh vien Party, bo quai cu
+    for (std::size_t i = m_party.size(); i < m_combatants.size(); ++i)
+        m_baseSpeed.erase(m_combatants[i].get());
+    m_combatants.resize(m_party.size());
+    m_views.resize(m_party.size());
 
     m_turnManager.clear();
     m_commandStack.clear();
@@ -604,21 +697,25 @@ void GameEngine::loadStage(int stage)
     m_lastHp.clear();
     m_ui.unloadAll();
     m_isSelectingSkill = false;
+    m_isSelectingItem = false;
     m_aiTurnTimer = 0.0f;
 
-    if (!m_combatants.empty())
-    {
-        Character* h = m_combatants[0].get();
-        if (stage > 1)
-            h->heal(static_cast<int>(static_cast<float>(h->getStats().m_hp) * STAGE_CLEAR_HEAL_RATE));
-        m_turnManager.addCharacter(h);
+    for (const auto& member : m_party.getMembers()) {
+        Character* h = member.get();
+        if (stage > 1 && h->isAlive())
+            h->heal(static_cast<int>(static_cast<float>(h->getMaxHp()) * STAGE_CLEAR_HEAL_RATE));
+        h->resetBattleState();
+        auto speed = m_baseSpeed.find(h);
+        if (speed != m_baseSpeed.end()) h->setSpeed(speed->second);
+        if (h->isAlive()) m_turnManager.addCharacter(h);
         m_lastHp[h] = h->getCurrentHp();
     }
 
     spawnEnemies(stage);
     layoutViews();
 
-    m_selectedTarget = (m_combatants.size() > 1) ? m_combatants[1].get() : nullptr;
+    m_selectedAlly = m_party.getLeader();
+    m_selectedTarget = (m_combatants.size() > m_party.size()) ? m_combatants[m_party.size()].get() : nullptr;
     m_battleMap.setStage(m_stage == 1 ? StageId::STAGE_1 : StageId::STAGE_2,
     resolvePath(m_stage == 1 ? "assets/images/bg_wave1.png"
                            : "assets/images/bg_wave2.png"));
@@ -630,15 +727,19 @@ void GameEngine::loadStage(int stage)
 
 void GameEngine::startNewGame(int startStage)
 {
+    m_currentCharacter = nullptr;
+    m_selectedTarget = nullptr;
+    m_selectedAlly = nullptr;
+    m_turnManager.clear();
+    m_statusEffects.clear();
+    m_commandStack.clear();
     m_combatants.clear();
+    m_baseSpeed.clear();
     m_views.clear();
     m_ui.unloadAll();
 
-    m_inventory = Inventory<std::string>();
-    for (int i = 0; i < INITIAL_POTIONS; ++i)
-        m_inventory.addItem(POTION_NAME);
-
     createHero();
+    seedItems();
     loadStage(startStage); 
     advanceTurn();
 
@@ -655,8 +756,9 @@ void GameEngine::processEvents()
     {
         if (m_stateMachine.is(GameStateMachine::State::IN_BATTLE))
         {
-            if (m_isSelectingSkill) {
+            if (m_isSelectingSkill || m_isSelectingItem) {
                 m_isSelectingSkill = false;
+                m_isSelectingItem = false;
             } else if (!cancelLastAction()) {
                 m_stateMachine.changeState(GameStateMachine::State::MENU);
             }
@@ -664,10 +766,18 @@ void GameEngine::processEvents()
         else 
         if (m_stateMachine.is(GameStateMachine::State::CREATE_HERO))
     {
-    m_stateMachine.changeState(GameStateMachine::State::MENU);
+        if (m_selectingFromPrep) {
+            m_selectingFromPrep = false;
+            openPrepMenu(m_pendingWave);
+        } else {
+            m_stateMachine.changeState(GameStateMachine::State::MENU);
+        }
     }
     else if (m_stateMachine.is(GameStateMachine::State::WAVE_SELECT))
     {
+    m_editingPartySlot = 0;
+    m_selectingFromPrep = false;
+    m_heroCreate.setSlotLabel("CHON THU LINH (1/3)");
     m_stateMachine.changeState(GameStateMachine::State::CREATE_HERO);   // ESC o man Chon Wave = ve Tao Hero
     }
     else if (m_stateMachine.is(GameStateMachine::State::PREP_MENU))
@@ -692,7 +802,11 @@ void GameEngine::processEvents()
     case MenuAction::START_GAME:
     if (m_heroCreate.hasOptions())
     {
+        m_partyConfigs.clear();
+        m_editingPartySlot = 0;
+        m_selectingFromPrep = false;
         m_heroCreate.reset(m_heroConfig.m_name);
+        m_heroCreate.setSlotLabel("CHON THU LINH (1/3)");
         m_stateMachine.changeState(GameStateMachine::State::CREATE_HERO);
     }
     else   // chua co data CSV: vao tran luon voi hero mac dinh
@@ -713,7 +827,11 @@ void GameEngine::processEvents()
     {
     case HeroCreateAction::CONFIRM:
     applyHeroSelection(m_heroCreate.getSelection());
-    if (m_dataLoaded && finalStage() > 1)
+    if (m_selectingFromPrep) {
+        m_selectingFromPrep = false;
+        openPrepMenu(m_pendingWave);
+    }
+    else if (m_dataLoaded && finalStage() > 1)
         openWaveSelect();   // co nhieu wave -> cho nguoi choi chon
         else if (m_dataLoaded)
     openPrepMenu(1); 
@@ -724,7 +842,10 @@ void GameEngine::processEvents()
     }
     break;
     case HeroCreateAction::BACK:
-        m_stateMachine.changeState(GameStateMachine::State::MENU);
+        if (m_selectingFromPrep) {
+            m_selectingFromPrep = false;
+            openPrepMenu(m_pendingWave);
+        } else m_stateMachine.changeState(GameStateMachine::State::MENU);
         break;
     case HeroCreateAction::NONE:
         break;
@@ -737,6 +858,9 @@ void GameEngine::processEvents()
         openPrepMenu(m_waveSelect.getSelectedWave());
         break;
     case WaveSelectAction::BACK:
+        m_editingPartySlot = 0;
+        m_selectingFromPrep = false;
+        m_heroCreate.setSlotLabel("CHON THU LINH (1/3)");
         m_stateMachine.changeState(GameStateMachine::State::CREATE_HERO);
         break;
     case WaveSelectAction::NONE:
@@ -744,8 +868,27 @@ void GameEngine::processEvents()
     }
     break;
     case GameStateMachine::State::PREP_MENU:
+    if (IsKeyPressed(KEY_T)) {
+        openPartyMemberSelection(std::min(static_cast<int>(m_partyConfigs.size()),
+                                          static_cast<int>(Party::MAX_SIZE) - 1));
+        break;
+    }
+    if (IsKeyPressed(KEY_G) && !m_gearIds.empty()) {
+        m_prepGearIndex = (m_prepGearIndex + 1) % (static_cast<int>(m_gearIds.size()) + 1);
+        openPrepMenu(m_pendingWave);
+        break;
+    }
     switch (m_prepMenu.handleInput())
     {
+    case PrepMenuAction::EDIT_MEMBER_1:
+        openPartyMemberSelection(0);
+        break;
+    case PrepMenuAction::EDIT_MEMBER_2:
+        openPartyMemberSelection(1);
+        break;
+    case PrepMenuAction::EDIT_MEMBER_3:
+        openPartyMemberSelection(2);
+        break;
     case PrepMenuAction::START:
         m_stateMachine.changeState(GameStateMachine::State::IN_BATTLE);
         startNewGame(m_pendingWave);
@@ -776,7 +919,7 @@ void GameEngine::ensureValidTarget()
         return;
 
     m_selectedTarget = nullptr;
-    for (size_t i = 1; i < m_combatants.size(); ++i)
+    for (size_t i = m_party.size(); i < m_combatants.size(); ++i)
     {
         if (m_combatants[i]->isAlive()) {
             m_selectedTarget = m_combatants[i].get();
@@ -787,21 +930,41 @@ void GameEngine::ensureValidTarget()
 
 void GameEngine::cycleTarget()
 {
+    const size_t first = m_party.size();
     const size_t count = m_combatants.size();
-    if (count < 2) return;
-
-    size_t start = 1;
-    const int current = indexOf(m_selectedTarget);
-    if (current >= 1) start = static_cast<size_t>(current);
-
-    for (size_t step = 1; step <= count - 1; ++step)
-    {
-        const size_t idx = 1 + ((start - 1 + step) % (count - 1));
-        if (m_combatants[idx]->isAlive()) {
-            m_selectedTarget = m_combatants[idx].get();
+    if (count <= first) return;
+    int current = indexOf(m_selectedTarget);
+    for (size_t step = 1; step <= count - first; ++step) {
+        size_t index = first + ((static_cast<size_t>(std::max(current, static_cast<int>(first))) - first + step) % (count - first));
+        if (m_combatants[index]->isAlive()) {
+            m_selectedTarget = m_combatants[index].get();
             return;
         }
     }
+}
+
+void GameEngine::selectAlly(int index)
+{
+    if (index >= 0 && static_cast<std::size_t>(index) < m_party.size())
+        m_selectedAlly = m_party.getMember(static_cast<std::size_t>(index));
+}
+
+std::vector<ItemPtr> GameEngine::availableItems() const
+{
+    std::vector<ItemPtr> items;
+    for (const ItemPtr& item : m_party.getInventory().getItems())
+        if (item && item->getCategory() != ItemCategory::HELD &&
+            std::none_of(items.begin(), items.end(), [&](const ItemPtr& existing) { return existing->getId() == item->getId(); }))
+            items.push_back(item);
+    return items;
+}
+
+void GameEngine::openItemMenu()
+{
+    m_isSelectingItem = !m_isSelectingItem;
+    m_isSelectingSkill = false;
+    m_selectedItemIndex = 0;
+    m_selectedAlly = hero();
 }
 
 void GameEngine::processPlayerInput()
@@ -821,8 +984,27 @@ void GameEngine::processPlayerInput()
     if (IsKeyPressed(KEY_TAB) || IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_LEFT))
         cycleTarget();
 
-    if (IsKeyPressed(KEY_S))
+    if (IsKeyPressed(KEY_I)) openItemMenu();
+    if (IsKeyPressed(KEY_S)) {
+        m_isSelectingItem = false;
         m_isSelectingSkill = !m_isSelectingSkill;
+    }
+    if (m_isSelectingItem) {
+        const auto items = availableItems();
+        if (items.empty()) {
+            m_battleLog = "Tui do khong co vat pham dung trong tran!";
+            m_isSelectingItem = false;
+            return;
+        }
+        const KeyboardKey keys[] = {KEY_ONE, KEY_TWO, KEY_THREE, KEY_FOUR, KEY_FIVE, KEY_SIX, KEY_SEVEN, KEY_EIGHT, KEY_NINE};
+        for (std::size_t i = 0; i < items.size() && i < 9; ++i)
+            if (IsKeyPressed(keys[i])) m_selectedItemIndex = static_cast<int>(i);
+        if (IsKeyPressed(KEY_F1)) selectAlly(0);
+        if (IsKeyPressed(KEY_F2)) selectAlly(1);
+        if (IsKeyPressed(KEY_F3)) selectAlly(2);
+        if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE)) doUseItem();
+        return;
+    }
 
     if (m_isSelectingSkill)
     {
@@ -846,8 +1028,7 @@ void GameEngine::processPlayerInput()
 
     if (IsKeyPressed(KEY_A))
         doBasicAttack();
-    else if (IsKeyPressed(KEY_I))
-        doUseItem();
+
 }
 
 void GameEngine::doBasicAttack()
@@ -873,33 +1054,30 @@ void GameEngine::doBasicAttack()
 
 void GameEngine::doUseItem()
 {
-    Character* h = hero();
-    if (m_inventory.getItems().empty()) {
-        m_battleLog = "Het binh mau!";
+    const auto items = availableItems();
+    if (m_selectedItemIndex < 0 || static_cast<std::size_t>(m_selectedItemIndex) >= items.size()) return;
+    const ItemPtr item = items[static_cast<std::size_t>(m_selectedItemIndex)];
+    Character* target = m_selectedAlly ? m_selectedAlly : hero();
+    if (!item || !target) return;
+    if (!item->canUse(*target)) {
+        m_battleLog = "Khong the dung " + item->getName() + " cho " + target->getName();
         return;
     }
-    if (h->getCurrentHp() >= h->getStats().m_hp) {
-        m_battleLog = "HP da day, khong can dung Potion.";
-        return;
-    }
-
-    auto healed = std::make_shared<int>(0);
-
-    auto executeAction = [this, h, healed]() {
-        const int before = h->getCurrentHp();
-        h->heal(POTION_HEAL);
-        *healed = h->getCurrentHp() - before;
-        m_inventory.removeItem(POTION_NAME);
-        syncHealth(h);
+    auto amount = std::make_shared<int>(0);
+    auto executeAction = [this, item, target, amount]() {
+        *amount = item->use(*target);
+        m_party.getInventory().removeItem(item);
+        syncHealth(target);
     };
-    auto undoAction = [this, h, healed]() {
-        h->takeDamage(*healed);     // tru lai dung luong da hoi
-        m_inventory.addItem(POTION_NAME);
+    auto undoAction = [this, item, target, amount]() {
+        item->revert(*target, *amount);
+        m_party.addItem(item);
+        syncHealth(target);
     };
-
-    queuePlayerCommand(std::make_unique<UseItemCommand>(executeAction, undoAction));
-
-    m_battleLog = h->getName() + " dung Potion hoi " + std::to_string(*healed) + " HP!  [ENTER] ket thuc luot, [ESC/Z] hoan tac";
+    if (!queuePlayerCommand(std::make_unique<UseItemCommand>(executeAction, undoAction))) return;
+    m_battleLog = hero()->getName() + " dung " + item->getName() + " cho " + target->getName()
+                + " (+" + std::to_string(*amount) + ") [ENTER] Xac nhan, [Z] Undo";
+    m_isSelectingItem = false;
     m_battlePhase = BattlePhase::PLAYER_CONFIRM;
 }
 
@@ -925,14 +1103,14 @@ bool GameEngine::castSkill(size_t skillIndex)
     Character* target = offensive ? m_selectedTarget : h;
 
     // Snapshot combat state before executing. Undo must restore MP, HP and status effects.
-    auto previousHp = std::make_shared<int>(target->getCurrentHp());
-    auto previousMp = std::make_shared<int>(h->getCurrentMp());
+    auto targetSnapshot = std::make_shared<CharacterSnapshot>(*target);
+    auto casterSnapshot = std::make_shared<CharacterSnapshot>(*h);
     auto previousEffects = std::make_shared<StatusEffectManager>(m_statusEffects[target]);
-    auto executeAction = [this, h, target, skill, offensive, previousHp, previousMp, previousEffects]() {
-        *previousHp = target->getCurrentHp();
-        *previousMp = h->getCurrentMp();
+    auto executeAction = [this, h, target, skill, offensive, targetSnapshot, casterSnapshot, previousEffects]() {
+        *targetSnapshot = CharacterSnapshot(*target);
+        *casterSnapshot = CharacterSnapshot(*h);
         *previousEffects = m_statusEffects[target];
-        const int hpBefore = *previousHp;
+        const int hpBefore = target->getCurrentHp();
 
         if (offensive)
         {
@@ -946,7 +1124,7 @@ bool GameEngine::castSkill(size_t skillIndex)
         }
         else
         {
-            spendMpWithoutDamage(skill);
+            spendMpWithoutDamage(h, skill);
             if (skill.m_type == SkillType::HEAL)
                 h->heal(skill.m_power);
         }
@@ -964,15 +1142,9 @@ bool GameEngine::castSkill(size_t skillIndex)
             m_battleLog = h->getName() + " dung " + skill.m_name + "!";
     };
 
-    auto undoAction = [this, h, target, previousHp, previousMp, previousEffects]() {
-        const int hpDelta = *previousHp - target->getCurrentHp();
-        if (hpDelta > 0) target->heal(hpDelta);
-        else if (hpDelta < 0) target->takeDamage(-hpDelta);
-
-        const int mpDelta = *previousMp - h->getCurrentMp();
-        if (mpDelta > 0) h->restoreMp(mpDelta);
-        else if (mpDelta < 0) h->consumeMp(-mpDelta);
-
+    auto undoAction = [this, h, target, targetSnapshot, casterSnapshot, previousEffects]() {
+        targetSnapshot->restore(*target);
+        if (target != h) casterSnapshot->restore(*h);
         m_statusEffects[target] = *previousEffects;
         syncHealth(target);
         syncHealth(h);
@@ -984,6 +1156,17 @@ void GameEngine::confirmTurn()
 {
     m_commandStack.clear();    // chot hanh dong: het kha nang Undo
     m_isSelectingSkill = false;
+    m_isSelectingItem = false;
+    Character* actor = m_currentCharacter;
+    if (actor) {
+        actor->onTurnEnd();
+        syncHealth(actor);
+        if (actor->isAlive() && actor->modifiers().consumeExtraTurn()) {
+            m_battleLog = actor->getName() + " duoc them 1 luot!";
+            m_battlePhase = BattlePhase::PLAYER_TURN;
+            return;
+        }
+    }
     advanceTurn();
 }
 
@@ -998,6 +1181,9 @@ bool GameEngine::beginTurn(Character* c)
     StatusEffectManager& effects = m_statusEffects[c];
     const bool wasStunned = effects.hasEffect(StatusType::STUN);
 
+    // SLOW must be calculated against the original speed, never stacked each turn.
+    auto baseSpeed = m_baseSpeed.find(c);
+    if (baseSpeed != m_baseSpeed.end()) c->setSpeed(baseSpeed->second);
     const int hpBefore = c->getCurrentHp();
     effects.updateEffects(c);          // BURN tru mau, REGEN hoi mau, tru so luot
     c->setStunned(false);              // Core tu xu ly mat luot, khong de TurnManager nuot am tham
@@ -1022,6 +1208,7 @@ void GameEngine::advanceTurn()
 {
     m_aiTurnTimer = 0.0f;
     m_isSelectingSkill = false;
+    m_isSelectingItem = false;
 
     // Gioi han vong lap: phong truong hop moi nhan vat deu mat luot lien tuc
     for (int guard = 0; guard < 64; ++guard)
@@ -1034,10 +1221,16 @@ void GameEngine::advanceTurn()
         if (!m_currentCharacter)
             continue;
 
-        if (!beginTurn(m_currentCharacter))
-            continue;   // mat luot / chet -> sang nguoi ke tiep
+        if (!beginTurn(m_currentCharacter)) {
+            if (m_currentCharacter->isAlive()) {
+                m_currentCharacter->onTurnEnd();
+                syncHealth(m_currentCharacter);
+            }
+            continue;
+        }
 
         m_battlePhase = isHero(m_currentCharacter) ? BattlePhase::PLAYER_TURN : BattlePhase::AI_THINKING;
+        if (isHero(m_currentCharacter)) refreshCurrentSkills();
         return;
     }
     m_battlePhase = BattlePhase::PLAYER_TURN;
@@ -1046,7 +1239,8 @@ void GameEngine::advanceTurn()
 void GameEngine::executeAiTurn(Character* aiChar)
 {
     std::vector<Character*> targets;
-    if (hero()) targets.push_back(hero());
+    for (const auto& member : m_party.getMembers())
+        if (member->isAlive()) targets.push_back(member.get());
     Character* h = CombatAI::selectTarget(targets);
     if (!aiChar || !aiChar->isAlive() || !h) return;
 
@@ -1071,6 +1265,8 @@ void GameEngine::executeAiTurn(Character* aiChar)
     playAnimation(aiChar, AnimState::ATTACK);
     syncHealth(h);
 
+    aiChar->onTurnEnd();
+    syncHealth(aiChar);
     m_battleLog = aiChar->getName() + " tan cong " + h->getName() + " gay " + std::to_string(dealt) + " sat thuong!";
 }
 
@@ -1123,13 +1319,13 @@ void GameEngine::checkBattleCondition()
 {
     if (m_combatants.empty()) return;
 
-    if (!m_combatants[0]->isAlive())
+    if (m_party.isDefeated())
     {
         m_stateMachine.changeState(GameStateMachine::State::GAME_OVER);
         return;
     }
 
-    for (size_t i = 1; i < m_combatants.size(); ++i)
+    for (size_t i = m_party.size(); i < m_combatants.size(); ++i)
     {
         if (m_combatants[i]->isAlive())
             return;
@@ -1164,10 +1360,10 @@ float GameEngine::damageMultiplier(const Character* attacker, const Character* t
     return multiplier;
 }
 
-void GameEngine::spendMpWithoutDamage(const Skill& skill)
+void GameEngine::spendMpWithoutDamage(Character* caster, const Skill& skill)
 {
     // Non-damaging skills still consume MP, without simulating an attack.
-    if (Character* h = hero()) h->consumeMp(skill.m_mpCost);
+    if (caster) caster->consumeMp(skill.m_mpCost);
 }
 
 void GameEngine::applySkillEffect(const Skill& skill, Character* target)
@@ -1262,12 +1458,16 @@ int GameEngine::indexOf(const Character* character) const
 
 Character* GameEngine::hero() const
 {
-    return m_combatants.empty() ? nullptr : m_combatants[0].get();
+    if (m_currentCharacter && isHero(m_currentCharacter)) return m_currentCharacter;
+    return m_party.getLeader();
 }
 
 bool GameEngine::isHero(const Character* character) const
 {
-    return character != nullptr && character == hero();
+    if (!character) return false;
+    for (const auto& member : m_party.getMembers())
+        if (member.get() == character) return true;
+    return false;
 }
 
 BattleSlot GameEngine::slotOf(int index) const
@@ -1329,7 +1529,7 @@ void GameEngine::renderCombatants()
 
     for (size_t i : order)
     {
-        const Color tint = (i == 0) ? WHITE : elementColor(m_combatants[i]->getElement());
+        const Color tint = (i < m_party.size()) ? WHITE : elementColor(m_combatants[i]->getElement());
         m_views[i]->draw(m_battleMap, tint);   // da gom bong + mo dan khi chet
     }
 }
@@ -1375,11 +1575,21 @@ void GameEngine::renderBattleUI()
     if (m_battlePhase == BattlePhase::PLAYER_CONFIRM)
         m_ui.drawCommandHelp("[ENTER] Ket thuc luot  |  [ESC/Z] Hoan tac (Undo)");
     else
-        m_ui.drawCommandHelp(TextFormat("[A] Tan Cong | [S] Ky Nang | [I] Potion x%d | [TAB] Doi Muc Tieu | [ESC] Menu",
-                                        static_cast<int>(m_inventory.getItems().size())));
+        m_ui.drawCommandHelp(TextFormat("[A] Tan Cong | [S] Ky Nang | [I] Vat pham x%d | [TAB] Doi Muc Tieu | [ESC] Menu",
+                                        static_cast<int>(availableItems().size())));
     m_ui.drawBattleLog("BATTLE LOG: " + m_battleLog);
 
     // ----- Menu ky nang (popup giua man hinh, ve cuoi cung de nam tren cung) -----
     if (m_isSelectingSkill)
         m_ui.drawSkillMenu(m_heroSkills, m_selectedSkillIndex, hero() ? hero()->getCurrentMp() : 0);
+    if (m_isSelectingItem) {
+        const auto items = availableItems();
+        DrawRectangle(340, 160, 600, 390, Color{20, 25, 40, 235});
+        DrawText("TUI DO: [1-9] Chon  [F1-F3] Dong doi  [ENTER] Dung", 355, 177, 18, WHITE);
+        if (m_selectedAlly) DrawText(TextFormat("Muc tieu: %s", m_selectedAlly->getName().c_str()), 355, 209, 18, YELLOW);
+        for (std::size_t i = 0; i < items.size() && i < 9; ++i)
+            DrawText(TextFormat("%d. %s", static_cast<int>(i + 1), items[i]->getName().c_str()),
+                     365, 246 + static_cast<int>(i) * 28, 18,
+                     static_cast<int>(i) == m_selectedItemIndex ? YELLOW : RAYWHITE);
+    }
 }

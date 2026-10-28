@@ -23,6 +23,9 @@
 #include "entities/Enemy.h"
 #include "entities/Boss.h"
 #include "entities/Inventory.h"
+#include "entities/Party.h"
+#include "entities/ItemDatabase.h"
+#include "entities/ItemFactory.h"
 #include "raylib.h"
 #include <memory>
 #include <random>
@@ -75,6 +78,7 @@ private:
     void openPrepMenu(int wave);
     void markWaveCleared(int stage); 
     void applyHeroSelection(const HeroSelection& selection);
+    void openPartyMemberSelection(int slot);
     static Skill toBattleSkill(const SkillData& data, Element heroElement);
 
     // ----- input nguoi choi -----
@@ -89,6 +93,11 @@ private:
     void ensureValidTarget();
     void doBasicAttack();
     void doUseItem();
+    void openItemMenu();
+    void selectAlly(int index);
+    std::vector<ItemPtr> availableItems() const;
+    void refreshCurrentSkills();
+    void seedItems();
     bool castSkill(size_t skillIndex);
     void confirmTurn();
 
@@ -100,7 +109,7 @@ private:
 
     // ----- chien dau (dung chung Player + AI) -----
     float damageMultiplier(const Character* attacker, const Character* target) const;
-    void spendMpWithoutDamage(const Skill& skill);
+    void spendMpWithoutDamage(Character* caster, const Skill& skill);
     void applySkillEffect(const Skill& skill, Character* target);
     void playAnimation(Character* character, AnimState state);
 
@@ -143,12 +152,23 @@ HeroConfig m_heroConfig;
     SubjectCombat m_combatSubject;
 
     // ----- Entities (Engine so huu, cac module khac chi quan sat bang con tro tho) -----
-    std::vector<std::unique_ptr<Character>> m_combatants;            // [0] = hero
+    std::vector<std::shared_ptr<Character>> m_combatants;            // [0] = hero
     std::vector<std::unique_ptr<CombatantView>> m_views;       // song song voi m_combatants
     std::unordered_map<const Character*, StatusEffectManager> m_statusEffects;
+    std::unordered_map<const Character*, int> m_baseSpeed;
     std::unordered_map<const Character*, int> m_lastHp;              // de Observer tinh delta
     std::vector<Skill> m_heroSkills;
-    Inventory<std::string> m_inventory;
+    Party m_party;
+    ItemDatabase m_itemDatabase;
+    bool m_itemsLoaded = false;
+    std::vector<HeroConfig> m_partyConfigs; // cac Hero thuc su duoc nguoi choi chon
+    int m_editingPartySlot = 0;
+    bool m_selectingFromPrep = false;
+    int m_prepGearIndex = 0;
+    std::vector<std::string> m_gearIds;
+    Character* m_selectedAlly = nullptr;
+    bool m_isSelectingItem = false;
+    int m_selectedItemIndex = 0;
 
     // ----- Tracking State -----
     Character* m_currentCharacter = nullptr;

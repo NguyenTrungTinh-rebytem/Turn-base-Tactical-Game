@@ -50,3 +50,14 @@ add_executable(test_entities EXCLUDE_FROM_ALL
     src/data/SkillElementConfig.cpp
 )
 add_test(NAME test_entities COMMAND test_entities ${CMAKE_CURRENT_SOURCE_DIR}/data)
+
+# Core <-> Entity integration tests (no Raylib window).
+add_executable(test_core_integration EXCLUDE_FROM_ALL
+    tests/test_core_integration.cpp
+    src/core/AttackCommand.cpp
+    src/core/UseItemCommand.cpp
+    ${ENTITY_SOURCES}
+    src/data/GameData.cpp
+    src/data/SkillElementConfig.cpp
+)
+add_test(NAME test_core_integration COMMAND test_core_integration ${CMAKE_CURRENT_SOURCE_DIR}/data)

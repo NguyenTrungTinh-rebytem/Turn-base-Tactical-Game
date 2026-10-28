@@ -352,7 +352,7 @@ void HeroCreateScreen::drawButtons() const {
 
 void HeroCreateScreen::draw() const {
     drawBackground();
-    drawCenteredText("CHON ANH HUNG", 640.0f, 28.0f, 48, COL_TITLE);
+    drawCenteredText(m_slotLabel.c_str(), 640.0f, 28.0f, 44, COL_TITLE);
     if (!hasOptions()) {
         drawCenteredText("Chua co du lieu tuong (data/heroes.csv, races.csv, classes.csv)", 640.0f, 340.0f, 22, COL_DIM);
         drawButtons();

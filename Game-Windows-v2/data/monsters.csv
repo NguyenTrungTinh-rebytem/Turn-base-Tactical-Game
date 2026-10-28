@@ -1,0 +1,7 @@
+# id,name,element(KIM|MOC|THUY|HOA|THO),isBoss(0|1),stage,hp,mp,spd,a,ma,d,md
+M_GOBLIN_KIM,Iron Goblin,KIM,0,1,80,20,9,12,4,8,4
+M_WOLF_MOC,Forest Wolf,MOC,0,1,75,15,12,11,3,5,4
+M_SLIME_THUY,Water Slime,THUY,0,1,90,25,7,8,8,6,8
+M_IMP_HOA,Fire Imp,HOA,0,1,70,30,10,7,12,4,6
+M_GOLEM_THO,Clay Golem,THO,0,1,110,10,5,13,2,12,5
+B_DRAGON_HOA,Ember Dragon,HOA,1,2,520,120,11,28,26,18,16

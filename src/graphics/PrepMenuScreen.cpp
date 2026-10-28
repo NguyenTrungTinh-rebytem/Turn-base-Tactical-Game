@@ -80,6 +80,11 @@ std::vector<std::string> splitLines(const std::string& s) {
     return out;
 }
 
+Rectangle partyCardRect(Rectangle area, int index) {
+    constexpr float gap = 24.0f, pad = 24.0f;
+    const float w = (area.width - 2.0f * pad - 2.0f * gap) / 3.0f;
+    return Rectangle{area.x + pad + index * (w + gap), area.y + pad, w, area.height - 2.0f * pad};
+}
 void drawStatRow(const char* label, int value, float x, float y, float w) {
     DrawText(label, static_cast<int>(x), static_cast<int>(y), 18, COL_LABEL);
     drawRightText(TextFormat("%d", value), x + w, y, 18, COL_TEXT);
@@ -150,6 +155,11 @@ PrepMenuAction PrepMenuScreen::handleInput() {
     if (IsKeyPressed(KEY_TWO))   m_tab = TAB_SKILLS;
     if (IsKeyPressed(KEY_THREE)) m_tab = TAB_ITEMS;
     if (IsKeyPressed(KEY_FOUR))  m_tab = TAB_GATE;
+    if (m_tab == TAB_PARTY) {
+        if (IsKeyPressed(KEY_F1)) return PrepMenuAction::EDIT_MEMBER_1;
+        if (IsKeyPressed(KEY_F2)) return PrepMenuAction::EDIT_MEMBER_2;
+        if (IsKeyPressed(KEY_F3)) return PrepMenuAction::EDIT_MEMBER_3;
+    }
     if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER)) return PrepMenuAction::START;
 
     // ---- Chuot ----
@@ -162,6 +172,11 @@ PrepMenuAction PrepMenuScreen::handleInput() {
         if (CheckCollisionPointRec(mouse, buttonRect(i))) m_hoverButton = i;
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        if (m_tab == TAB_PARTY) {
+            for (int i = 0; i < 3; ++i)
+                if (CheckCollisionPointRec(mouse, partyCardRect(contentRect(), i)))
+                    return static_cast<PrepMenuAction>(static_cast<int>(PrepMenuAction::EDIT_MEMBER_1) + i);
+        }
         if (m_hoverTab >= 0) m_tab = m_hoverTab;
         if (m_hoverButton == BTN_BACK)  return PrepMenuAction::BACK;
         if (m_hoverButton == BTN_START) return PrepMenuAction::START;
@@ -197,7 +212,9 @@ void PrepMenuScreen::draw() const {
     }
 
     drawButtons();
-    drawCenteredText("[Q/E hoac LEFT/RIGHT] Doi tab   [1-4] Chon tab   [ENTER] Vao tran   [ESC] Quay lai",
+    drawCenteredText(m_tab == TAB_PARTY
+                         ? "[CLICK / F1-F3] Chon tung Hero   [T] Them/Doi Hero   [ENTER] Vao tran"
+                         : "[Q/E / LEFT/RIGHT] Doi tab   [1-4] Chon tab   [ENTER] Vao tran   [ESC] Quay lai",
                      cx, 702.0f, 16, Color{ 200, 195, 225, 220 });
 
     // Tooltip ky nang: ve CUOI CUNG de nam tren moi thu
@@ -233,45 +250,40 @@ void PrepMenuScreen::drawTabs() const {
 
 // ---------------- Tab 1: DOI HINH ----------------
 void PrepMenuScreen::drawPartyTab(const Rectangle& area) const {
-    const int slots = 1 + std::max(0, m_info.m_teammateSlots);
-    const float gap = 24.0f, pad = 24.0f;
-    const float cardW = (area.width - 2.0f * pad - (slots - 1) * gap) / static_cast<float>(slots);
-    const float cardH = area.height - 2.0f * pad;
-
-    for (int i = 0; i < slots; ++i) {
-        const Rectangle r = { area.x + pad + i * (cardW + gap), area.y + pad, cardW, cardH };
-        if (i == 0) {
-            const PrepHeroInfo& h = m_info.m_hero;
+    for (int i = 0; i < 3; ++i) {
+        const Rectangle r = partyCardRect(area, i);
+        const PrepHeroInfo* h = (static_cast<std::size_t>(i) < m_info.m_members.size())
+            ? &m_info.m_members[static_cast<std::size_t>(i)]
+            : (i == 0 ? &m_info.m_hero : nullptr);
+        const bool hovered = CheckCollisionPointRec(GetMousePosition(), r);
+        const float cx = r.x + r.width / 2.0f;
+        if (h) {
             DrawRectangleRec(r, Color{ 28, 24, 58, 235 });
             DrawRectangleRec(Rectangle{ r.x, r.y, r.width, 54.0f }, Color{ 40, 62, 128, 255 });
-            drawCenteredText(h.m_name.c_str(), r.x + r.width / 2.0f, r.y + 14.0f, 28, COL_TEXT);
-
-            const float cx = r.x + r.width / 2.0f;
-            drawCenteredText(TextFormat("%s %s", h.m_race.c_str(), h.m_class.c_str()), cx, r.y + 68.0f, 18, COL_LABEL);
-            DrawCircle(static_cast<int>(cx - 30), static_cast<int>(r.y + 106), 7.0f, elementColor(h.m_element));
-            DrawText(TextFormat("He %s", elementName(h.m_element)), static_cast<int>(cx - 16), static_cast<int>(r.y + 97), 18, elementColor(h.m_element));
-
+            drawCenteredText(h->m_name.c_str(), cx, r.y + 14.0f, 24, COL_TEXT);
+            drawCenteredText(TextFormat("%s %s", h->m_race.c_str(), h->m_class.c_str()), cx, r.y + 68.0f, 17, COL_LABEL);
+            DrawCircle(static_cast<int>(cx - 30), static_cast<int>(r.y + 106), 7.0f, elementColor(h->m_element));
+            DrawText(TextFormat("He %s", elementName(h->m_element)), static_cast<int>(cx - 16), static_cast<int>(r.y + 97), 18, elementColor(h->m_element));
             float y = r.y + 140.0f;
-            const float x = r.x + 28.0f, w = r.width - 56.0f;
-            drawStatRow("HP",   h.m_stats.m_hp,  x, y, w); y += 30.0f;
-            drawStatRow("MP",   h.m_stats.m_mp,  x, y, w); y += 30.0f;
-            drawStatRow("ATK",  h.m_stats.m_a,   x, y, w); y += 30.0f;
-            drawStatRow("MATK", h.m_stats.m_ma,  x, y, w); y += 30.0f;
-            drawStatRow("DEF",  h.m_stats.m_d,   x, y, w); y += 30.0f;
-            drawStatRow("MDEF", h.m_stats.m_md,  x, y, w); y += 30.0f;
-            drawStatRow("SPD",  h.m_stats.m_spd, x, y, w);
-
-            DrawRectangleLinesEx(r, 3.0f, COL_EDGE_SEL);
-            drawCenteredText("ANH HUNG", cx, r.y + r.height - 34.0f, 16, COL_OK);
+            const float x = r.x + 22.0f, w = r.width - 44.0f;
+            drawStatRow("HP", h->m_stats.m_hp, x, y, w); y += 30.0f;
+            drawStatRow("MP", h->m_stats.m_mp, x, y, w); y += 30.0f;
+            drawStatRow("ATK", h->m_stats.m_a, x, y, w); y += 30.0f;
+            drawStatRow("MATK", h->m_stats.m_ma, x, y, w); y += 30.0f;
+            drawStatRow("DEF", h->m_stats.m_d, x, y, w); y += 30.0f;
+            drawStatRow("MDEF", h->m_stats.m_md, x, y, w); y += 30.0f;
+            drawStatRow("SPD", h->m_stats.m_spd, x, y, w);
+            drawCenteredText(i == 0 ? "THU LINH - CLICK DE DOI" : "DONG DOI - CLICK DE DOI",
+                             cx, r.y + r.height - 29.0f, 14, COL_OK);
         } else {
-            DrawRectangleRec(r, Color{ 20, 18, 40, 200 });
-            DrawRectangleLinesEx(r, 2.0f, COL_DIM);
-            const float cx = r.x + r.width / 2.0f, cy = r.y + r.height / 2.0f;
-            DrawRectangle(static_cast<int>(cx - 3), static_cast<int>(cy - 28), 6, 56, COL_DIM);     // dau +
+            DrawRectangleRec(r, Color{20,18,40,200});
+            const float cy = r.y + r.height / 2.0f;
+            DrawRectangle(static_cast<int>(cx - 3), static_cast<int>(cy - 28), 6, 56, COL_DIM);
             DrawRectangle(static_cast<int>(cx - 28), static_cast<int>(cy - 3), 56, 6, COL_DIM);
-            drawCenteredText(TextFormat("DONG DOI %d", i), cx, cy + 46.0f, 20, COL_LABEL);
-            drawCenteredText("Chua gia nhap", cx, cy + 74.0f, 16, COL_DIM);
+            drawCenteredText(TextFormat("DONG DOI %d", i + 1), cx, cy + 46.0f, 20, COL_LABEL);
+            drawCenteredText("CLICK DE CHON", cx, cy + 74.0f, 16, COL_OK);
         }
+        DrawRectangleLinesEx(r, hovered ? 3.0f : 2.0f, hovered ? COL_EDGE_SEL : (h ? COL_EDGE_SEL : COL_DIM));
     }
 }
 

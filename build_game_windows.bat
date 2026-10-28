@@ -18,14 +18,14 @@ set "PATH=%MSYS%;%PATH%"
 "%MSYS%\cmake.exe" -S . -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release || goto :failed
 "%MSYS%\cmake.exe" --build build-release --parallel 4 || goto :failed
 if not exist "build-release\game.exe" goto :failed
-if not exist "Game-Windows" mkdir "Game-Windows"
-copy /y "build-release\game.exe" "Game-Windows\game.exe" >nul
-xcopy /e /i /y "data" "Game-Windows\data" >nul
-xcopy /e /i /y "assets" "Game-Windows\assets" >nul
-for %%F in (libraylib.dll libgcc_s_seh-1.dll libstdc++-6.dll libwinpthread-1.dll) do if exist "%MSYS%\%%F" copy /y "%MSYS%\%%F" "Game-Windows\%%F" >nul
+if not exist "Game-Windows-v2" mkdir "Game-Windows-v2"
+copy /y "build-release\game.exe" "Game-Windows-v2\game.exe" >nul
+xcopy /e /i /y "data" "Game-Windows-v2\data" >nul
+xcopy /e /i /y "assets" "Game-Windows-v2\assets" >nul
+for %%F in (libraylib.dll glfw3.dll libgcc_s_seh-1.dll libstdc++-6.dll libwinpthread-1.dll) do if exist "%MSYS%\%%F" copy /y "%MSYS%\%%F" "Game-Windows-v2\%%F" >nul
 rem Copy UCRT runtime DLLs when distributed to other Windows machines.
-for %%F in (libssp-0.dll) do if exist "%MSYS%\%%F" copy /y "%MSYS%\%%F" "Game-Windows\%%F" >nul
-echo DONE: Game-Windows\game.exe
+for %%F in (libssp-0.dll) do if exist "%MSYS%\%%F" copy /y "%MSYS%\%%F" "Game-Windows-v2\%%F" >nul
+echo DONE: Game-Windows-v2\game.exe
 pause
 exit /b 0
 :failed
