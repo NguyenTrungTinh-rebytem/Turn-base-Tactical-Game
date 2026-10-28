@@ -9,6 +9,9 @@
 #include <numeric>
 #include <exception>
 #include <iostream>
+#include "data/HeroPresetConfig.h"
+#include "data/CharacterRules.h"
+#include <cctype>
 
 namespace
 {   
@@ -318,10 +321,10 @@ void GameEngine::layoutViews()
 {
     if (m_views.empty()) return;
 
-    // Hero: luôn ở m_combatants[0]
+    // Hero: luÃ´n á»Ÿ m_combatants[0]
     m_views[0]->setSlot(m_battleMap.layoutPlayers({ 1.0f })[0]);
 
-    // Quái: Boss to 1.3, quái thường 1.0
+    // QuÃ¡i: Boss to 1.3, quÃ¡i thÆ°á»ng 1.0
     std::vector<float> muls;
     for (size_t i = 1; i < m_combatants.size(); ++i)
         muls.push_back(dynamic_cast<const Boss*>(m_combatants[i].get()) ? BOSS_SCALE_MUL : 1.0f);
@@ -463,6 +466,43 @@ void GameEngine::setupHeroCreateScreen()
         classes.push_back({ c.m_name, c.m_stats, skillNames(c.m_skillIds) });
 
     m_heroCreate.setOptions(races, classes);
+    
+        // ----- Tuong co san: data/heroes.csv (thieu file -> danh sach mac dinh) -----
+    std::vector<HeroPresetData> presetData;
+    if (loadHeroPresets(resolvePath("data/heroes.csv"), presetData) == 0)
+        presetData = defaultHeroPresets();
+
+    auto lower = [](std::string text) {
+        for (char& ch : text) ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+        return text;
+    };
+    auto findOption = [&lower](const std::vector<HeroOption>& list, const std::string& name) -> int {
+        for (size_t i = 0; i < list.size(); ++i)
+            if (lower(list[i].m_name) == lower(name)) return static_cast<int>(i);
+        return -1;
+    };
+
+    std::vector<HeroPreset> presets;
+    for (const HeroPresetData& d : presetData)
+    {
+        const int raceIndex = findOption(races, d.m_race);
+        const int classIndex = findOption(classes, d.m_class);
+        if (raceIndex < 0 || classIndex < 0)
+        {
+            std::cerr << "heroes.csv: bo qua '" << d.m_id << "' (khong tim thay " << d.m_race << " / " << d.m_class << ")" << std::endl;
+            continue;
+        }
+
+        HeroPreset p;
+        p.m_id = d.m_id;
+        p.m_name = d.m_name;
+        p.m_raceIndex = static_cast<size_t>(raceIndex);
+        p.m_classIndex = static_cast<size_t>(classIndex);
+        p.m_element = d.m_element;
+        p.m_idleSpritePath = resolvePath("assets/images/hero_" + d.m_id + "_idle.png");
+        presets.push_back(p);
+    }
+    m_heroCreate.setPresets(presets);
 }
 
 void GameEngine::applyHeroSelection(const HeroSelection& selection)
