@@ -26,6 +26,18 @@ namespace
     constexpr int FRAME_W = 64;
     constexpr int FRAME_H = 64;
     const char* const SPRITE_SHEET_PATH = "assets/images/test_sheet.png";
+    // Hero dung sheet chien dau rieng: assets/images/hero_<id>_battle.png, o 128x128 (3 hang: idle 4 / attack 4 / hurt 2).
+    constexpr int   HERO_FRAME = 128;
+    constexpr float HERO_SCALE_MUL = 0.6f;   // o 128 ve nho lai de gan bang quai (o 64)
+    // id hero = ten viet thuong, bo hau to " 2"/" 3" (do applyHeroSelection them khi trung ten)
+    std::string heroSpritePath(const std::string& heroName)
+    {
+        std::string id;
+        for (char ch : heroName) id += static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+        while (!id.empty() && (std::isdigit(static_cast<unsigned char>(id.back())) || id.back() == ' ')) id.pop_back();
+        if (id.empty()) return "";
+        return "assets/images/hero_" + id + "_battle.png";
+    }
     
     // Sprite sheet rieng cho tung quai (theo id trong monsters.csv). Id la -> dung SPRITE_SHEET_PATH.
     std::string monsterSpritePath(const std::string& monsterId)
@@ -214,6 +226,7 @@ void GameEngine::shutdown()
     m_combatants.clear();
     m_party.clear();
     m_baseSpeed.clear();
+    m_scaleMul.clear();
 
     if (m_isInitialized)
     {
@@ -324,11 +337,18 @@ void GameEngine::addCombatant(std::unique_ptr<Character> character, const std::s
 
     // Thieu file anh rieng -> dung sheet mac dinh de game khong bi mat hinh
     int frameW = FRAME_W, frameH = FRAME_H;
+    float scaleMul = 1.0f;
     std::string sheet = resolvePath(spritePath.empty() ? SPRITE_SHEET_PATH : spritePath);
     if (!FileExists(sheet.c_str()))
         sheet = resolvePath(SPRITE_SHEET_PATH);
     else if (dynamic_cast<const Boss*>(character.get()))
         frameW = frameH = BOSS_FRAME;            // boss dung sheet khung lon (192x192)
+    else if (dynamic_cast<const Player*>(character.get()))
+    {
+        frameW = frameH = HERO_FRAME;            // hero co sheet rieng khung 128x128
+        scaleMul = HERO_SCALE_MUL;
+    }
+    m_scaleMul[character.get()] = scaleMul;
 
     auto view = std::make_unique<CombatantView>(character.get(), sheet,
                                             frameW, frameH, BattleSlot{});
@@ -345,6 +365,11 @@ void GameEngine::layoutViews()
     if (m_views.empty() || members == 0) return;
 
     std::vector<float> playerScales(members, 1.0f);
+    for (std::size_t i = 0; i < members && i < m_combatants.size(); ++i)
+    {
+        const auto it = m_scaleMul.find(m_combatants[i].get());
+        if (it != m_scaleMul.end()) playerScales[i] = it->second;
+    }
     const auto playerSlots = m_battleMap.layoutPlayers(playerScales);
     for (std::size_t i = 0; i < members && i < m_views.size(); ++i)
         m_views[i]->setSlot(playerSlots[i]);
@@ -590,7 +615,8 @@ void GameEngine::createHero()
     m_party.clear();
     auto addPartyHero = [this](std::unique_ptr<Player> player) {
         if (!player) return;
-        addCombatant(std::move(player));
+        const std::string sprite = heroSpritePath(player->getName());   // hero_<ten>_battle.png (thieu -> sheet mac dinh)
+        addCombatant(std::move(player), sprite);
         m_party.addMember(std::dynamic_pointer_cast<Player>(m_combatants.back()));
     };
 
@@ -735,6 +761,7 @@ void GameEngine::startNewGame(int startStage)
     m_commandStack.clear();
     m_combatants.clear();
     m_baseSpeed.clear();
+    m_scaleMul.clear();
     m_views.clear();
     m_ui.unloadAll();
 
