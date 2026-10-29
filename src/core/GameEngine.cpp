@@ -18,6 +18,9 @@
 namespace
 {   
     constexpr float BOSS_SCALE_MUL = 3.2f;   // boss to gap may lan quai thuong
+    constexpr float BOSS_OFFSET_X = 150.0f;   // đẩy Boss ra xa phe hero (px, dương = sang phải)
+    constexpr float BOSS_OFFSET_Y = 0.0f;     // 0 = giữ nguyên hàng; số âm = lùi lên cao hơn (trông xa hơn)
+    constexpr float ENEMY_SCALE_MUL = 1.3f;
     constexpr int   BOSS_FRAME     = 192;    // sheet boss: moi frame 192x192
     constexpr int SCREEN_WIDTH = 1280;
     constexpr int SCREEN_HEIGHT = 720;
@@ -377,12 +380,19 @@ void GameEngine::layoutViews()
     std::vector<float> enemyScales;
     for (std::size_t i = members; i < m_combatants.size(); ++i)
         enemyScales.push_back(dynamic_cast<const Boss*>(m_combatants[i].get())
-            ? BOSS_SCALE_MUL * static_cast<float>(FRAME_W) / BOSS_FRAME : 1.0f);
+            ? BOSS_SCALE_MUL * static_cast<float>(FRAME_W) / BOSS_FRAME : ENEMY_SCALE_MUL);
     const auto enemySlots = m_battleMap.layoutEnemies(enemyScales);
     for (std::size_t i = 0; i < enemySlots.size() && i + members < m_views.size(); ++i)
-        m_views[i + members]->setSlot(enemySlots[i]);
+    {
+        BattleSlot slot = enemySlots[i];
+        if (dynamic_cast<const Boss*>(m_combatants[i + members].get()))
+        {
+            slot.m_feetPos.x += BOSS_OFFSET_X;   // đẩy Boss ra xa phe hero
+            slot.m_feetPos.y += BOSS_OFFSET_Y;
+        }
+        m_views[i + members]->setSlot(slot);
+    }
 }
-
 std::vector<Character*> GameEngine::upcomingOrder() const
 {
     std::vector<Character*> order;
