@@ -11,8 +11,9 @@ constexpr float SCALE_FAR  = 1.6f;      // sprite 64px -> ~166px
 constexpr float SCALE_NEAR = 2.0f;      // sprite 64px -> ~205px
 constexpr float REF_FRAME_PX = 64.0f;
 constexpr float FRONT_X    = 0.36f;     // tuyen dau cach mep ngoai 38% chieu rong
-constexpr float FRONT_X_PLAYER = 0.42f;  // tuyen dau cua phe nguoi choi (de khong che menu dieu khien)
-constexpr float FRONT_X_ENEMY = 0.36f;   // tuyen dau cua phe dich (de khong che menu dieu khien)
+constexpr float FRONT_X_PLAYER = 0.41f;  // tuyen dau cua phe nguoi choi (de khong che menu dieu khien)
+constexpr float FRONT_X_ENEMY = 0.41f;   // tuyen dau cua phe dich (de khong che menu dieu khien)
+constexpr float PLAYER_SIZE_MUL = 1.3f;   // THÊM MỚI: độ to của hero (1.0 = như cũ)
 constexpr float EDGE_X     = 0.09f;     // don vi xa nhat cach mep >= 9%
 constexpr float STEP_X     = 0.085f;    // moi don vi lui ra mep them 8.5% chieu rong
 constexpr float GAP_FACTOR = 0.80f;     // 2 don vi CUNG hang: khoang cach tam >= 80% tong nua do rong
@@ -99,7 +100,7 @@ std::vector<BattleSlot> BattleMap::layoutSide(const std::vector<float>& scaleMul
     const float W = (float)GetScreenWidth(), H = (float)GetScreenHeight();
     const size_t n = scaleMuls.size();
 
-    auto mulOf   = [&](size_t i) { return std::max(0.1f, scaleMuls[i]); };
+    auto mulOf = [&](size_t i) { return std::max(0.1f, scaleMuls[i] * (isPlayer ? PLAYER_SIZE_MUL : 1.0f)); };
     auto depthOf = [&](size_t i) { return (n == 1) ? 0.5f : (i % 2 == 0 ? 1.0f : 0.0f); };
     auto widthOf = [&](size_t i) { return REF_FRAME_PX * lerpf(SCALE_FAR, SCALE_NEAR, depthOf(i)) * mulOf(i); };
 
@@ -111,12 +112,12 @@ std::vector<BattleSlot> BattleMap::layoutSide(const std::vector<float>& scaleMul
             offset[i] = std::max(offset[i], offset[i - 2] + 0.5f * (widthOf(i) + widthOf(i - 2)) * GAP_FACTOR);
     }
     const float frontX = isPlayer ? FRONT_X_PLAYER : FRONT_X_ENEMY;
-    const float available = W * (FRONT_X - EDGE_X);
+    const float available = W * (frontX - EDGE_X);
     const float k = (n > 1 && offset[n - 1] > available) ? available / offset[n - 1] : 1.0f;
 
     for (size_t i = 0; i < n; ++i) {
         const float t = depthOf(i);
-        const float distFromEdge = W * FRONT_X - offset[i] * k;
+        const float distFromEdge = W * frontX - offset[i] * k;
         slots[i].m_feetPos.x = isPlayer ? distFromEdge : W - distFromEdge;
         slots[i].m_feetPos.y = lerpf(H * FEET_FAR, H * FEET_NEAR, t);
         slots[i].m_scale = lerpf(SCALE_FAR, SCALE_NEAR, t) * mulOf(i) * k;
