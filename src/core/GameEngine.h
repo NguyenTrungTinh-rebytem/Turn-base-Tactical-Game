@@ -142,7 +142,7 @@ private:
     int m_unlockedWave = 1;                 // wave cao nhat da mo khoa (trong phien choi hien tai)
     std::vector<bool> m_wavesCleared;       // m_wavesCleared[n] = da hoan thanh wave n
 
-struct HeroConfig {                              // hero người chơi chọn
+struct HeroConfig {                              // hero ngÆ°á»i chÆ¡i chá»n
     std::string m_name;
     std::string m_race;
     std::string m_class;
@@ -156,6 +156,7 @@ HeroConfig m_heroConfig;
     std::vector<std::unique_ptr<CombatantView>> m_views;       // song song voi m_combatants
     std::unordered_map<const Character*, StatusEffectManager> m_statusEffects;
     std::unordered_map<const Character*, int> m_baseSpeed;
+    std::unordered_map<const Character*, float> m_scaleMul;          // he so to sprite (hero khung 128 -> nho lai)
     std::unordered_map<const Character*, int> m_lastHp;              // de Observer tinh delta
     std::vector<Skill> m_heroSkills;
     Party m_party;
