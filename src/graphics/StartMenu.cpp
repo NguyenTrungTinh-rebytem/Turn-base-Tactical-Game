@@ -1,3 +1,8 @@
+#include "graphics/ui/UiInput.h"
+#include "graphics/ui/UiFrame.h"
+#include "graphics/ui/UiWidgets.h"
+#include "graphics/ui/UiTheme.h"
+#include "graphics/ui/UiText.h"
 // Member 4 - Huynh Quang Khai | src/graphics/StartMenu.cpp
 #include "StartMenu.h"
 #include <algorithm>
@@ -37,14 +42,14 @@ float hash01(int n) {
 }
 
 void drawCenteredText(const char* text, float centerX, float y, int size, Color color) {
-    const int w = MeasureText(text, size);
-    DrawText(text, static_cast<int>(centerX - w / 2.0f), static_cast<int>(y), size, color);
+    const int w = UiText::measure(text, size);
+    UiText::draw(text, static_cast<int>(centerX - w / 2.0f), static_cast<int>(y), size, color);
 }
 } // namespace
 
 StartMenu::StartMenu() {
-    m_buttons.push_back({ "BAT DAU", MenuAction::START_GAME, 0.0f });
-    m_buttons.push_back({ "THOAT",   MenuAction::EXIT,       0.0f });
+    m_buttons.push_back({ "Bắt đầu", MenuAction::START_GAME, 0.0f });
+    m_buttons.push_back({ "Thoát",   MenuAction::EXIT,       0.0f });
 }
 
 StartMenu::~StartMenu() { unloadAll(); }
@@ -72,8 +77,8 @@ void StartMenu::setStatusText(const std::string& text, bool isOk) {
 }
 
 Rectangle StartMenu::buttonRect(size_t index) const {
-    const float W = static_cast<float>(GetScreenWidth());
-    const float H = static_cast<float>(GetScreenHeight());
+    const float W = static_cast<float>(UiTheme::WIDTH);
+    const float H = static_cast<float>(UiTheme::HEIGHT);
     return { W * m_menuCenterX - BUTTON_W / 2.0f,
              H * BUTTONS_Y_RATIO + static_cast<float>(index) * (BUTTON_H + BUTTON_GAP),
              BUTTON_W, BUTTON_H };
@@ -90,21 +95,35 @@ void StartMenu::update(float deltaTime) {
 MenuAction StartMenu::handleInput() {
     if (m_buttons.empty()) return MenuAction::NONE;
     const int count = static_cast<int>(m_buttons.size());
+    auto& input = UiInput::instance();
+    if (m_confirmExit) {
+        if (input.click({450, 398, 172, 55}) || IsKeyPressed(KEY_ESCAPE)) {
+            m_confirmExit = false;
+            return MenuAction::NONE;
+        }
+        if (input.click({658, 398, 172, 55})) return MenuAction::EXIT;
+        return MenuAction::NONE;
+    }
 
     // ---- Ban phim ----
     if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) m_selected = (m_selected + 1) % count;
     if (IsKeyPressed(KEY_UP)   || IsKeyPressed(KEY_W)) m_selected = (m_selected + count - 1) % count;
-    if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER) || IsKeyPressed(KEY_SPACE))
+    if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER) || IsKeyPressed(KEY_SPACE)) {
+        if (m_buttons[static_cast<size_t>(m_selected)].m_action == MenuAction::EXIT) {
+            m_confirmExit = true; return MenuAction::NONE;
+        }
         return m_buttons[static_cast<size_t>(m_selected)].m_action;
+    }
 
     // ---- Chuot: di chuyen thi chon nut dang tro, bam trai thi kich hoat ----
-    const Vector2 mouse = GetMousePosition();
+    const Vector2 mouse = UiInput::instance().mouse();
     const Vector2 moved = GetMouseDelta();
     for (int i = 0; i < count; ++i) {
         if (!CheckCollisionPointRec(mouse, buttonRect(static_cast<size_t>(i)))) continue;
         if (moved.x != 0.0f || moved.y != 0.0f) m_selected = i;
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        if (input.click(buttonRect(static_cast<size_t>(i)))) {
             m_selected = i;
+            if (m_buttons[static_cast<size_t>(i)].m_action == MenuAction::EXIT) { m_confirmExit = true; return MenuAction::NONE; }
             return m_buttons[static_cast<size_t>(i)].m_action;
         }
     }
@@ -117,16 +136,23 @@ void StartMenu::draw() const {
     drawTitle();
     drawButtons();
     drawFooter();
+    if (m_confirmExit) {
+        DrawRectangle(0, 0, UiTheme::WIDTH, UiTheme::HEIGHT, Color{0,0,0,178});
+        UiFrame::panel({390,275,500,215},true);
+        drawCenteredText("Rời khỏi hành trình?",640,310,32,UiTheme::AGED_GOLD);
+        UiWidgets::button({450,398,172,55},"Ở lại", UiInput::instance().hover({450,398,172,55}));
+        UiWidgets::button({658,398,172,55},"Thoát", UiInput::instance().hover({658,398,172,55}),false,true,true);
+    }
 
     // Fade-in tu mau den khi vao menu
     const float fade = 1.0f - clamp01(m_time / FADE_IN_SECONDS);
     if (fade > 0.0f)
-        DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(),
+        DrawRectangle(0, 0, UiTheme::WIDTH, UiTheme::HEIGHT,
                       Color{ 0, 0, 0, static_cast<unsigned char>(255 * fade) });
 }
 
 void StartMenu::drawBackground() const {
-    const int W = GetScreenWidth(), H = GetScreenHeight();
+    const int W = UiTheme::WIDTH, H = UiTheme::HEIGHT;
     if (m_hasBackground) {
         Rectangle src = { 0, 0, static_cast<float>(m_background.width), static_cast<float>(m_background.height) };
         Rectangle dst = { 0, 0, static_cast<float>(W), static_cast<float>(H) };
@@ -151,7 +177,7 @@ void StartMenu::drawBackground() const {
 
 // Nen thu tuc khi chua co anh: bau troi dem + trang + sao nhap nhay + nui
 void StartMenu::drawProceduralBackground() const {
-    const int W = GetScreenWidth(), H = GetScreenHeight();
+    const int W = UiTheme::WIDTH, H = UiTheme::HEIGHT;
     const int horizon = static_cast<int>(H * 0.68f);
 
     DrawRectangleGradientV(0, 0, W, horizon, Color{ 10, 8, 36, 255 }, Color{ 214, 104, 96, 255 });
@@ -170,8 +196,8 @@ void StartMenu::drawProceduralBackground() const {
 }
 
 void StartMenu::drawTitle() const {
-    const float W = static_cast<float>(GetScreenWidth());
-    const float H = static_cast<float>(GetScreenHeight());
+    const float W = static_cast<float>(UiTheme::WIDTH);
+    const float H = static_cast<float>(UiTheme::HEIGHT);
     const float cx = W * m_menuCenterX;
     const float bob = std::sin(m_time * 1.8f) * 4.0f;
     const float y = H * TITLE_Y_RATIO + bob;
@@ -197,9 +223,7 @@ void StartMenu::drawButtons() const {
         const float grow = 10.0f * b.m_hover;
         r.x -= grow; r.width += grow * 2.0f;
 
-        DrawRectangleRec(Rectangle{ r.x + 4, r.y + 5, r.width, r.height }, Color{ 0, 0, 0, 110 });   // bong
-        DrawRectangleRec(r, selected ? COL_BTN_SELECTED : COL_BTN);
-        DrawRectangleLinesEx(r, selected ? 3.0f : 2.0f, selected ? COL_BTN_EDGE_SEL : COL_BTN_EDGE);
+        UiFrame::plaque(r, selected, i == 1, b.m_hover);
 
         const int fontSize = 28;
         const float textY = r.y + (r.height - fontSize) / 2.0f;
@@ -216,12 +240,12 @@ void StartMenu::drawButtons() const {
 }
 
 void StartMenu::drawFooter() const {
-    const float W = static_cast<float>(GetScreenWidth());
-    const float H = static_cast<float>(GetScreenHeight());
+    const float W = static_cast<float>(UiTheme::WIDTH);
+    const float H = static_cast<float>(UiTheme::HEIGHT);
 
-    drawCenteredText("[UP/DOWN] Chon   [ENTER] Xac nhan   [ESC] Thoat", W / 2.0f, H - 34.0f, 18, Color{ 200, 195, 225, 220 });
+    drawCenteredText("Dùng chuột để khám phá hành trình", W / 2.0f, H - 34.0f, 18, Color{ 200, 195, 225, 220 });
     if (!m_statusText.empty())
-        DrawText(m_statusText.c_str(), 20, static_cast<int>(H) - 30, 16, m_statusOk ? COL_OK : COL_ERR);
+        UiText::draw(m_statusText.c_str(), 20, static_cast<int>(H) - 30, 16, m_statusOk ? COL_OK : COL_ERR);
     const char* credit = "DT10 - Turn-based RPG Battle Engine";
-    DrawText(credit, static_cast<int>(W) - MeasureText(credit, 14) - 20, static_cast<int>(H) - 28, 14, Color{ 160, 155, 190, 200 });
+    UiText::draw(credit, static_cast<int>(W) - UiText::measure(credit, 14) - 20, static_cast<int>(H) - 28, 14, Color{ 160, 155, 190, 200 });
 }

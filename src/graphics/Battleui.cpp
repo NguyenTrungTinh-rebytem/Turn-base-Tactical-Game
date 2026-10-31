@@ -1,5 +1,12 @@
+#include "graphics/ui/UiText.h"
 // Member 4 - Huynh Quang Khai | src/graphics/BattleUI.cpp
 #include "BattleUI.h"
+#include "graphics/ui/UiFrame.h"
+#include "graphics/ui/UiTheme.h"
+#include "graphics/ui/UiWidgets.h"
+#include "graphics/ui/UiIcons.h"
+#include "graphics/ui/UiInput.h"
+#include "SkillTooltip.h"
 #include "entities/Character.h"
 #include <algorithm>
 #include <cmath>
@@ -7,8 +14,8 @@
 namespace {
 // ---- Bo cuc (thiet ke cho cua so 1280x720) ----
 constexpr int   PANEL_X = 20, PANEL_Y = 560, PANEL_W = 1240, PANEL_H = 140;
-constexpr int   BANNER_Y = PANEL_Y + 15, HELP_Y = PANEL_Y + 50, LOG_Y = PANEL_Y + 90;
-constexpr float BAR_W = 120.0f, HP_H = 12.0f, MP_H = 8.0f;
+constexpr int   BANNER_Y = PANEL_Y + 15, HELP_Y = PANEL_Y + 50, LOG_Y = PANEL_Y + 118;
+constexpr float BAR_W = 145.0f, HP_H = 12.0f, MP_H = 8.0f;
 constexpr float TURN_BOX_W = 170.0f, TURN_BOX_H = 30.0f, TURN_GAP = 4.0f, TURN_MARGIN = 10.0f;
 constexpr int   TURN_MAX_SHOWN = 8;
 constexpr int   SKILL_BOX_W = 560, SKILL_BOX_Y = 290, SKILL_ROW_H = 35, SKILL_MAX_VISIBLE = 4;
@@ -35,18 +42,16 @@ float ratioOf(int cur, int maxV) {                       // chia 0 an toan
 
 void drawBar(Vector2 pos, float w, float h, float ratio, Color fill) {
     Rectangle bg = { pos.x, pos.y, w, h };
-    DrawRectangleRec(bg, COL_BAR_BG);
-    DrawRectangleRec(Rectangle{ pos.x, pos.y, w * ratio, h }, fill);
-    DrawRectangleLinesEx(bg, 1.5f, BLACK);
+    UiFrame::gauge(bg, ratio, fill);
 }
 
 const char* elementName(Element e) {
     switch (e) {
         case Element::KIM:  return "Kim";
-        case Element::MOC:  return "Moc";
-        case Element::THUY: return "Thuy";
-        case Element::HOA:  return "Hoa";
-        case Element::THO:  return "Tho";
+        case Element::MOC:  return "Mộc";
+        case Element::THUY: return "Thủy";
+        case Element::HOA:  return "Hỏa";
+        case Element::THO:  return "Thổ";
     }
     return "?";
 }
@@ -62,22 +67,23 @@ void BattleUI::drawHpMpBar(const Character& c, Vector2 anchor) const {
     const float x = anchor.x - BAR_W / 2.0f;
     const float y = anchor.y - 40.0f;
 
-    DrawText(TextFormat("%s [%s]", c.getName().c_str(), elementName(c.getElement())),
-             (int)x, (int)y - 16, 14, c.isAlive() ? RAYWHITE : DARKGRAY);
+    DrawRectangleRec({x-7,y-26,BAR_W+14,58}, Color{12,12,20,218});
+    UiIcons::element(c.getElement(),{x+7,y-16},7.0f);
+    UiText::drawEllipsis(c.getName(), {x+17,y-29,BAR_W-21,18}, 14, c.isAlive()?UiTheme::TEXT:UiTheme::MUTED);
 
     Color hpColor = (hpRatio > 0.5f) ? COL_HP_HIGH : (hpRatio > 0.25f) ? COL_HP_MID : COL_HP_LOW;
     drawBar({ x, y }, BAR_W, HP_H, hpRatio, hpColor);
     const char* hpText = TextFormat("%d/%d", std::max(0, c.getCurrentHp()), maxHp);
-    DrawText(hpText, (int)(x + (BAR_W - MeasureText(hpText, 10)) / 2.0f), (int)(y + (HP_H - 10) / 2.0f), 10, WHITE);
+    UiText::draw(hpText, (int)(x + (BAR_W - UiText::measure(hpText, 10)) / 2.0f), (int)(y + (HP_H - 10) / 2.0f), 10, WHITE);
 
     drawBar({ x, y + HP_H + 3.0f }, BAR_W, MP_H, ratioOf(c.getCurrentMp(), maxMp), COL_MP);
 }
 
 // ============ Turn order ============
 void BattleUI::drawTurnOrder(const std::vector<Character*>& upcoming, const Character* current) const {
-    float x = GetScreenWidth() - TURN_BOX_W - TURN_MARGIN;
+    float x = 1280 - TURN_BOX_W - TURN_MARGIN;
     float y = TURN_MARGIN;
-    DrawText("TURN ORDER", (int)x, (int)y, 16, GOLD);
+    UiText::draw("TURN ORDER", (int)x, (int)y, 16, GOLD);
     y += 22.0f;
 
     int shown = 0;
@@ -91,9 +97,9 @@ void BattleUI::drawTurnOrder(const std::vector<Character*>& upcoming, const Char
         DrawRectangleLinesEx(box, isCurrent ? 2.5f : 1.0f, isCurrent ? GOLD : GRAY);
 
         Color textColor = alive ? RAYWHITE : DARKGRAY;
-        DrawText(TextFormat("%d. %s", shown + 1, c->getName().c_str()), (int)x + 8, (int)y + 8, 14, textColor);
+        UiText::draw(TextFormat("%d. %s", shown + 1, c->getName().c_str()), (int)x + 8, (int)y + 8, 14, textColor);
         const char* spd = TextFormat("SPD %d", c->getSpeed());
-        DrawText(spd, (int)(x + TURN_BOX_W - MeasureText(spd, 12) - 8), (int)y + 9, 12, alive ? SKYBLUE : DARKGRAY);
+        UiText::draw(spd, (int)(x + TURN_BOX_W - UiText::measure(spd, 12) - 8), (int)y + 9, 12, alive ? SKYBLUE : DARKGRAY);
 
         y += TURN_BOX_H + TURN_GAP;
         ++shown;
@@ -103,32 +109,29 @@ void BattleUI::drawTurnOrder(const std::vector<Character*>& upcoming, const Char
 // ============ Khung dieu khien ============
 void BattleUI::drawControlPanel() const {
     Rectangle panel = { (float)PANEL_X, (float)PANEL_Y, (float)PANEL_W, (float)PANEL_H };
-    DrawRectangleRec(panel, COL_PANEL);
-    DrawRectangleLinesEx(panel, 2.0f, COL_PANEL_EDGE);
+    UiFrame::panel(panel,true);
 }
 
 void BattleUI::drawTurnBanner(int stage, const Character* current, bool isPlayerTurn, bool waitingConfirm) const {
-    DrawText(TextFormat("MAN %d", stage), PANEL_X + PANEL_W - 100, BANNER_Y, 20, SKYBLUE);
-    DrawText("DEN LUOT:", PANEL_X + 20, BANNER_Y, 20, YELLOW);
+    UiText::draw(TextFormat("MAN %d", stage), PANEL_X + PANEL_W - 100, BANNER_Y, 20, SKYBLUE);
+    UiText::draw("DEN LUOT:", PANEL_X + 20, BANNER_Y, 20, YELLOW);
     if (!current) return;
     if (isPlayerTurn) {
-        DrawText(TextFormat("%s%s", current->getName().c_str(), waitingConfirm ? " (Cho xac nhan)" : ""),
+        UiText::draw(TextFormat("%s%s", current->getName().c_str(), waitingConfirm ? " (Cho xac nhan)" : ""),
                  PANEL_X + 140, BANNER_Y, 20, GREEN);
     } else {
-        DrawText(TextFormat("%s (Dang suy nghi...)", current->getName().c_str()), PANEL_X + 140, BANNER_Y, 20, RED);
+        UiText::draw(TextFormat("%s (Dang suy nghi...)", current->getName().c_str()), PANEL_X + 140, BANNER_Y, 20, RED);
     }
 }
 
 void BattleUI::drawCommandHelp(const std::string& helpText) const {
-    const char* text = helpText.empty()
-        ? "[A] Tan Cong | [S] Ky Nang | [I] Vat pham | [TAB] Doi Muc Tieu | [ESC] Menu"
-        : helpText.c_str();
-    DrawText(text, PANEL_X + 20, HELP_Y, 18, LIGHTGRAY);
+    const char* text = helpText.empty() ? "Nhấp để chọn hành động" : helpText.c_str();
+    UiText::drawEllipsis(text,{PANEL_X+20,HELP_Y,1180,23},17,UiTheme::MUTED);
 }
 
 void BattleUI::drawBattleLog(const std::string& message) const {
     if (message.empty()) return;
-    DrawText(message.c_str(), PANEL_X + 20, LOG_Y, 20, ORANGE);
+    UiText::drawEllipsis(message,{PANEL_X+20,LOG_Y,1180,19},14,UiTheme::AGED_GOLD);
 }
 
 void BattleUI::drawSkillMenu(const std::vector<Skill>& skills, int selectedIndex, int currentMp) const {
@@ -140,26 +143,29 @@ void BattleUI::drawSkillMenu(const std::vector<Skill>& skills, int selectedIndex
     const int visible = std::min(total, SKILL_MAX_VISIBLE);
     const int first = std::max(0, std::min(selectedIndex - visible + 1, total - visible));
 
-    const int boxX = (GetScreenWidth() - SKILL_BOX_W) / 2;
+    const int boxX = (1280 - SKILL_BOX_W) / 2;
     const int boxH = 70 + visible * SKILL_ROW_H;
     Rectangle box = { (float)boxX, (float)SKILL_BOX_Y, (float)SKILL_BOX_W, (float)boxH };
-    DrawRectangleRec(box, COL_SKILL_BOX);
-    DrawRectangleLinesEx(box, 2.0f, SKYBLUE);
-    DrawText("KY NANG (1-4 chon, SPACE de dung, ESC dong)", boxX + 20, SKILL_BOX_Y + 15, 16, YELLOW);
+    UiFrame::panel(box,true);
+    UiText::draw("Kỹ năng (1-4 chon, SPACE de dung, ESC dong)", boxX + 20, SKILL_BOX_Y + 15, 16, YELLOW);
 
     int y = SKILL_BOX_Y + 50;
+    int hoveredSkill = -1;
     for (int i = first; i < first + visible; ++i, y += SKILL_ROW_H) {
         const Skill& s = skills[static_cast<size_t>(i)];
+        Rectangle row = {static_cast<float>(boxX+20),static_cast<float>(y),static_cast<float>(SKILL_BOX_W-40),static_cast<float>(SKILL_ROW_H)};
+        if (UiInput::instance().hover(row)) hoveredSkill = i;
         Color color = WHITE;
         if (currentMp < s.m_mpCost) color = GRAY;               // thieu MP => mo
         else if (i == selectedIndex) color = GREEN;
 
         const char* suffix = (s.m_type == SkillType::HEAL) ? " HP" : "%";
-        DrawText(TextFormat("[%d] %s  (MP %d, %d%s)", i + 1, s.m_name.c_str(), s.m_mpCost, s.m_power, suffix),
+        UiText::draw(TextFormat("%s  (MP %d, %d%s)", s.m_name.c_str(), s.m_mpCost, s.m_power, suffix),
                  boxX + 30, y, 18, color);
     }
     if (total > visible)
-        DrawText(TextFormat("%d/%d", selectedIndex + 1, total), boxX + SKILL_BOX_W - 60, SKILL_BOX_Y + 15, 14, GRAY);
+        UiText::draw(TextFormat("%d/%d", selectedIndex + 1, total), boxX + SKILL_BOX_W - 60, SKILL_BOX_Y + 15, 14, GRAY);
+    if (hoveredSkill>=0) SkillTooltip::draw(skills[static_cast<size_t>(hoveredSkill)],UiInput::instance().mouse());
 }
 
 void BattleUI::drawTargetCursor(const BattleSlot& slot) const {
@@ -195,10 +201,10 @@ void BattleUI::drawFloatingTexts() const {
         Color c = t.m_color;
         c.a = static_cast<unsigned char>(255 * clamp01(t.m_life / t.m_maxLife));
         const int size = 26;
-        const int w = MeasureText(t.m_text.c_str(), size);
+        const int w = UiText::measure(t.m_text.c_str(), size);
         const int px = (int)(t.m_pos.x - w / 2.0f), py = (int)t.m_pos.y;
-        DrawText(t.m_text.c_str(), px + 2, py + 2, size, Color{ 0, 0, 0, c.a });
-        DrawText(t.m_text.c_str(), px, py, size, c);
+        UiText::draw(t.m_text.c_str(), px + 2, py + 2, size, Color{ 0, 0, 0, c.a });
+        UiText::draw(t.m_text.c_str(), px, py, size, c);
     }
 }
 

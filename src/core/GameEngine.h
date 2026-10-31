@@ -183,8 +183,16 @@ HeroConfig m_heroConfig;
     bool m_isSelectingSkill = false;
     float m_aiTurnTimer = 0.0f;
     std::string m_battleLog = "Chao mung den voi Battle Engine!";
+    std::vector<std::string> m_logEntries;
+    int m_logScroll = 0;
 
     std::mt19937 m_rng{ std::random_device{}() };
+    RenderTexture2D m_logicalTarget{};
+    bool m_pauseOpen = false;
+    bool m_pauseConfirm = false;
+    bool m_waitingTarget = false;
+    bool m_pendingAttack = false;
+    bool m_pendingItem = false;
     bool m_isRunning = false;
     bool m_isInitialized = false;
 };

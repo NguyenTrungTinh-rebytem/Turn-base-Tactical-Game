@@ -30,6 +30,11 @@ std::vector<CsvRow> readCsv(const std::string& path, size_t expectedFields) {
     int lineNo = 0;
     while (std::getline(in, line)) {
         ++lineNo;
+        if (lineNo == 1 && line.size() >= 3 &&
+            static_cast<unsigned char>(line[0]) == 0xEF &&
+            static_cast<unsigned char>(line[1]) == 0xBB &&
+            static_cast<unsigned char>(line[2]) == 0xBF)
+            line.erase(0, 3); // Optional UTF-8 BOM, preserve other bytes of Vietnamese names.
         line = trim(line);
         if (line.empty() || line[0] == '#') continue;
 

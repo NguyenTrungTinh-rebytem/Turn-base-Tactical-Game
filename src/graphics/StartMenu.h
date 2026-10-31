@@ -49,6 +49,7 @@ private:
     void drawFooter() const;
 
     std::vector<Button> m_buttons;
+    bool        m_confirmExit = false;
     int         m_selected = 0;
     float       m_time = 0.0f;
     float       m_menuCenterX = 0.68f;

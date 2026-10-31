@@ -1,3 +1,8 @@
+#include "graphics/ui/UiInput.h"
+#include "graphics/ui/UiFrame.h"
+#include "graphics/ui/UiWidgets.h"
+#include "graphics/ui/UiTheme.h"
+#include "graphics/ui/UiText.h"
 // src/graphics/PrepMenuScreen.cpp
 #include "PrepMenuScreen.h"
 #include "SkillTooltip.h"
@@ -37,10 +42,10 @@ Color elementColor(Element e) {
 const char* elementName(Element e) {
     switch (e) {
         case Element::KIM:  return "Kim";
-        case Element::MOC:  return "Moc";
-        case Element::THUY: return "Thuy";
-        case Element::HOA:  return "Hoa";
-        case Element::THO:  return "Tho";
+        case Element::MOC:  return "Mộc";
+        case Element::THUY: return "Thủy";
+        case Element::HOA:  return "Hỏa";
+        case Element::THO:  return "Thổ";
     }
     return "?";
 }
@@ -53,19 +58,19 @@ SkillTipInfo toTipInfo(const PrepSkillInfo& s) {
     t.m_mpCost = s.m_mpCost;
     t.m_effectText = s.m_effectText;
     t.m_isMagic = s.m_isMagic;
-    t.m_isHeal = (s.m_typeText.find("Hoi") != std::string::npos);   // "Hoi mau"
+    t.m_isHeal = (s.m_typeText.find("Hoi") != std::string::npos);   // "Hồi máu"
     return t;
 }
 const char* tabLabel(int i) {
-    static const char* labels[] = { "DOI HINH", "KY NANG", "TUI DO", "THONG TIN CONG" };
+    static const char* labels[] = { "DOI HINH", "Kỹ năng", "Túi đồ", "THONG TIN CONG" };
     return labels[i];
 }
 
 void drawCenteredText(const char* text, float cx, float y, int size, Color c) {
-    DrawText(text, static_cast<int>(cx - MeasureText(text, size) / 2.0f), static_cast<int>(y), size, c);
+    UiText::draw(text, static_cast<int>(cx - UiText::measure(text, size) / 2.0f), static_cast<int>(y), size, c);
 }
 void drawRightText(const char* text, float right, float y, int size, Color c) {
-    DrawText(text, static_cast<int>(right - MeasureText(text, size)), static_cast<int>(y), size, c);
+    UiText::draw(text, static_cast<int>(right - UiText::measure(text, size)), static_cast<int>(y), size, c);
 }
 
 std::vector<std::string> splitLines(const std::string& s) {
@@ -86,7 +91,7 @@ Rectangle partyCardRect(Rectangle area, int index) {
     return Rectangle{area.x + pad + index * (w + gap), area.y + pad, w, area.height - 2.0f * pad};
 }
 void drawStatRow(const char* label, int value, float x, float y, float w) {
-    DrawText(label, static_cast<int>(x), static_cast<int>(y), 18, COL_LABEL);
+    UiText::draw(label, static_cast<int>(x), static_cast<int>(y), 18, COL_LABEL);
     drawRightText(TextFormat("%d", value), x + w, y, 18, COL_TEXT);
 }
 } // namespace
@@ -126,19 +131,19 @@ void PrepMenuScreen::reset(int tab) {
 
 // ============ Bo cuc ============
 Rectangle PrepMenuScreen::tabRect(int index) const {
-    const float W = static_cast<float>(GetScreenWidth());
+    const float W = static_cast<float>(UiTheme::WIDTH);
     const float total = TAB_COUNT * TAB_W + (TAB_COUNT - 1) * TAB_GAP;
     return { (W - total) / 2.0f + static_cast<float>(index) * (TAB_W + TAB_GAP), TAB_Y, TAB_W, TAB_H };
 }
 
 Rectangle PrepMenuScreen::contentRect() const {
-    const float W = static_cast<float>(GetScreenWidth());
+    const float W = static_cast<float>(UiTheme::WIDTH);
     return { (W - PANEL_W) / 2.0f, PANEL_Y, PANEL_W, PANEL_H };
 }
 
 Rectangle PrepMenuScreen::buttonRect(int index) const {
     const float total = BTN_COUNT * BTN_W + (BTN_COUNT - 1) * BTN_GAP;
-    const float startX = (static_cast<float>(GetScreenWidth()) - total) / 2.0f;
+    const float startX = (static_cast<float>(UiTheme::WIDTH) - total) / 2.0f;
     return { startX + index * (BTN_W + BTN_GAP), BTN_Y, BTN_W, BTN_H };
 }
 
@@ -163,7 +168,7 @@ PrepMenuAction PrepMenuScreen::handleInput() {
     if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER)) return PrepMenuAction::START;
 
     // ---- Chuot ----
-    const Vector2 mouse = GetMousePosition();
+    const Vector2 mouse = UiInput::instance().mouse();
     m_hoverTab = -1;
     for (int i = 0; i < TAB_COUNT; ++i)
         if (CheckCollisionPointRec(mouse, tabRect(i))) m_hoverTab = i;
@@ -171,15 +176,15 @@ PrepMenuAction PrepMenuScreen::handleInput() {
     for (int i = 0; i < BTN_COUNT; ++i)
         if (CheckCollisionPointRec(mouse, buttonRect(i))) m_hoverButton = i;
 
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    if (UiInput::instance().leftPressed()) {
         if (m_tab == TAB_PARTY) {
             for (int i = 0; i < 3; ++i)
-                if (CheckCollisionPointRec(mouse, partyCardRect(contentRect(), i)))
+                if (UiInput::instance().click(partyCardRect(contentRect(), i)))
                     return static_cast<PrepMenuAction>(static_cast<int>(PrepMenuAction::EDIT_MEMBER_1) + i);
         }
-        if (m_hoverTab >= 0) m_tab = m_hoverTab;
-        if (m_hoverButton == BTN_BACK)  return PrepMenuAction::BACK;
-        if (m_hoverButton == BTN_START) return PrepMenuAction::START;
+        if (m_hoverTab >= 0 && UiInput::instance().click(tabRect(m_hoverTab))) m_tab = m_hoverTab;
+        if (m_hoverButton == BTN_BACK && UiInput::instance().click(buttonRect(BTN_BACK))) return PrepMenuAction::BACK;
+        if (m_hoverButton == BTN_START && UiInput::instance().click(buttonRect(BTN_START))) return PrepMenuAction::START;
     }
     return PrepMenuAction::NONE;
 }
@@ -190,18 +195,16 @@ void PrepMenuScreen::update(float deltaTime) { m_time += deltaTime; }
 void PrepMenuScreen::draw() const {
     m_hoverSkill = -1;
     drawBackground();
-    const float cx = GetScreenWidth() / 2.0f;
-    drawCenteredText("CHUAN BI TRAN DAU", cx, 26.0f, 40, COL_TITLE);
+    const float cx = UiTheme::WIDTH / 2.0f;
+    drawCenteredText("Chuẩn bị trận đấu", cx, 26.0f, 40, COL_TITLE);
     if (!m_info.m_gate.m_title.empty())
-        drawCenteredText(TextFormat("%s  -  Anh hung: %s", m_info.m_gate.m_title.c_str(), m_info.m_hero.m_name.c_str()),
+        drawCenteredText(TextFormat("%s  -  Anh hùng: %s", m_info.m_gate.m_title.c_str(), m_info.m_hero.m_name.c_str()),
                          cx, 66.0f, 16, COL_LABEL);
 
     drawTabs();
 
     const Rectangle area = contentRect();
-    DrawRectangleRec(Rectangle{ area.x + 5, area.y + 6, area.width, area.height }, Color{ 0, 0, 0, 120 });
-    DrawRectangleRec(area, COL_PANEL);
-    DrawRectangleLinesEx(area, 2.0f, COL_EDGE);
+    UiFrame::panel(area);
 
     switch (m_tab) {
         case TAB_PARTY:  drawPartyTab(area);  break;
@@ -212,21 +215,18 @@ void PrepMenuScreen::draw() const {
     }
 
     drawButtons();
-    drawCenteredText(m_tab == TAB_PARTY
-                         ? "[CLICK / F1-F3] Chon tung Hero   [T] Them/Doi Hero   [ENTER] Vao tran"
-                         : "[Q/E / LEFT/RIGHT] Doi tab   [1-4] Chon tab   [ENTER] Vao tran   [ESC] Quay lai",
-                     cx, 702.0f, 16, Color{ 200, 195, 225, 220 });
+    drawCenteredText("Nhấp các thẻ và nút để chuẩn bị chiến đấu", cx, 702.0f, 16, COL_LABEL);
 
     // Tooltip ky nang: ve CUOI CUNG de nam tren moi thu
     if (m_tab == TAB_SKILLS && m_hoverSkill >= 0 &&
         static_cast<size_t>(m_hoverSkill) < m_info.m_skills.size()) {
         SkillTooltip::draw(toTipInfo(m_info.m_skills[static_cast<size_t>(m_hoverSkill)]),
-                           GetMousePosition(), &m_info.m_hero.m_stats);
+                           UiInput::instance().mouse(), &m_info.m_hero.m_stats);
     }
 }
 
 void PrepMenuScreen::drawBackground() const {
-    const int W = GetScreenWidth(), H = GetScreenHeight();
+    const int W = UiTheme::WIDTH, H = UiTheme::HEIGHT;
     if (m_hasBackground) {
         DrawTexturePro(m_background, Rectangle{ 0, 0, static_cast<float>(m_background.width), static_cast<float>(m_background.height) },
                        Rectangle{ 0, 0, static_cast<float>(W), static_cast<float>(H) }, Vector2{ 0, 0 }, 0.0f, WHITE);
@@ -241,9 +241,8 @@ void PrepMenuScreen::drawTabs() const {
         const Rectangle r = tabRect(i);
         const bool active = (i == m_tab);
         const bool hover = (i == m_hoverTab);
-        DrawRectangleRec(r, active ? Color{ 60, 46, 18, 240 } : (hover ? Color{ 40, 34, 70, 235 } : Color{ 24, 20, 50, 225 }));
-        DrawRectangleLinesEx(r, active ? 3.0f : 2.0f, active ? COL_EDGE_SEL : COL_EDGE);
-        drawCenteredText(TextFormat("%d. %s", i + 1, tabLabel(i)), r.x + r.width / 2.0f, r.y + (r.height - 20.0f) / 2.0f, 20,
+        UiFrame::plaque(r, active, false, hover ? 1.0f : 0.0f);
+        drawCenteredText(tabLabel(i), r.x + r.width / 2.0f, r.y + (r.height - 20.0f) / 2.0f, 20,
                          active ? COL_TITLE : (hover ? COL_TEXT : COL_LABEL));
     }
 }
@@ -255,15 +254,15 @@ void PrepMenuScreen::drawPartyTab(const Rectangle& area) const {
         const PrepHeroInfo* h = (static_cast<std::size_t>(i) < m_info.m_members.size())
             ? &m_info.m_members[static_cast<std::size_t>(i)]
             : (i == 0 ? &m_info.m_hero : nullptr);
-        const bool hovered = CheckCollisionPointRec(GetMousePosition(), r);
+        const bool hovered = CheckCollisionPointRec(UiInput::instance().mouse(), r);
         const float cx = r.x + r.width / 2.0f;
         if (h) {
-            DrawRectangleRec(r, Color{ 28, 24, 58, 235 });
-            DrawRectangleRec(Rectangle{ r.x, r.y, r.width, 54.0f }, Color{ 40, 62, 128, 255 });
+            UiFrame::panel(r, hovered);
+            DrawRectangleRec(Rectangle{ r.x+12, r.y+9, r.width-24, 42.0f }, Color{ 55, 42, 43, 238 });
             drawCenteredText(h->m_name.c_str(), cx, r.y + 14.0f, 24, COL_TEXT);
             drawCenteredText(TextFormat("%s %s", h->m_race.c_str(), h->m_class.c_str()), cx, r.y + 68.0f, 17, COL_LABEL);
             DrawCircle(static_cast<int>(cx - 30), static_cast<int>(r.y + 106), 7.0f, elementColor(h->m_element));
-            DrawText(TextFormat("He %s", elementName(h->m_element)), static_cast<int>(cx - 16), static_cast<int>(r.y + 97), 18, elementColor(h->m_element));
+            UiText::draw(TextFormat("Hệ %s", elementName(h->m_element)), static_cast<int>(cx - 16), static_cast<int>(r.y + 97), 18, elementColor(h->m_element));
             float y = r.y + 140.0f;
             const float x = r.x + 22.0f, w = r.width - 44.0f;
             drawStatRow("HP", h->m_stats.m_hp, x, y, w); y += 30.0f;
@@ -273,28 +272,28 @@ void PrepMenuScreen::drawPartyTab(const Rectangle& area) const {
             drawStatRow("DEF", h->m_stats.m_d, x, y, w); y += 30.0f;
             drawStatRow("MDEF", h->m_stats.m_md, x, y, w); y += 30.0f;
             drawStatRow("SPD", h->m_stats.m_spd, x, y, w);
-            drawCenteredText(i == 0 ? "THU LINH - CLICK DE DOI" : "DONG DOI - CLICK DE DOI",
+            drawCenteredText(i == 0 ? "Thủ lĩnh · Nhấp để đổi" : "Đồng đội · Nhấp để đổi",
                              cx, r.y + r.height - 29.0f, 14, COL_OK);
         } else {
             DrawRectangleRec(r, Color{20,18,40,200});
             const float cy = r.y + r.height / 2.0f;
             DrawRectangle(static_cast<int>(cx - 3), static_cast<int>(cy - 28), 6, 56, COL_DIM);
             DrawRectangle(static_cast<int>(cx - 28), static_cast<int>(cy - 3), 56, 6, COL_DIM);
-            drawCenteredText(TextFormat("DONG DOI %d", i + 1), cx, cy + 46.0f, 20, COL_LABEL);
-            drawCenteredText("CLICK DE CHON", cx, cy + 74.0f, 16, COL_OK);
+            drawCenteredText(TextFormat("Đồng đội %d", i + 1), cx, cy + 46.0f, 20, COL_LABEL);
+            drawCenteredText("Nhấp để chọn", cx, cy + 74.0f, 16, COL_OK);
         }
         DrawRectangleLinesEx(r, hovered ? 3.0f : 2.0f, hovered ? COL_EDGE_SEL : (h ? COL_EDGE_SEL : COL_DIM));
     }
 }
 
-// ---------------- Tab 2: KY NANG ----------------
+// ---------------- Tab 2: Kỹ năng ----------------
 void PrepMenuScreen::drawSkillsTab(const Rectangle& area) const {
-    DrawText("KY NANG CUA ANH HUNG", static_cast<int>(area.x + 28), static_cast<int>(area.y + 20), 20, COL_TITLE);
+    UiText::draw("Kỹ năng của anh hùng", static_cast<int>(area.x + 28), static_cast<int>(area.y + 20), 20, COL_TITLE);
     drawRightText("MP", area.x + area.width - 250.0f, area.y + 24.0f, 14, COL_DIM);
-    drawRightText("SAT THUONG", area.x + area.width - 120.0f, area.y + 24.0f, 14, COL_DIM);
+    drawRightText("Sát thương", area.x + area.width - 120.0f, area.y + 24.0f, 14, COL_DIM);
 
     if (m_info.m_skills.empty()) {
-        drawCenteredText("Chua co ky nang", area.x + area.width / 2.0f, area.y + area.height / 2.0f, 22, COL_DIM);
+        drawCenteredText("Chưa có kỹ năng", area.x + area.width / 2.0f, area.y + area.height / 2.0f, 22, COL_DIM);
         return;
     }
 
@@ -303,27 +302,27 @@ void PrepMenuScreen::drawSkillsTab(const Rectangle& area) const {
     for (size_t i = 0; i < m_info.m_skills.size() && i < MAX_SKILL_ROWS; ++i) {
         const PrepSkillInfo& s = m_info.m_skills[i];
         const Rectangle r = { area.x + 24.0f, y, area.width - 48.0f, rowH };
-        const bool rowHover = CheckCollisionPointRec(GetMousePosition(), r);
+        const bool rowHover = CheckCollisionPointRec(UiInput::instance().mouse(), r);
         if (rowHover) m_hoverSkill = static_cast<int>(i);
         DrawRectangleRec(r, rowHover ? Color{ 40, 34, 80, 245 } : Color{ 28, 24, 58, 235 });
         DrawRectangleLinesEx(r, 2.0f, rowHover ? COL_EDGE_SEL : COL_EDGE);
         DrawRectangle(static_cast<int>(r.x), static_cast<int>(r.y), 6, static_cast<int>(r.height), elementColor(s.m_element));
 
-        DrawText(s.m_name.c_str(), static_cast<int>(r.x + 24), static_cast<int>(r.y + 10), 22, COL_TEXT);
+        UiText::draw(s.m_name.c_str(), static_cast<int>(r.x + 24), static_cast<int>(r.y + 10), 22, COL_TEXT);
         std::string sub = s.m_typeText;
         if (!s.m_effectText.empty()) sub += "  |  " + s.m_effectText;
-        DrawText(sub.c_str(), static_cast<int>(r.x + 24), static_cast<int>(r.y + 38), 16, COL_LABEL);
+        UiText::draw(sub.c_str(), static_cast<int>(r.x + 24), static_cast<int>(r.y + 38), 16, COL_LABEL);
 
-        DrawText(elementName(s.m_element), static_cast<int>(r.x + r.width - 410), static_cast<int>(r.y + 20), 18, elementColor(s.m_element));
+        UiText::draw(elementName(s.m_element), static_cast<int>(r.x + r.width - 410), static_cast<int>(r.y + 20), 18, elementColor(s.m_element));
         drawRightText(TextFormat("%d", s.m_mpCost), r.x + r.width - 226.0f, r.y + 20.0f, 20, Color{ 110, 170, 255, 255 });
         drawRightText(s.m_power > 0 ? TextFormat("%d%%", s.m_power) : "-", r.x + r.width - 24.0f, r.y + 20.0f, 20, COL_TEXT);
         y += rowH + rowGap;
     }
 }
 
-// ---------------- Tab 3: TUI DO ----------------
+// ---------------- Tab 3: Túi đồ ----------------
 void PrepMenuScreen::drawItemsTab(const Rectangle& area) const {
-    DrawText("TUI DO MANG VAO TRAN", static_cast<int>(area.x + 28), static_cast<int>(area.y + 20), 20, COL_TITLE);
+    UiText::draw("Túi đồ mang vào trận", static_cast<int>(area.x + 28), static_cast<int>(area.y + 20), 20, COL_TITLE);
 
     const int cols = 4;
     const float pad = 28.0f, gap = 18.0f, top = 64.0f;
@@ -339,12 +338,13 @@ void PrepMenuScreen::drawItemsTab(const Rectangle& area) const {
         if (filled) {
             const PrepItemInfo& it = m_info.m_items[static_cast<size_t>(i)];
             const float cx = r.x + r.width / 2.0f;
-            DrawCircle(static_cast<int>(cx), static_cast<int>(r.y + 52), 24.0f, Color{ 220, 80, 100, 255 });   // bieu tuong tam
-            DrawRectangle(static_cast<int>(cx - 7), static_cast<int>(r.y + 22), 14, 12, Color{ 200, 190, 220, 255 });
+            UiWidgets::itemIcon({cx-30,r.y+20,60,65}, it.m_name);
             drawCenteredText(it.m_name.c_str(), cx, r.y + 92.0f, 20, COL_TEXT);
             drawCenteredText(TextFormat("x%d", it.m_count), cx, r.y + 118.0f, 18, COL_OK);
+            if (UiInput::instance().hover(r))
+                UiWidgets::tooltip(it.m_name, TextFormat("Số lượng: %d", it.m_count), UiInput::instance().mouse());
         } else {
-            drawCenteredText("Trong", r.x + r.width / 2.0f, r.y + r.height / 2.0f - 9.0f, 18, Color{ 70, 66, 96, 255 });
+            drawCenteredText("Trống", r.x + r.width / 2.0f, r.y + r.height / 2.0f - 9.0f, 18, Color{ 70, 66, 96, 255 });
         }
     }
 }
@@ -357,10 +357,10 @@ void PrepMenuScreen::drawGateTab(const Rectangle& area) const {
     const float rightX = area.x + pad + leftW + 36.0f, rightW = area.x + area.width - pad - rightX;
 
     // ---- Cot trai: cong + thoi han ----
-    DrawText(g.m_title.empty() ? "CONG" : g.m_title.c_str(), static_cast<int>(leftX), static_cast<int>(area.y + 22), 34, COL_TITLE);
+    UiText::draw(g.m_title.empty() ? "CONG" : g.m_title.c_str(), static_cast<int>(leftX), static_cast<int>(area.y + 22), 34, COL_TITLE);
     float y = area.y + 72.0f;
     for (const std::string& line : splitLines(g.m_description)) {
-        DrawText(line.c_str(), static_cast<int>(leftX), static_cast<int>(y), 18, COL_LABEL);
+        UiText::draw(line.c_str(), static_cast<int>(leftX), static_cast<int>(y), 18, COL_LABEL);
         y += 26.0f;
     }
 
@@ -369,30 +369,30 @@ void PrepMenuScreen::drawGateTab(const Rectangle& area) const {
     const bool hasDeadline = g.m_deadlineTurns >= 0;
     DrawRectangleRec(clockBox, Color{ 28, 24, 58, 235 });
     DrawRectangleLinesEx(clockBox, 2.0f, hasDeadline ? COL_EDGE_SEL : COL_EDGE);
-    DrawText("THOI HAN", static_cast<int>(clockBox.x + 20), static_cast<int>(clockBox.y + 16), 16, COL_DIM);
+    UiText::draw("THỜI HẠN", static_cast<int>(clockBox.x + 20), static_cast<int>(clockBox.y + 16), 16, COL_DIM);
     if (hasDeadline) {
-        DrawText(TextFormat("%d", g.m_deadlineTurns), static_cast<int>(clockBox.x + 20), static_cast<int>(clockBox.y + 44), 56, COL_TITLE);
-        DrawText("luot de ha gac cong", static_cast<int>(clockBox.x + 100 + (g.m_deadlineTurns >= 100 ? 36 : 0)),
+        UiText::draw(TextFormat("%d", g.m_deadlineTurns), static_cast<int>(clockBox.x + 20), static_cast<int>(clockBox.y + 44), 56, COL_TITLE);
+        UiText::draw("lượt để hạ gác cổng", static_cast<int>(clockBox.x + 100 + (g.m_deadlineTurns >= 100 ? 36 : 0)),
                  static_cast<int>(clockBox.y + 66), 18, COL_TEXT);
     } else {
-        DrawText("Khong gioi han", static_cast<int>(clockBox.x + 20), static_cast<int>(clockBox.y + 52), 30, COL_OK);
+        UiText::draw("Không giới hạn", static_cast<int>(clockBox.x + 20), static_cast<int>(clockBox.y + 52), 30, COL_OK);
     }
 
     // Goi y khac he
     const Rectangle hintBox = { leftX, area.y + 310.0f, leftW, 150.0f };
     DrawRectangleRec(hintBox, Color{ 28, 24, 58, 235 });
     DrawRectangleLinesEx(hintBox, 2.0f, COL_EDGE);
-    DrawText("VONG KHAC HE", static_cast<int>(hintBox.x + 20), static_cast<int>(hintBox.y + 14), 16, COL_DIM);
+    UiText::draw("VÒNG KHẮC HỆ", static_cast<int>(hintBox.x + 20), static_cast<int>(hintBox.y + 14), 16, COL_DIM);
     const Element ring[] = { Element::KIM, Element::MOC, Element::THO, Element::THUY, Element::HOA };
     float hx = hintBox.x + 20.0f;
     for (int i = 0; i < 5; ++i) {
         DrawCircle(static_cast<int>(hx + 8), static_cast<int>(hintBox.y + 58), 8.0f, elementColor(ring[i]));
-        DrawText(elementName(ring[i]), static_cast<int>(hx + 20), static_cast<int>(hintBox.y + 49), 16, elementColor(ring[i]));
+        UiText::draw(elementName(ring[i]), static_cast<int>(hx + 20), static_cast<int>(hintBox.y + 49), 16, elementColor(ring[i]));
         hx += 78.0f;
     }
-    DrawText("Khac he: x1.5 sat thuong", static_cast<int>(hintBox.x + 20), static_cast<int>(hintBox.y + 84), 16, COL_OK);
-    DrawText("Bi khac he: x0.5 sat thuong", static_cast<int>(hintBox.x + 20), static_cast<int>(hintBox.y + 108), 16, COL_ERR);
-    DrawText("(Kim > Moc > Tho > Thuy > Hoa > Kim)", static_cast<int>(hintBox.x + 20), static_cast<int>(hintBox.y + 128), 14, COL_DIM);
+    UiText::draw("Khắc hệ: ×1.5 sát thương", static_cast<int>(hintBox.x + 20), static_cast<int>(hintBox.y + 84), 16, COL_OK);
+    UiText::draw("Bị khắc hệ: ×0.5 sát thương", static_cast<int>(hintBox.x + 20), static_cast<int>(hintBox.y + 108), 16, COL_ERR);
+    UiText::draw("Kim › Mộc › Thổ › Thủy › Hỏa › Kim", static_cast<int>(hintBox.x + 20), static_cast<int>(hintBox.y + 128), 14, COL_DIM);
 
     // ---- Cot phai: boss + quai ----
     float ry = area.y + 22.0f;
@@ -402,39 +402,37 @@ void PrepMenuScreen::drawGateTab(const Rectangle& area) const {
         DrawRectangleLinesEx(boss, 3.0f, COL_BOSS);
         DrawRectangleRec(Rectangle{ boss.x + 18, boss.y + 14, 68, 22 }, COL_BOSS);
         drawCenteredText("BOSS", boss.x + 18 + 34, boss.y + 17, 16, WHITE);
-        DrawText(g.m_bossName.c_str(), static_cast<int>(boss.x + 100), static_cast<int>(boss.y + 12), 28, COL_TEXT);
+        UiText::draw(g.m_bossName.c_str(), static_cast<int>(boss.x + 100), static_cast<int>(boss.y + 12), 28, COL_TEXT);
         DrawCircle(static_cast<int>(boss.x + 30), static_cast<int>(boss.y + 76), 8.0f, elementColor(g.m_bossElement));
-        DrawText(TextFormat("He %s", elementName(g.m_bossElement)), static_cast<int>(boss.x + 46), static_cast<int>(boss.y + 66), 18, elementColor(g.m_bossElement));
-        DrawText(TextFormat("HP %d", g.m_bossHp), static_cast<int>(boss.x + 46), static_cast<int>(boss.y + 94), 18, COL_TEXT);
+        UiText::draw(TextFormat("Hệ %s", elementName(g.m_bossElement)), static_cast<int>(boss.x + 46), static_cast<int>(boss.y + 66), 18, elementColor(g.m_bossElement));
+        UiText::draw(TextFormat("HP %d", g.m_bossHp), static_cast<int>(boss.x + 46), static_cast<int>(boss.y + 94), 18, COL_TEXT);
         ry += 130.0f + 20.0f;
     }
 
-    DrawText(g.m_hasBoss ? "QUAN HO TONG" : "QUAI CO THE GAP", static_cast<int>(rightX), static_cast<int>(ry), 16, COL_TITLE);
+    UiText::draw(g.m_hasBoss ? "QUÂN HỘ TỐNG" : "QUÁI CÓ THỂ GẶP", static_cast<int>(rightX), static_cast<int>(ry), 16, COL_TITLE);
     ry += 28.0f;
     size_t shown = 0;
     for (const PrepEnemyInfo& e : g.m_enemies) {
         if (ry + 26.0f > area.y + area.height - 16.0f) break;
         DrawCircle(static_cast<int>(rightX + 10), static_cast<int>(ry + 11), 6.0f, elementColor(e.m_element));
-        DrawText(e.m_name.c_str(), static_cast<int>(rightX + 28), static_cast<int>(ry), 20, COL_TEXT);
+        UiText::draw(e.m_name.c_str(), static_cast<int>(rightX + 28), static_cast<int>(ry), 20, COL_TEXT);
         drawRightText(elementName(e.m_element), rightX + rightW, ry + 3.0f, 16, elementColor(e.m_element));
         ry += 30.0f;
         ++shown;
     }
     if (g.m_enemies.empty())
-        DrawText("Khong co du lieu", static_cast<int>(rightX), static_cast<int>(ry), 18, COL_DIM);
+        UiText::draw("Không có dữ liệu", static_cast<int>(rightX), static_cast<int>(ry), 18, COL_DIM);
     else if (shown < g.m_enemies.size())
-        DrawText(TextFormat("+%d quai khac", static_cast<int>(g.m_enemies.size() - shown)), static_cast<int>(rightX + 28), static_cast<int>(ry), 14, COL_DIM);
+        UiText::draw(TextFormat("+%d quái khác", static_cast<int>(g.m_enemies.size() - shown)), static_cast<int>(rightX + 28), static_cast<int>(ry), 14, COL_DIM);
 }
 
 void PrepMenuScreen::drawButtons() const {
-    const char* labels[BTN_COUNT] = { "QUAY LAI", "VAO TRAN" };
+    const char* labels[BTN_COUNT] = { "Quay lại", "Vào trận" };
     for (int i = 0; i < BTN_COUNT; ++i) {
         const Rectangle r = buttonRect(i);
         const bool hover = (m_hoverButton == i);
         const bool primary = (i == BTN_START);
-        DrawRectangleRec(Rectangle{ r.x + 4, r.y + 5, r.width, r.height }, Color{ 0, 0, 0, 110 });
-        DrawRectangleRec(r, hover ? Color{ 90, 60, 20, 235 } : (primary ? Color{ 50, 40, 14, 230 } : COL_PANEL));
-        DrawRectangleLinesEx(r, hover ? 3.0f : 2.0f, (hover || primary) ? COL_EDGE_SEL : COL_EDGE);
+        UiFrame::plaque(r, primary || hover, false, hover?1.f:0.f);
         drawCenteredText(labels[i], r.x + r.width / 2.0f, r.y + (r.height - 24.0f) / 2.0f, 24,
                          hover ? Color{ 255, 240, 170, 255 } : COL_TEXT);
     }

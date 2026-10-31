@@ -1,0 +1,35 @@
+COMPLETE NEW / MODIFIED FILES (merge into original tree)
+CMakeLists.txt
+README_UI_UPGRADE.md
+UI_AUDIT.md
+assets/fonts/LICENSE-Noto.txt
+src/core/GameEngine.cpp
+src/core/GameEngine.h
+src/data/GameData.cpp
+src/graphics/BattleMap.cpp
+src/graphics/Battleui.cpp
+src/graphics/Herocreatescreen.cpp
+src/graphics/PrepMenuScreen.cpp
+src/graphics/Skilltooltip.cpp
+src/graphics/SpriteAnimation.cpp
+src/graphics/StartMenu.cpp
+src/graphics/StartMenu.h
+src/graphics/Turnorderbar.cpp
+src/graphics/Waveselectscreen.cpp
+src/graphics/ui/FontManager.cpp
+src/graphics/ui/FontManager.h
+src/graphics/ui/UiFrame.cpp
+src/graphics/ui/UiFrame.h
+src/graphics/ui/UiIcons.cpp
+src/graphics/ui/UiIcons.h
+src/graphics/ui/UiInput.cpp
+src/graphics/ui/UiInput.h
+src/graphics/ui/UiText.cpp
+src/graphics/ui/UiText.h
+src/graphics/ui/UiTheme.cpp
+src/graphics/ui/UiTheme.h
+src/graphics/ui/UiWidgets.cpp
+src/graphics/ui/UiWidgets.h
+PATCH_MANIFEST.txt
+
+Font binaries are NOT distributed; see README_UI_UPGRADE.md.

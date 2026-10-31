@@ -1,3 +1,8 @@
+#include "graphics/ui/UiFrame.h"
+#include "graphics/ui/UiTheme.h"
+#include "graphics/ui/UiInput.h"
+#include "graphics/ui/UiWidgets.h"
+#include "graphics/ui/UiText.h"
 // src/graphics/TurnOrderBar.cpp
 #include "TurnOrderBar.h"
 #include "entities/Character.h"
@@ -48,7 +53,7 @@ void TurnOrderBar::draw(const std::vector<Character*>& upcoming, const Character
     const float dt = std::min(GetFrameTime(), 0.05f);   // tranh nhay vot khi lag
     m_time += dt;
 
-    const float x0 = GetScreenWidth() - BOX_W - MARGIN;
+    const float x0 = 1280 - BOX_W - MARGIN;
     const float y0 = MARGIN + 22.0f;
     const float step = BOX_H + GAP;
 
@@ -99,14 +104,17 @@ void TurnOrderBar::draw(const std::vector<Character*>& upcoming, const Character
                  m_rows.end());
 
     // ---- Ve ----
-    DrawText("TURN ORDER", static_cast<int>(x0), static_cast<int>(MARGIN), 16, GOLD);
+    UiText::draw("THỨ TỰ LƯỢT", static_cast<int>(x0), static_cast<int>(MARGIN), 16, GOLD);
 
     const float pulse = 0.5f + 0.5f * std::sin(m_time * 6.0f);
+    const Row* hoveredRow = nullptr;
     for (const Row& r : m_rows) {
         const float act = r.m_active;
         const Rectangle box = { x0 + r.m_x, r.m_y, BOX_W, BOX_H };
+        if (UiInput::instance().hover(box)) hoveredRow = &r;
 
-        DrawRectangleRec(box, withAlpha(lerpColor(Color{ 25, 25, 40, 200 }, Color{ 90, 70, 20, 230 }, act), r.m_alpha));
+        UiFrame::plaque(box, r.m_isCurrent, false, act);
+        DrawCircleV({box.x+13,box.y+BOX_H/2}, 7.0f, withAlpha(UiTheme::EMBER, r.m_alpha));
         if (r.m_isCurrent && m_flash > 0.0f)
             DrawRectangleRec(box, withAlpha(WHITE, 0.45f * m_flash * r.m_alpha));   // tia sang khi vua doi luot
         if (act > 0.01f)
@@ -114,10 +122,12 @@ void TurnOrderBar::draw(const std::vector<Character*>& upcoming, const Character
                                  1.0f, withAlpha(GOLD, (0.15f + 0.30f * pulse) * act * r.m_alpha));   // quang nhap nhay
         DrawRectangleLinesEx(box, 1.0f + 1.5f * act, withAlpha(lerpColor(GRAY, GOLD, act), r.m_alpha));
 
-        DrawText(TextFormat("%d. %s", r.m_rank, r.m_name.c_str()),
+        UiText::draw(TextFormat("%d. %s", r.m_rank, r.m_name.c_str()),
                  static_cast<int>(box.x) + 8, static_cast<int>(box.y) + 8, 14, withAlpha(RAYWHITE, r.m_alpha));
         const char* spd = TextFormat("SPD %d", r.m_spd);
-        DrawText(spd, static_cast<int>(box.x + BOX_W - MeasureText(spd, 12) - 8), static_cast<int>(box.y) + 9, 12,
+        UiText::draw(spd, static_cast<int>(box.x + BOX_W - UiText::measure(spd, 12) - 8), static_cast<int>(box.y) + 9, 12,
                  withAlpha(SKYBLUE, r.m_alpha));
     }
+    if (hoveredRow) UiWidgets::tooltip(hoveredRow->m_name,
+        TextFormat("Tốc độ: %d · Lượt #%d",hoveredRow->m_spd,hoveredRow->m_rank),UiInput::instance().mouse());
 }

@@ -1,3 +1,9 @@
+#include "graphics/ui/UiTheme.h"
+#include "graphics/ui/UiInput.h"
+#include "graphics/ui/UiFrame.h"
+#include "graphics/ui/UiWidgets.h"
+#include "graphics/ui/FontManager.h"
+#include "graphics/ui/UiText.h"
 #include "core/GameEngine.h"
 #include <string>
 #include <unordered_map>
@@ -70,8 +76,8 @@ namespace
     const char* const POTION_NAME = "ITM_HP_MINOR";
     const char* skillTypeText(SkillType t) {
     switch (t) {
-        case SkillType::DAMAGE: return "Sat thuong";
-        case SkillType::HEAL:   return "Hoi mau";
+        case SkillType::DAMAGE: return "Sát thương";
+        case SkillType::HEAL:   return "Hồi máu";
         case SkillType::BUFF:   return "Buff";
         case SkillType::DEBUFF: return "Debuff";
     }
@@ -81,16 +87,16 @@ namespace
 std::string effectText(EffectType e, int turns) {
     const char* name = "";
     switch (e) {
-        case EffectType::ATK_BOOST: name = "Tang cong";  break;
-        case EffectType::DEF_BOOST: name = "Tang thu";   break;
-        case EffectType::REGEN:     name = "Hoi mau";    break;
-        case EffectType::STUN:      name = "Choang";     break;
-        case EffectType::BURN:      name = "Chay";       break;
-        case EffectType::SLOW:      name = "Lam cham";   break;
-        case EffectType::WEAKNESS:  name = "Suy yeu";    break;
+        case EffectType::ATK_BOOST: name = "Tăng công";  break;
+        case EffectType::DEF_BOOST: name = "Tăng thủ";   break;
+        case EffectType::REGEN:     name = "Hồi máu";    break;
+        case EffectType::STUN:      name = "Choáng";     break;
+        case EffectType::BURN:      name = "Cháy";       break;
+        case EffectType::SLOW:      name = "Làm chậm";   break;
+        case EffectType::WEAKNESS:  name = "Suy yếu";    break;
         case EffectType::NONE:      return "";
     }
-    return std::string(name) + " " + std::to_string(turns) + " luot";
+    return std::string(name) + " " + std::to_string(turns) + " lượt";
 }
 
 int deadlineTurnsForStage(int /*stage*/) {
@@ -173,6 +179,12 @@ void GameEngine::initialize()
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "2.5D RPG Battle Engine - Demo");
     SetTargetFPS(60);
+    SetWindowState(FLAG_WINDOW_RESIZABLE);
+    SetWindowMinSize(800, 450);
+    HideCursor();
+    m_logicalTarget = LoadRenderTexture(UiTheme::WIDTH, UiTheme::HEIGHT);
+    SetTextureFilter(m_logicalTarget.texture, TEXTURE_FILTER_BILINEAR);
+    FontManager::instance().initialize(resolvePath("assets"));
     SetExitKey(KEY_NULL);   // ESC do game tu xu ly (Undo / ve Menu), khong thoat thang
 
     try {
@@ -233,6 +245,10 @@ void GameEngine::shutdown()
 
     if (m_isInitialized)
     {
+        FontManager::instance().shutdown();
+        if (m_logicalTarget.id != 0) UnloadRenderTexture(m_logicalTarget);
+        m_logicalTarget = RenderTexture2D{};
+        ShowCursor();
         CloseWindow();
         m_isInitialized = false;
     }
@@ -264,7 +280,7 @@ bool GameEngine::cancelLastAction()
     if (result) {
         for (auto& c : m_combatants) syncHealth(c.get());
         m_battlePhase = BattlePhase::PLAYER_TURN;
-        m_battleLog = "Da hoan tac (Undo) hanh dong vua roi! Chon lenh khac.";
+        m_battleLog = "Đã hoàn tác hành động vừa rồi! Chọn lệnh khác.";
     }
     return result;
 }
@@ -436,7 +452,7 @@ void GameEngine::openWaveSelect()
         const int appear = (stage == 1) ? std::min(static_cast<int>(monsters.size()), STAGE1_ENEMY_COUNT)
                                         : static_cast<int>(monsters.size());
         w.m_description = w.m_isBoss ? std::string("Tran chien voi Boss")
-                                     : "Xuat hien ngau nhien " + std::to_string(appear) + " quai";
+                                     : "Xuất hiện ngẫu nhiên " + std::to_string(appear) + " quái";
         w.m_locked = !m_waveManager.isWaveUnlocked(stage);
         w.m_cleared = static_cast<size_t>(stage) < m_wavesCleared.size() && m_wavesCleared[static_cast<size_t>(stage)];
         waves.push_back(std::move(w));
@@ -515,7 +531,7 @@ void GameEngine::openPrepMenu(int wave)
     }
     info.m_gate.m_description = info.m_gate.m_hasBoss
         ? std::string("Tran chien voi Boss\nHa gac cong de tien len")
-        : std::string("Quet sach quai canh cong\nXuat hien ngau nhien");
+        : std::string("Quét sạch quái canh cổng\nXuất hiện ngẫu nhiên");
 
     m_prepMenu.setInfo(info);
     m_prepMenu.reset(0);
@@ -780,7 +796,9 @@ void GameEngine::startNewGame(int startStage)
     loadStage(startStage); 
     advanceTurn();
 
-    m_battleLog = "Tran dau bat dau! Den luot: " + (m_currentCharacter ? m_currentCharacter->getName() : std::string("None"));
+    m_logEntries.clear();
+    m_logScroll = 0;
+    m_battleLog = "Trận đấu bắt đầu! Đến lượt: " + (m_currentCharacter ? m_currentCharacter->getName() : std::string("None"));
 }
 
 // =====================================================================
@@ -789,6 +807,27 @@ void GameEngine::startNewGame(int startStage)
 
 void GameEngine::processEvents()
 {
+    UiInput::instance().beginFrame();
+    auto& input = UiInput::instance();
+    if (m_stateMachine.is(GameStateMachine::State::IN_BATTLE)) {
+        if (m_pauseOpen) {
+            if (m_pauseConfirm) {
+                if (input.click({463, 418, 165, 52})) m_pauseConfirm = false;
+                else if (input.click({654, 418, 165, 52})) {
+                    m_pauseOpen = m_pauseConfirm = false;
+                    m_waitingTarget = m_pendingAttack = m_pendingItem = false;
+                    m_stateMachine.changeState(GameStateMachine::State::MENU);
+                }
+            } else {
+                if (input.click({465, 320, 350, 54})) m_pauseOpen = false;
+                else if (input.click({465, 393, 350, 54})) m_pauseConfirm = true;
+            }
+            return; // Modal consumes all input and stops battle commands
+        }
+        if (input.click({1090, 624, 160, 50})) { m_pauseOpen = true; return; }
+    }
+    if (input.isDebugShown()) return;
+
     if (IsKeyPressed(KEY_ESCAPE))
     {
         if (m_stateMachine.is(GameStateMachine::State::IN_BATTLE))
@@ -797,7 +836,7 @@ void GameEngine::processEvents()
                 m_isSelectingSkill = false;
                 m_isSelectingItem = false;
             } else if (!cancelLastAction()) {
-                m_stateMachine.changeState(GameStateMachine::State::MENU);
+                m_pauseOpen = true;
             }
         }
         else 
@@ -944,8 +983,12 @@ void GameEngine::processEvents()
 
     case GameStateMachine::State::VICTORY:
     case GameStateMachine::State::GAME_OVER:
-        if (IsKeyPressed(KEY_ENTER))
+        if (IsKeyPressed(KEY_ENTER) || input.click({465, 384, 350, 58}))
             m_stateMachine.changeState(GameStateMachine::State::MENU);
+        else if (input.click({465, 456, 350, 58})) {
+            m_stateMachine.changeState(GameStateMachine::State::IN_BATTLE);
+            startNewGame(m_stage);
+        }
         break;
     }
 }
@@ -1007,6 +1050,89 @@ void GameEngine::openItemMenu()
 void GameEngine::processPlayerInput()
 {
     if (!m_currentCharacter || !isHero(m_currentCharacter)) return;
+    auto& input = UiInput::instance();
+
+    if (input.hover({25,675,1230,29}) && input.wheel()!=0 && !m_logEntries.empty()) {
+        m_logScroll = std::max(0,std::min(static_cast<int>(m_logEntries.size())-1,m_logScroll+(input.wheel()>0?1:-1)));
+    }
+    if (input.rightClick() || input.click({940,624,136,50})) {
+        m_isSelectingSkill = m_isSelectingItem = false;
+        m_waitingTarget = m_pendingAttack = m_pendingItem = false;
+        return;
+    }
+    if (m_battlePhase == BattlePhase::PLAYER_CONFIRM) {
+        if (input.click({42,624,183,50})) confirmTurn();
+        else if (input.click({250,624,183,50})) cancelLastAction();
+        return;
+    }
+
+    // Mouse action dock and anchored popup. Popup selection is separate from targeting.
+    if (m_isSelectingSkill) {
+        for (size_t i = 0; i < m_heroSkills.size() && i < 4; ++i) {
+            if (input.click({360.0f, 340.0f + static_cast<float>(i)*35.0f, 560.0f, 35.0f})) {
+                if (hero() && hero()->getCurrentMp() >= m_heroSkills[i].m_mpCost) {
+                    m_selectedSkillIndex = static_cast<int>(i);
+                    m_isSelectingSkill = false;
+                    m_waitingTarget = true;
+                    m_pendingAttack = m_pendingItem = false;
+                }
+                return;
+            }
+        }
+        if (input.leftPressed() && input.hover({360,290,560,210})) {input.consume();return;}
+    }
+    if (m_isSelectingItem) {
+        const auto items = availableItems();
+        for (size_t i = 0; i < items.size() && i < 9; ++i) {
+            if (input.click({355.0f, 240.0f + static_cast<float>(i)*28.0f, 555.0f, 28.0f})) {
+                m_selectedItemIndex = static_cast<int>(i);
+                m_isSelectingItem = false;
+                m_waitingTarget = m_pendingItem = true;
+                m_pendingAttack = false;
+                return;
+            }
+        }
+    }
+    if (m_waitingTarget) {
+        const bool targetEnemy = !m_pendingItem &&
+            (m_pendingAttack || (m_selectedSkillIndex >= 0 && static_cast<size_t>(m_selectedSkillIndex) < m_heroSkills.size() &&
+            (m_heroSkills[static_cast<size_t>(m_selectedSkillIndex)].m_type == SkillType::DAMAGE ||
+             (m_heroSkills[static_cast<size_t>(m_selectedSkillIndex)].m_type == SkillType::DEBUFF &&
+              m_heroSkills[static_cast<size_t>(m_selectedSkillIndex)].m_power > 0))));
+        for (size_t i = 0; i < m_combatants.size(); ++i) {
+            Character* c = m_combatants[i].get();
+            if (!c || !c->isAlive() || isHero(c) == targetEnemy) continue;
+            const Vector2 head = m_views[i]->getHeadPos();
+            if (input.click({head.x-70,head.y-20,140,135})) {
+                if (m_pendingItem) { m_selectedAlly = c; doUseItem(); }
+                else if (m_pendingAttack) { m_selectedTarget = c; doBasicAttack(); }
+                else {
+                    if (targetEnemy) m_selectedTarget = c;
+                    if (castSkill(static_cast<size_t>(m_selectedSkillIndex)))
+                        m_battlePhase = BattlePhase::PLAYER_CONFIRM;
+                }
+                m_waitingTarget = m_pendingAttack = m_pendingItem = false;
+                return;
+            }
+        }
+    } else {
+        for (size_t i = m_party.size(); i < m_combatants.size(); ++i) {
+            if (!m_combatants[i]->isAlive()) continue;
+            const Vector2 head = m_views[i]->getHeadPos();
+            if (input.click({head.x-70,head.y-20,140,135})) {m_selectedTarget=m_combatants[i].get(); return;}
+        }
+    }
+    if (input.click({42,624,183,50})) {
+        m_isSelectingSkill = m_isSelectingItem = m_pendingItem = false;
+        m_pendingAttack = m_waitingTarget = true;
+        return;
+    }
+    if (input.click({250,624,183,50})) {
+        m_isSelectingSkill = !m_isSelectingSkill;
+        m_isSelectingItem = m_waitingTarget = m_pendingAttack = m_pendingItem = false;
+        return;
+    }
+    if (input.click({458,624,183,50})) {openItemMenu();m_waitingTarget=m_pendingAttack=m_pendingItem=false;return;}
 
     // Da hanh dong -> cho xac nhan (ENTER) hoac Undo (ESC/Z xu ly o processEvents)
     if (m_battlePhase == BattlePhase::PLAYER_CONFIRM)
@@ -1084,8 +1210,7 @@ void GameEngine::doBasicAttack()
     playAnimation(attacker, AnimState::ATTACK);
     syncHealth(target);
 
-    m_battleLog = attacker->getName() + " tan cong " + target->getName() + " gay " + std::to_string(dealt) + " sat thuong!"
-                + "  [ENTER] ket thuc luot, [ESC/Z] hoan tac";
+    m_battleLog = attacker->getName() + " tấn công " + target->getName() + " gây " + std::to_string(dealt) + " sát thương!";
     m_battlePhase = BattlePhase::PLAYER_CONFIRM;
 }
 
@@ -1113,7 +1238,7 @@ void GameEngine::doUseItem()
     };
     if (!queuePlayerCommand(std::make_unique<UseItemCommand>(executeAction, undoAction))) return;
     m_battleLog = hero()->getName() + " dung " + item->getName() + " cho " + target->getName()
-                + " (+" + std::to_string(*amount) + ") [ENTER] Xac nhan, [Z] Undo";
+                + " (+" + std::to_string(*amount) + ")";
     m_isSelectingItem = false;
     m_battlePhase = BattlePhase::PLAYER_CONFIRM;
 }
@@ -1199,7 +1324,7 @@ void GameEngine::confirmTurn()
         actor->onTurnEnd();
         syncHealth(actor);
         if (actor->isAlive() && actor->modifiers().consumeExtraTurn()) {
-            m_battleLog = actor->getName() + " duoc them 1 luot!";
+            m_battleLog = actor->getName() + " được thêm 1 lượt!";
             m_battlePhase = BattlePhase::PLAYER_TURN;
             return;
         }
@@ -1232,7 +1357,7 @@ bool GameEngine::beginTurn(Character* c)
     }
 
     if (wasStunned) {
-        m_battleLog = c->getName() + " bi choang, mat luot!";
+        m_battleLog = c->getName() + " bị choáng, mất lượt!";
         return false;
     }
 
@@ -1308,7 +1433,13 @@ void GameEngine::executeAiTurn(Character* aiChar)
 }
 
 void GameEngine::update(float deltaTime)
-{   
+{
+    if (m_pauseOpen) return;
+    if (!m_battleLog.empty() && (m_logEntries.empty() || m_logEntries.back()!=m_battleLog)) {
+        m_logEntries.push_back(m_battleLog);
+        if (m_logEntries.size() > 80) m_logEntries.erase(m_logEntries.begin());
+        m_logScroll = 0;
+    }   
     if (m_stateMachine.is(GameStateMachine::State::MENU))
     m_startMenu.update(deltaTime);
     if (m_stateMachine.is(GameStateMachine::State::CREATE_HERO))
@@ -1518,8 +1649,8 @@ BattleSlot GameEngine::slotOf(int index) const
 
 void GameEngine::render()
 {
-    BeginDrawing();
-    ClearBackground(RAYWHITE);
+    BeginTextureMode(m_logicalTarget);
+    ClearBackground(UiTheme::ASH);
        switch (m_stateMachine.getState())
     {
     case GameStateMachine::State::MENU:
@@ -1542,16 +1673,42 @@ void GameEngine::render()
         break;
 
     case GameStateMachine::State::VICTORY:
-        DrawText("VICTORY!", 500, 250, 50, GREEN);
-        DrawText("Press ENTER to return to Menu", 420, 340, 22, DARKGRAY);
+        UiFrame::panel({350,205,580,365}, true);
+        UiText::drawShadowed("CHIẾN THẮNG", 458, 240, 50, UiTheme::AGED_GOLD);
+        UiWidgets::button({465,384,350,58}, "Về menu", UiInput::instance().hover({465,384,350,58}));
+        UiWidgets::button({465,456,350,58}, "Chơi lại", UiInput::instance().hover({465,456,350,58}));
         break;
 
     case GameStateMachine::State::GAME_OVER:
-        DrawText("GAME OVER", 480, 250, 50, RED);
-        DrawText("Press ENTER to return to Menu", 420, 340, 22, DARKGRAY);
+        UiFrame::panel({350,205,580,365}, true);
+        UiText::drawShadowed("THẤT BẠI", 488, 240, 50, UiTheme::DANGER);
+        UiWidgets::button({465,384,350,58}, "Về menu", UiInput::instance().hover({465,384,350,58}));
+        UiWidgets::button({465,456,350,58}, "Thử lại", UiInput::instance().hover({465,456,350,58}));
         break;
     }
 
+    if (m_pauseOpen) {
+        DrawRectangle(0,0,1280,720,Color{0,0,0,175});
+        UiFrame::panel({390,215,500,300},true);
+        UiText::draw("TẠM DỪNG",510,249,40,UiTheme::AGED_GOLD);
+        if (m_pauseConfirm) {
+            UiText::draw("Trở về menu chính?",483,338,24,UiTheme::TEXT);
+            UiWidgets::button({463,418,165,52},"Ở lại",UiInput::instance().hover({463,418,165,52}));
+            UiWidgets::button({654,418,165,52},"Rời trận",UiInput::instance().hover({654,418,165,52}),false,true,true);
+        } else {
+            UiWidgets::button({465,320,350,54},"Tiếp tục",UiInput::instance().hover({465,320,350,54}));
+            UiWidgets::button({465,393,350,54},"Về menu",UiInput::instance().hover({465,393,350,54}),false,true,true);
+        }
+    }
+    UiInput::instance().drawFontDebug();
+    UiInput::instance().drawCursor();
+    EndTextureMode();
+    BeginDrawing();
+    ClearBackground(BLACK);
+    const float sw = static_cast<float>(GetScreenWidth()), sh = static_cast<float>(GetScreenHeight());
+    const float scale = std::min(sw/1280.f, sh/720.f);
+    const Rectangle dest = {(sw-1280.f*scale)*0.5f,(sh-720.f*scale)*0.5f,1280.f*scale,720.f*scale};
+    DrawTexturePro(m_logicalTarget.texture,{0,0,1280,-720},dest,{0,0},0.f,WHITE);
     EndDrawing();
 }
 
@@ -1574,13 +1731,28 @@ void GameEngine::renderCombatants()
 void GameEngine::renderBattleUI()
 {
     // ----- HP/MP + con tro muc tieu + hieu ung tung nhan vat -----
+    std::vector<Rectangle> usedLabelBounds;
     for (size_t i = 0; i < m_combatants.size(); ++i)
     {
         const Character* c = m_combatants[i].get();
         if (!c->isAlive()) continue;
 
         const Vector2 head = m_views[i]->getHeadPos();
-        m_ui.drawHpMpBar(*c, head);
+        Vector2 barHead = head;
+        Rectangle label{barHead.x-77,barHead.y-60,154,64};
+        bool changed = true;
+        for (int attempt = 0; attempt < 8 && changed; ++attempt) {
+            changed = false;
+            for (const Rectangle& used : usedLabelBounds) {
+                if (CheckCollisionRecs(label,used)) {
+                    label.y = used.y - label.height - 5;
+                    changed = true;
+                }
+            }
+        }
+        barHead.y = label.y + 60;
+        usedLabelBounds.push_back(label);
+        m_ui.drawHpMpBar(*c, barHead);
 
         if (c == m_selectedTarget)
             m_ui.drawTargetCursor(m_views[i]->getSlot());
@@ -1594,8 +1766,8 @@ void GameEngine::renderBattleUI()
             for (const StatusEffect& effect : fx->second.getEffects())
             {
                 const char* label = TextFormat("%s(%d)", statusName(effect.type), effect.durationTurns);
-                DrawText(label, ex, ey, 12, ORANGE);
-                ex += MeasureText(label, 12) + 6;
+                UiText::draw(label, ex, ey, 12, ORANGE);
+                ex += UiText::measure(label, 12) + 6;
             }
         }
     }
@@ -1609,24 +1781,49 @@ void GameEngine::renderBattleUI()
                         m_currentCharacter && isHero(m_currentCharacter),
                         m_battlePhase == BattlePhase::PLAYER_CONFIRM);
 
-    if (m_battlePhase == BattlePhase::PLAYER_CONFIRM)
-        m_ui.drawCommandHelp("[ENTER] Ket thuc luot  |  [ESC/Z] Hoan tac (Undo)");
-    else
-        m_ui.drawCommandHelp(TextFormat("[A] Tan Cong | [S] Ky Nang | [I] Vat pham x%d | [TAB] Doi Muc Tieu | [ESC] Menu",
-                                        static_cast<int>(availableItems().size())));
-    m_ui.drawBattleLog("BATTLE LOG: " + m_battleLog);
+    const bool confirm = m_battlePhase == BattlePhase::PLAYER_CONFIRM;
+    m_ui.drawCommandHelp(m_waitingTarget ? "Nhấp mục tiêu trên chiến trường · Chuột phải để hủy" : "Chọn hành động bằng chuột");
+    m_ui.drawBattleLog(m_logEntries.empty()?m_battleLog:m_logEntries[m_logEntries.size()-1-static_cast<size_t>(std::min(m_logScroll,static_cast<int>(m_logEntries.size())-1))]);
+    const char* names[] = {confirm?"Kết thúc lượt":"Tấn công", confirm?"Hoàn tác":"Kỹ năng", "Vật phẩm", "Hủy", "Menu"};
+    const Rectangle rects[] = {{42,624,183,50},{250,624,183,50},{458,624,183,50},{940,624,136,50},{1090,624,160,50}};
+    auto& input = UiInput::instance();
+    for (int i = 0; i < 5; ++i) {
+        if (i == 2 && confirm) continue;
+        UiWidgets::button(rects[i],names[i],input.hover(rects[i]),false,true,i==4);
+    }
+    if (m_waitingTarget) {
+        const bool offensive = m_pendingAttack || (!m_pendingItem &&
+            m_selectedSkillIndex>=0 && static_cast<size_t>(m_selectedSkillIndex)<m_heroSkills.size() &&
+            m_heroSkills[static_cast<size_t>(m_selectedSkillIndex)].m_type==SkillType::DAMAGE);
+        if (offensive) input.setTargetCursor(true);
+    }
+    for (size_t i = 0; i < m_combatants.size(); ++i) {
+        if (!m_combatants[i]->isAlive()) continue;
+        const Vector2 head=m_views[i]->getHeadPos();
+        const Rectangle hit={head.x-70,head.y-20,140,135};
+        if (input.hover(hit)) {
+            const Character& c=*m_combatants[i];
+            if (!isHero(&c)) DrawCircleLines(static_cast<int>(head.x),static_cast<int>(m_views[i]->getSlot().m_feetPos.y),38,
+                                             m_waitingTarget?UiTheme::EMBER:UiTheme::AGED_GOLD);
+            UiWidgets::tooltip(c.getName(),TextFormat("HP %d/%d · MP %d/%d · SPD %d",c.getCurrentHp(),c.getStats().m_hp,c.getCurrentMp(),c.getStats().m_mp,c.getSpeed()),input.mouse());
+        }
+    }
 
     // ----- Menu ky nang (popup giua man hinh, ve cuoi cung de nam tren cung) -----
     if (m_isSelectingSkill)
         m_ui.drawSkillMenu(m_heroSkills, m_selectedSkillIndex, hero() ? hero()->getCurrentMp() : 0);
     if (m_isSelectingItem) {
         const auto items = availableItems();
-        DrawRectangle(340, 160, 600, 390, Color{20, 25, 40, 235});
-        DrawText("TUI DO: [1-9] Chon  [F1-F3] Dong doi  [ENTER] Dung", 355, 177, 18, WHITE);
-        if (m_selectedAlly) DrawText(TextFormat("Muc tieu: %s", m_selectedAlly->getName().c_str()), 355, 209, 18, YELLOW);
-        for (std::size_t i = 0; i < items.size() && i < 9; ++i)
-            DrawText(TextFormat("%d. %s", static_cast<int>(i + 1), items[i]->getName().c_str()),
-                     365, 246 + static_cast<int>(i) * 28, 18,
+        UiFrame::panel({340, 160, 600, 390},true);
+        UiText::draw("TÚI ĐỒ · Nhấp vật phẩm, sau đó nhấp đồng đội", 355, 177, 18, WHITE);
+        if (m_selectedAlly) UiText::draw(TextFormat("Mục tiêu: %s", m_selectedAlly->getName().c_str()), 355, 209, 18, YELLOW);
+        for (std::size_t i = 0; i < items.size() && i < 9; ++i) {
+            const int y=246+static_cast<int>(i)*28;
+            UiWidgets::itemIcon({365.0f,static_cast<float>(y)-9,37,32},items[i]->getName());
+            UiText::drawEllipsis(items[i]->getName(),{412.0f,static_cast<float>(y),480,23},18,
                      static_cast<int>(i) == m_selectedItemIndex ? YELLOW : RAYWHITE);
+            if (UiInput::instance().hover({355.0f,static_cast<float>(y)-5,550,34}))
+                UiWidgets::tooltip(items[i]->getName(),"Nhấp để chọn, sau đó nhấp vào một đồng đội",UiInput::instance().mouse());
+        }
     }
 }

@@ -40,12 +40,12 @@ void BattleMap::setStage(StageId stage, const std::string& backgroundPath) {
     }
 }
 
-float BattleMap::groundY() const { return GetScreenHeight() * HORIZON_RATIO; }   // y cua duong chan troi
+float BattleMap::groundY() const { return 720 * HORIZON_RATIO; }   // y cua duong chan troi
 
 void BattleMap::draw() const {
     if (m_hasBackground) {
         Rectangle src = { 0, 0, (float)m_background.width, (float)m_background.height };
-        Rectangle dst = { 0, 0, (float)GetScreenWidth(), (float)GetScreenHeight() };
+        Rectangle dst = { 0, 0, (float)1280, (float)720 };
         DrawTexturePro(m_background, src, dst, Vector2{ 0, 0 }, 0.0f, WHITE);
     } else {
         drawProceduralBackground();
@@ -53,7 +53,7 @@ void BattleMap::draw() const {
 }
 
 void BattleMap::drawProceduralBackground() const {
-    const int W = GetScreenWidth(), H = GetScreenHeight();
+    const int W = 1280, H = 720;
     const float hz = groundY();
     const bool s1 = (m_stage == StageId::STAGE_1);
 
@@ -97,7 +97,7 @@ std::vector<BattleSlot> BattleMap::layoutSide(const std::vector<float>& scaleMul
     std::vector<BattleSlot> slots(scaleMuls.size());
     if (scaleMuls.empty()) return slots;
 
-    const float W = (float)GetScreenWidth(), H = (float)GetScreenHeight();
+    const float W = (float)1280, H = (float)720;
     const size_t n = scaleMuls.size();
 
     auto mulOf = [&](size_t i) { return std::max(0.1f, scaleMuls[i] * (isPlayer ? PLAYER_SIZE_MUL : 1.0f)); };

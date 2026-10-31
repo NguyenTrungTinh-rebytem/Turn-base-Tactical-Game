@@ -1,3 +1,4 @@
+#include "graphics/ui/UiText.h"
 // Member 4 - Huynh Quang Khai | src/graphics/SpriteAnimation.cpp
 #include "SpriteAnimation.h"
 
@@ -75,7 +76,7 @@ void SpriteAnimation::drawFrame(Vector2 pos, bool flipX, float scale, Color tint
                 : (m_state == AnimState::TAKE_DAMAGE) ? RED : SKYBLUE;
         DrawRectangleRec(dest, c);
         DrawRectangleLinesEx(dest, 2, DARKGRAY);
-        DrawText(TextFormat("f%d", m_currentFrame), (int)dest.x + 4, (int)dest.y + 4, 10, BLACK);
+        UiText::draw(TextFormat("f%d", m_currentFrame), (int)dest.x + 4, (int)dest.y + 4, 10, BLACK);
         return;
     }
 

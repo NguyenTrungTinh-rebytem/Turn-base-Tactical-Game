@@ -3,6 +3,10 @@ project(TurnBaseTacticalGame CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# Correct UTF-8 string literals and source parsing in Visual Studio 2022.
+if (MSVC)
+    add_compile_options(/utf-8 /W4)
+endif()
 
 # 1. Thu nhặt toàn bộ file mã nguồn (.cpp)
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
