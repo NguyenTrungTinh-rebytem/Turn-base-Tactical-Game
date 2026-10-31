@@ -16,25 +16,25 @@ constexpr float BTN_W = 220.0f, BTN_H = 52.0f, BTN_GAP = 30.0f, BTN_Y = 640.0f;
 constexpr size_t MAX_ENEMY_LINES = 6;
 
 // ---- Mau ----
-constexpr Color COL_TITLE      { 255, 214, 96, 255 };
-constexpr Color COL_PANEL      { 16, 13, 36, 225 };
-constexpr Color COL_EDGE       { 140, 120, 180, 255 };
-constexpr Color COL_EDGE_SEL   { 255, 214, 96, 255 };
-constexpr Color COL_LABEL      { 190, 185, 220, 255 };
-constexpr Color COL_TEXT       { 238, 235, 252, 255 };
-constexpr Color COL_DIM        { 130, 126, 160, 255 };
-constexpr Color COL_ERR        { 255, 110, 110, 255 };
-constexpr Color COL_OK         { 120, 230, 140, 255 };
-constexpr Color COL_HEAD_NORMAL{ 40, 62, 128, 255 };
-constexpr Color COL_HEAD_BOSS  { 130, 32, 44, 255 };
+constexpr Color COL_TITLE = UiTheme::AGED_GOLD;
+constexpr Color COL_PANEL      { 28, 25, 40, 255 };
+constexpr Color COL_EDGE = UiTheme::SLATE;
+constexpr Color COL_EDGE_SEL = UiTheme::AGED_GOLD;
+constexpr Color COL_LABEL = UiTheme::MUTED;
+constexpr Color COL_TEXT = UiTheme::TEXT;
+constexpr Color COL_DIM = UiTheme::DISABLED;
+constexpr Color COL_ERR = UiTheme::DANGER;
+constexpr Color COL_OK = UiTheme::HP;
+constexpr Color COL_HEAD_NORMAL{ 48, 84, 105, 255 };
+constexpr Color COL_HEAD_BOSS  { 112, 54, 61, 255 };
 
 Color elementColor(Element e) {
     switch (e) {
-        case Element::KIM:  return Color{ 215, 215, 230, 255 };
-        case Element::MOC:  return Color{ 100, 210, 100, 255 };
-        case Element::THUY: return Color{ 90, 160, 255, 255 };
-        case Element::HOA:  return Color{ 255, 110, 80, 255 };
-        case Element::THO:  return Color{ 205, 160, 90, 255 };
+        case Element::KIM:  return UiTheme::elementColor(Element::KIM);
+        case Element::MOC:  return UiTheme::elementColor(Element::MOC);
+        case Element::THUY: return UiTheme::elementColor(Element::THUY);
+        case Element::HOA:  return UiTheme::elementColor(Element::HOA);
+        case Element::THO:  return UiTheme::elementColor(Element::THO);
     }
     return WHITE;
 }
@@ -223,7 +223,7 @@ void WaveSelectScreen::drawBackground() const {
         DrawTexturePro(m_background, Rectangle{ 0, 0, static_cast<float>(m_background.width), static_cast<float>(m_background.height) },
                        Rectangle{ 0, 0, static_cast<float>(W), static_cast<float>(H) }, Vector2{ 0, 0 }, 0.0f, WHITE);
     } else {
-        DrawRectangleGradientV(0, 0, W, H, Color{ 10, 8, 36, 255 }, Color{ 60, 30, 70, 255 });
+        DrawRectangleGradientV(0, 0, W, H, Color{ 18, 22, 30, 255 }, Color{ 54, 57, 70, 255 });
     }
     DrawRectangle(0, 0, W, H, Color{ 0, 0, 0, 160 });
 }
@@ -274,11 +274,11 @@ void WaveSelectScreen::drawCard(size_t index) const {
         drawCenteredText("ĐÃ HOÀN THÀNH", r.x + r.width / 2.0f, r.y + r.height - 38.0f, 18, COL_OK);
 
     // ---- Vien (vang khi duoc chon) ----
-    DrawRectangleLinesEx(r, selected ? 4.0f : 2.0f, selected ? COL_EDGE_SEL : COL_EDGE);
+    // Slanted panel already provides an ember edge; avoid rectangular outline.
 
     // ---- Khoa: phu toi + o khoa ----
     if (w.m_locked) {
-        DrawRectangleRec(r, Color{ 0, 0, 0, 175 });
+        DrawRectangleRec(r, Color{ 21, 18, 31, 255 });
         const float cx = r.x + r.width / 2.0f, cy = r.y + r.height / 2.0f - 10.0f;
         DrawRectangleLinesEx(Rectangle{ cx - 14, cy - 34, 28, 30 }, 5.0f, Color{ 200, 170, 80, 255 });   // quai khoa
         DrawRectangleRec(Rectangle{ cx - 24, cy - 8, 48, 36 }, Color{ 200, 170, 80, 255 });              // than khoa
@@ -291,7 +291,7 @@ void WaveSelectScreen::drawCard(size_t index) const {
             drawCenteredText(line.c_str(), cx, hy, 16, COL_TEXT);
             hy += 22.0f;
         }
-        DrawRectangleLinesEx(r, selected ? 4.0f : 2.0f, selected ? COL_EDGE_SEL : COL_EDGE);
+        // Slanted panel already provides an ember edge; avoid rectangular outline.
     }
 }
 
@@ -304,6 +304,6 @@ void WaveSelectScreen::drawButtons() const {
         const bool disabled = primary && selectedLocked();
         UiFrame::plaque(r, primary && !disabled, false, hover&&!disabled?1.f:0.f);
         drawCenteredText(labels[i], r.x + r.width / 2.0f, r.y + (r.height - 24.0f) / 2.0f, 24,
-                         disabled ? COL_DIM : (hover ? Color{ 255, 240, 170, 255 } : COL_TEXT));
+                         disabled ? COL_DIM : (hover ? UiTheme::AGED_GOLD : COL_TEXT));
     }
 }

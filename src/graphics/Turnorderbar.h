@@ -2,16 +2,22 @@
 // src/graphics/TurnOrderBar.h - Thanh thu tu luot (goc phai tren) co hieu ung chuyen dong.
 // Chi ve + animation, khong chua logic game. Thay cho BattleUI::drawTurnOrder.
 #include "raylib.h"
+#include "data/Element.h"
 #include <string>
+#include <memory>
 #include <vector>
 
 class Character;   // Forward declaration
+class CombatantView;
 
 class TurnOrderBar {
 public:
     // Ve va cap nhat animation (dung GetFrameTime()).
     // upcoming = thu tu hien thi, current = nguoi dang di (co the nullptr).
-    void draw(const std::vector<Character*>& upcoming, const Character* current);
+    void draw(const std::vector<Character*>& upcoming, const Character* current,
+              const std::vector<std::shared_ptr<Character>>& all,
+              const std::vector<std::unique_ptr<CombatantView>>& views, size_t partyCount);
+    const Character* hovered() const { return m_hovered; }
 
     // Xoa trang thai. Goi khi vao man moi / van moi, vi con tro Character cu khong con hop le.
     void reset();
@@ -21,6 +27,9 @@ private:
         const Character* m_character = nullptr;   // CHI de so sanh dia chi, khong dereference
         std::string m_name;                       // luu ban sao de hang dang mo dan van ve duoc
         int   m_spd = 0;
+        int   m_hp = 0;
+        int   m_maxHp = 0;
+        Element m_element = Element::KIM;
         int   m_rank = 0;
         bool  m_present = false;                  // con trong danh sach hien tai?
         bool  m_isCurrent = false;
@@ -33,6 +42,7 @@ private:
 
     std::vector<Row> m_rows;
     const Character* m_lastCurrent = nullptr;
+    const Character* m_hovered = nullptr;
     float m_flash = 0.0f;                         // nhay sang khi doi luot
     float m_time = 0.0f;
 };

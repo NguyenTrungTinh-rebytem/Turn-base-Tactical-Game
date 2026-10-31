@@ -2,48 +2,37 @@
 #include "UiTheme.h"
 #include <algorithm>
 namespace {
-void notched(Rectangle r, Color color, float notch) {
-    const Vector2 pts[8] = {
-        {r.x+notch,r.y},{r.x+r.width-notch,r.y},{r.x+r.width,r.y+notch},
-        {r.x+r.width,r.y+r.height-notch},{r.x+r.width-notch,r.y+r.height},
-        {r.x+notch,r.y+r.height},{r.x,r.y+r.height-notch},{r.x,r.y+notch}
-    };
-    for (int i = 0; i < 8; ++i) DrawTriangle({r.x+r.width/2, r.y+r.height/2}, pts[i], pts[(i+1)%8], color);
+Color shade(Color c,int amount){
+ auto clamp=[](int n){return static_cast<unsigned char>(std::max(0,std::min(255,n)));};
+ return {clamp(c.r+amount),clamp(c.g+amount),clamp(c.b+amount),255};
+}
+void shard(Rectangle r,Color fill,Color edge,bool emphasized){
+ if(r.width<8||r.height<8)return;
+ const float cut=std::min(9.f,r.height*.22f);
+ // Single solid chamfered silhouette, no lines crossing content.
+ DrawRectangleRec({r.x+cut,r.y,r.width-2*cut,r.height},fill);
+ DrawRectangleRec({r.x,r.y+cut,r.width,r.height-2*cut},fill);
+ DrawTriangle({r.x+cut,r.y},{r.x,r.y+cut},{r.x+cut,r.y+cut},fill);
+ DrawTriangle({r.x+r.width-cut,r.y},{r.x+r.width,r.y+cut},{r.x+r.width-cut,r.y+cut},fill);
+ DrawTriangle({r.x,r.y+r.height-cut},{r.x+cut,r.y+r.height},{r.x+cut,r.y+r.height-cut},fill);
+ DrawTriangle({r.x+r.width,r.y+r.height-cut},{r.x+r.width-cut,r.y+r.height},{r.x+r.width-cut,r.y+r.height-cut},fill);
+ DrawLineEx({r.x+cut,r.y+.5f},{r.x+r.width-cut,r.y+.5f},emphasized?2.f:1.f,edge);
+ if(emphasized)DrawRectangleRec({r.x+1,r.y+cut,3,r.height-cut*2},edge);
 }
 }
 namespace UiFrame {
-void panel(Rectangle r, bool highlighted) {
-    DrawRectangleRec({r.x+3,r.y+5,r.width,r.height}, Color{0,0,0,115});
-    notched(r, UiTheme::IRON, 13);
-    DrawLineEx({r.x+18,r.y+4}, {r.x+r.width-18,r.y+4}, 1.5f, highlighted?UiTheme::EMBER:UiTheme::SLATE);
-    DrawLineEx({r.x+18,r.y+r.height-5}, {r.x+r.width-18,r.y+r.height-5}, 1.5f, UiTheme::SLATE);
-    for (Vector2 p : {Vector2{r.x+13,r.y+13},Vector2{r.x+r.width-13,r.y+13},
-                      Vector2{r.x+13,r.y+r.height-13},Vector2{r.x+r.width-13,r.y+r.height-13}}) {
-        DrawCircleV(p, 3.0f, UiTheme::AGED_GOLD);
-        DrawCircleV(p, 1.1f, UiTheme::ASH);
-    }
+void panel(Rectangle r,bool highlighted){
+ shard(r,{21,18,31,255},highlighted?UiTheme::AGED_GOLD:Color{75,69,86,255},highlighted);
 }
-void plaque(Rectangle r, bool active, bool danger, float hover) {
-    notched({r.x+2,r.y+4,r.width,r.height}, {0,0,0,110}, 11);
-    Color base = active ? Color{90,48,39,248}: UiTheme::IRON;
-    if (hover > 0.01f) {
-        base.r = static_cast<unsigned char>(std::min(255.0f, base.r + 24.0f * hover));
-        base.g = static_cast<unsigned char>(std::min(255.0f, base.g + 11.0f * hover));
-    }
-    notched(r, base, 10);
-    Color edge = danger ? UiTheme::DANGER : active ? UiTheme::EMBER : UiTheme::SLATE;
-    DrawLineEx({r.x+12,r.y+3},{r.x+r.width-12,r.y+3},active ? 3.0f:1.6f,edge);
-    DrawLineEx({r.x+12,r.y+r.height-3},{r.x+r.width-12,r.y+r.height-3},1.6f,edge);
-    if (active || hover > 0.3f) {
-        DrawCircleV({r.x+9,r.y+r.height/2},2.5f,edge);
-        DrawCircleV({r.x+r.width-9,r.y+r.height/2},2.5f,edge);
-    }
+void plaque(Rectangle r,bool active,bool danger,float hover){
+ const bool focus=active||hover>.01f;
+ const Color base=danger?Color{74,37,46,255}:active?Color{66,49,39,255}:Color{32,29,43,255};
+ const Color fill=shade(base,hover>0.f?static_cast<int>(10*std::min(1.f,hover)):0);
+ shard(r,fill,danger?UiTheme::DANGER:focus?UiTheme::AGED_GOLD:Color{74,68,84,255},focus);
 }
-void gauge(Rectangle bounds, float ratio, Color tint) {
-    ratio = std::max(0.0f, std::min(1.0f, ratio));
-    DrawRectangleRec(bounds, {7,8,12,240});
-    DrawRectangleRec({bounds.x+2,bounds.y+2,(bounds.width-4)*ratio,bounds.height-4},tint);
-    DrawLineEx({bounds.x,bounds.y},{bounds.x+bounds.width,bounds.y},1,UiTheme::AGED_GOLD);
-    DrawLineEx({bounds.x,bounds.y+bounds.height},{bounds.x+bounds.width,bounds.y+bounds.height},1,UiTheme::SLATE);
+void gauge(Rectangle r,float value,Color tint){
+ const float fraction=std::max(0.f,std::min(1.f,value));
+ DrawRectangleRec(r,{13,12,19,255});
+ if(fraction>.001f)DrawRectangleRec({r.x+1,r.y+1,(r.width-2)*fraction,std::max(1.f,r.height-2)},tint);
 }
 }

@@ -6,9 +6,9 @@
 
 namespace {
 Font roleFont(int size) {
-    return FontManager::instance().font(size >= 32 ? FontManager::Role::DISPLAY : FontManager::Role::BODY, size);
+    return FontManager::instance().font(size >= 32 ? FontManager::Role::DISPLAY : (size >= 22 ? FontManager::Role::HUD : FontManager::Role::BODY), size);
 }
-float letterSpacing(int size) { return size >= 32 ? 1.0f : 0.3f; }
+float letterSpacing(int size) { return size >= 22 && size < 32 ? 0.7f : 0.25f; }
 // Removes a single UTF-8 codepoint at the end without splitting a character.
 void popCodepoint(std::string& text) {
     if (text.empty()) return;
@@ -30,16 +30,25 @@ Vector2 measureEx(const std::string& text, int size) {
     return MeasureTextEx(roleFont(size), text.c_str(), static_cast<float>(size), letterSpacing(size));
 }
 void drawShadowed(const std::string& text, int x, int y, int size, Color color) {
-    draw(text.c_str(), x + 2, y + 3, size, Color{0, 0, 0, static_cast<unsigned char>(color.a * 0.75f)});
+    draw(text.c_str(), x + 1, y + 1, size, Color{0, 0, 0, static_cast<unsigned char>(color.a * 0.75f)});
     draw(text.c_str(), x, y, size, color);
 }
 void drawEllipsis(const std::string& text, Rectangle bounds, int size, Color color) {
-    std::string visible = text;
-    if (measure(visible.c_str(), size) > bounds.width) {
-        const std::string ellipsis = "…";
-        while (!visible.empty() && measure((visible + ellipsis).c_str(), size) > bounds.width) popCodepoint(visible);
-        visible += ellipsis;
+    if (text.empty() || bounds.width <= 0.f) return;
+    // Common path: draw without allocating a temporary std::string.
+    if (measure(text.c_str(), size) <= bounds.width) {
+        draw(text.c_str(), static_cast<int>(bounds.x), static_cast<int>(bounds.y), size, color);
+        return;
     }
+    const std::string dots = "…";
+    if (measure(dots.c_str(), size) > bounds.width) return;
+    std::string visible = text;
+    // Measure the ellipsis just once, rather than allocating a new
+    // concatenated string for every candidate codepoint.
+    const float available = bounds.width - measure(dots.c_str(), size) - letterSpacing(size);
+    while (!visible.empty() && measure(visible.c_str(), size) > available)
+        popCodepoint(visible);
+    visible += dots;
     draw(visible.c_str(), static_cast<int>(bounds.x), static_cast<int>(bounds.y), size, color);
 }
 void drawWrapped(const std::string& text, Rectangle bounds, int size, Color color) {
@@ -68,12 +77,12 @@ void drawWrapped(const std::string& text, Rectangle bounds, int size, Color colo
     if (!line.empty() && y + size <= bounds.y + bounds.height) drawEllipsis(line, {bounds.x, y, bounds.width, static_cast<float>(size)}, size, color);
 }
 void drawFontTest() {
-    DrawRectangle(80, 42, 1120, 638, Color{11, 12, 18, 250});
+    DrawRectangle(80, 42, 1120, 638, Color{11, 10, 16, 250});
     DrawRectangleLinesEx({80, 42, 1120, 638}, 2, UiTheme::EMBER);
-    draw("FONT TEST · VI / EN", 108, 65, 32, UiTheme::AGED_GOLD);
+    draw("KIỂM TRA FONT · VI / EN", 108, 65, 32, UiTheme::AGED_GOLD);
     const char* pangram = "Chú bé quàng khăn đỏ vượt đèo, ngắm ánh trăng và dòng sông.";
-    const char* alphabet = "ÀÁẢÃẠ ĂẰẮẲẴẶ ÂẦẤẨẪẬ Đ ÊỀẾỂỄỆ ÔỒỐỔỖỘ ƠỜỚỞỠỢ ƯỪỨỬỮỰ ỲÝỶỸỴ";
-    const int sizes[] = {14, 18, 24, 32, 48};
+    const char* alphabet = "À Á Ả Ã Ạ Ắ Ằ Ẳ Ẵ Ặ Ấ Ầ Ẩ Ẫ Ậ Đ Ê Ế Ề Ể Ễ Ệ Ô Ố Ồ Ổ Ỗ Ộ Ơ Ớ Ờ Ở Ỡ Ợ Ư Ứ Ừ Ử Ữ Ự Ỳ Ý Ỷ Ỹ Ỵ";
+    const int sizes[] = {16, 18, 22, 28, 40};
     float y = 120;
     for (int size : sizes) {
         draw(TextFormat("%d px", size), 108, static_cast<int>(y), 14, UiTheme::MUTED);
@@ -81,6 +90,6 @@ void drawFontTest() {
         y += size + 28;
     }
     drawWrapped(alphabet, {108, y + 8, 1040, 110}, 20, UiTheme::TEXT);
-    draw("Nhấp góc trái bên trên để đóng", 108, 648, 14, UiTheme::MUTED);
+    draw("Nhấp góc trái bên trên để đóng", 108, 648, 16, UiTheme::MUTED);
 }
 }

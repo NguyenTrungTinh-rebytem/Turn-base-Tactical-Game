@@ -154,6 +154,7 @@ HeroConfig m_heroConfig;
     // ----- Entities (Engine so huu, cac module khac chi quan sat bang con tro tho) -----
     std::vector<std::shared_ptr<Character>> m_combatants;            // [0] = hero
     std::vector<std::unique_ptr<CombatantView>> m_views;       // song song voi m_combatants
+    std::vector<size_t> m_renderOrder;  // Reused render-only index buffer; avoid per-frame allocations.
     std::unordered_map<const Character*, StatusEffectManager> m_statusEffects;
     std::unordered_map<const Character*, int> m_baseSpeed;
     std::unordered_map<const Character*, float> m_scaleMul;          // he so to sprite (hero khung 128 -> nho lai)
@@ -185,6 +186,9 @@ HeroConfig m_heroConfig;
     std::string m_battleLog = "Chao mung den voi Battle Engine!";
     std::vector<std::string> m_logEntries;
     int m_logScroll = 0;
+    int m_listScroll = 0;
+    bool m_draggingListScroll = false;
+    bool m_logExpanded = false;
 
     std::mt19937 m_rng{ std::random_device{}() };
     RenderTexture2D m_logicalTarget{};

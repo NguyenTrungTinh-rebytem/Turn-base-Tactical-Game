@@ -22,7 +22,7 @@ void UiInput::beginFrame() {
     m_pointer = false;
     m_target = false;
     if (m_leftPressed) { m_clickTime = static_cast<float>(GetTime()); m_clickPos = m_mouse; }
-    if (m_leftPressed && CheckCollisionPointRec(m_mouse,{0,0,43,43})) {m_debug=!m_debug;m_consumed=true;}
+    if (m_leftPressed && CheckCollisionPointRec(m_mouse,{0,0,19,19})) {m_debug=!m_debug;m_consumed=true;}
 }
 bool UiInput::hover(Rectangle area) {
     const bool hit = m_inside && CheckCollisionPointRec(m_mouse, area);

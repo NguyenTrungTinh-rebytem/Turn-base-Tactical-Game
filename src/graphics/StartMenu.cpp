@@ -3,6 +3,7 @@
 #include "graphics/ui/UiWidgets.h"
 #include "graphics/ui/UiTheme.h"
 #include "graphics/ui/UiText.h"
+#include "graphics/ui/Strings.h"
 // Member 4 - Huynh Quang Khai | src/graphics/StartMenu.cpp
 #include "StartMenu.h"
 #include <algorithm>
@@ -19,18 +20,18 @@ constexpr float FADE_IN_SECONDS = 0.8f;
 constexpr float HOVER_SPEED     = 10.0f;
 
 // ---- Mau ----
-constexpr Color COL_TITLE        { 255, 214, 96, 255 };
-constexpr Color COL_TITLE_SHADOW { 60, 30, 10, 255 };
-constexpr Color COL_SUBTITLE     { 220, 210, 240, 255 };
+constexpr Color COL_TITLE = UiTheme::AGED_GOLD;
+constexpr Color COL_TITLE_SHADOW { 15, 18, 23, 235 };
+constexpr Color COL_SUBTITLE = UiTheme::MUTED;
 constexpr Color COL_BTN          { 18, 14, 40, 190 };
 constexpr Color COL_BTN_SELECTED { 90, 60, 20, 230 };
 constexpr Color COL_BTN_EDGE     { 140, 120, 180, 255 };
-constexpr Color COL_BTN_EDGE_SEL { 255, 214, 96, 255 };
-constexpr Color COL_TEXT         { 235, 232, 250, 255 };
-constexpr Color COL_TEXT_SEL     { 255, 240, 170, 255 };
+constexpr Color COL_BTN_EDGE_SEL = UiTheme::EMBER;
+constexpr Color COL_TEXT = UiTheme::TEXT;
+constexpr Color COL_TEXT_SEL = UiTheme::AGED_GOLD;
 constexpr Color COL_OK           { 120, 230, 140, 255 };
 constexpr Color COL_ERR          { 255, 110, 110, 255 };
-constexpr Color COL_EMBER(unsigned char alpha) { return Color{ 255, 140, 70, alpha }; }   // tan lua (doi sang 190,255,120 neu muon dom dom xanh)
+constexpr Color COL_EMBER(unsigned char alpha) { return Color{ 193, 139, 97, alpha }; }   // tan lua (doi sang 190,255,120 neu muon dom dom xanh)
 
 float clamp01(float v) { return std::max(0.0f, std::min(1.0f, v)); }
 
@@ -48,8 +49,8 @@ void drawCenteredText(const char* text, float centerX, float y, int size, Color 
 } // namespace
 
 StartMenu::StartMenu() {
-    m_buttons.push_back({ "Bắt đầu", MenuAction::START_GAME, 0.0f });
-    m_buttons.push_back({ "Thoát",   MenuAction::EXIT,       0.0f });
+    m_buttons.push_back({ Strings::get(Strings::Key::START), MenuAction::START_GAME, 0.0f });
+    m_buttons.push_back({ Strings::get(Strings::Key::EXIT),   MenuAction::EXIT,       0.0f });
 }
 
 StartMenu::~StartMenu() { unloadAll(); }
@@ -105,6 +106,7 @@ MenuAction StartMenu::handleInput() {
         return MenuAction::NONE;
     }
 
+    // Revision 3 ships Vietnamese-only until battle logs and CSV are fully translated.
     // ---- Ban phim ----
     if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) m_selected = (m_selected + 1) % count;
     if (IsKeyPressed(KEY_UP)   || IsKeyPressed(KEY_W)) m_selected = (m_selected + count - 1) % count;
@@ -139,9 +141,9 @@ void StartMenu::draw() const {
     if (m_confirmExit) {
         DrawRectangle(0, 0, UiTheme::WIDTH, UiTheme::HEIGHT, Color{0,0,0,178});
         UiFrame::panel({390,275,500,215},true);
-        drawCenteredText("Rời khỏi hành trình?",640,310,32,UiTheme::AGED_GOLD);
-        UiWidgets::button({450,398,172,55},"Ở lại", UiInput::instance().hover({450,398,172,55}));
-        UiWidgets::button({658,398,172,55},"Thoát", UiInput::instance().hover({658,398,172,55}),false,true,true);
+        drawCenteredText(Strings::get(Strings::Key::EXIT_CONFIRM),640,310,32,UiTheme::AGED_GOLD);
+        UiWidgets::button({450,398,172,55},Strings::get(Strings::Key::STAY), UiInput::instance().hover({450,398,172,55}));
+        UiWidgets::button({658,398,172,55},Strings::get(Strings::Key::EXIT), UiInput::instance().hover({658,398,172,55}),false,true,true);
     }
 
     // Fade-in tu mau den khi vao menu
@@ -162,12 +164,12 @@ void StartMenu::drawBackground() const {
     }
 
     // Dom dom bay nhe (tinh tu thoi gian, khong luu trang thai)
-    for (int i = 0; i < 18; ++i) {
+    for (int i = 0; i < 7; ++i) {
         const float t = m_time * (0.25f + 0.5f * hash01(i * 3 + 1)) + hash01(i * 7) * 20.0f;
         const float x = hash01(i * 11 + 2) * W + std::sin(t) * 24.0f;
         const float y = H * (0.55f + 0.38f * hash01(i * 5 + 3)) + std::cos(t * 0.8f) * 14.0f;
         const float glow = 0.5f + 0.5f * std::sin(m_time * 2.0f + i);
-        DrawCircleV(Vector2{ x, y }, 2.0f + glow, COL_EMBER(static_cast<unsigned char>(80 + 150 * glow)));
+        DrawCircleV(Vector2{ x, y }, 1.2f + glow, COL_EMBER(static_cast<unsigned char>(35 + 55 * glow)));
     }
 
     // Toi nhe phia tren/duoi de chu de doc
@@ -199,9 +201,10 @@ void StartMenu::drawTitle() const {
     const float W = static_cast<float>(UiTheme::WIDTH);
     const float H = static_cast<float>(UiTheme::HEIGHT);
     const float cx = W * m_menuCenterX;
-    const float bob = std::sin(m_time * 1.8f) * 4.0f;
+    const float bob = 0.f; // stable title improves long-session comfort
     const float y = H * TITLE_Y_RATIO + bob;
 
+    UiFrame::panel({cx-330,y-24,660,162},false);
     // Bong + chu vang
     drawCenteredText("THE FIRST STEP", cx + 4.0f, y + 4.0f, 76, COL_TITLE_SHADOW);
     drawCenteredText("THE FIRST STEP", cx, y, 76, COL_TITLE);
@@ -210,7 +213,7 @@ void StartMenu::drawTitle() const {
 
     // Duong ke trang tri
     const float lineW = 300.0f, lineY = y + 128.0f;
-    DrawLineEx(Vector2{ cx - lineW / 2.0f, lineY }, Vector2{ cx + lineW / 2.0f, lineY }, 2.0f, Color{ 255, 214, 96, 160 });
+    (void)lineW; (void)lineY; // no decorative line crossing content
 }
 
 void StartMenu::drawButtons() const {
@@ -220,17 +223,17 @@ void StartMenu::drawButtons() const {
 
         // Nut dang chon phong to nhe va sang len
         Rectangle r = buttonRect(i);
-        const float grow = 10.0f * b.m_hover;
+        const float grow = 3.0f * b.m_hover;
         r.x -= grow; r.width += grow * 2.0f;
 
         UiFrame::plaque(r, selected, i == 1, b.m_hover);
 
         const int fontSize = 28;
         const float textY = r.y + (r.height - fontSize) / 2.0f;
-        drawCenteredText(b.m_label.c_str(), r.x + r.width / 2.0f, textY, fontSize, selected ? COL_TEXT_SEL : COL_TEXT);
+        drawCenteredText(Strings::get(b.m_action==MenuAction::EXIT?Strings::Key::EXIT:Strings::Key::START), r.x + r.width / 2.0f, textY, fontSize, selected ? COL_TEXT_SEL : COL_TEXT);
 
         if (selected) {   // mui ten hai ben
-            const float ax = 16.0f + 4.0f * std::sin(m_time * 6.0f);
+            const float ax = 16.0f;
             const float cy = r.y + r.height / 2.0f;
             DrawTriangle(Vector2{ r.x + 12.0f, cy - 9.0f }, Vector2{ r.x + 12.0f, cy + 9.0f }, Vector2{ r.x + ax + 10.0f, cy }, COL_BTN_EDGE_SEL);
             DrawTriangle(Vector2{ r.x + r.width - 12.0f, cy + 9.0f }, Vector2{ r.x + r.width - 12.0f, cy - 9.0f },
@@ -243,9 +246,9 @@ void StartMenu::drawFooter() const {
     const float W = static_cast<float>(UiTheme::WIDTH);
     const float H = static_cast<float>(UiTheme::HEIGHT);
 
-    drawCenteredText("Dùng chuột để khám phá hành trình", W / 2.0f, H - 34.0f, 18, Color{ 200, 195, 225, 220 });
+    drawCenteredText("", W / 2.0f, H - 34.0f, 18, Color{ 200, 195, 225, 220 });
     if (!m_statusText.empty())
         UiText::draw(m_statusText.c_str(), 20, static_cast<int>(H) - 30, 16, m_statusOk ? COL_OK : COL_ERR);
-    const char* credit = "DT10 - Turn-based RPG Battle Engine";
-    UiText::draw(credit, static_cast<int>(W) - UiText::measure(credit, 14) - 20, static_cast<int>(H) - 28, 14, Color{ 160, 155, 190, 200 });
+    const char* credit = "ĐT10 · RPG chiến thuật";
+    UiText::draw(credit, static_cast<int>(W) - UiText::measure(credit, 16) - 20, static_cast<int>(H) - 30, 16, UiTheme::MUTED);
 }

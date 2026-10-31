@@ -3,6 +3,8 @@
 #include "graphics/ui/UiWidgets.h"
 #include "graphics/ui/UiTheme.h"
 #include "graphics/ui/UiText.h"
+#include "graphics/ui/Strings.h"
+#include "graphics/ui/UiIcons.h"
 // src/graphics/PrepMenuScreen.cpp
 #include "PrepMenuScreen.h"
 #include "SkillTooltip.h"
@@ -18,24 +20,24 @@ constexpr size_t MAX_SKILL_ROWS = 6;
 constexpr int    ITEM_SLOTS = 8;
 
 // ---- Mau (dong bo voi WaveSelectScreen) ----
-constexpr Color COL_TITLE    { 255, 214, 96, 255 };
-constexpr Color COL_PANEL    { 16, 13, 36, 225 };
-constexpr Color COL_EDGE     { 140, 120, 180, 255 };
-constexpr Color COL_EDGE_SEL { 255, 214, 96, 255 };
-constexpr Color COL_LABEL    { 190, 185, 220, 255 };
-constexpr Color COL_TEXT     { 238, 235, 252, 255 };
-constexpr Color COL_DIM      { 130, 126, 160, 255 };
-constexpr Color COL_ERR      { 255, 110, 110, 255 };
-constexpr Color COL_OK       { 120, 230, 140, 255 };
+constexpr Color COL_TITLE = UiTheme::AGED_GOLD;
+constexpr Color COL_PANEL    { 28, 25, 40, 255 };
+constexpr Color COL_EDGE = UiTheme::SLATE;
+constexpr Color COL_EDGE_SEL = UiTheme::AGED_GOLD;
+constexpr Color COL_LABEL = UiTheme::MUTED;
+constexpr Color COL_TEXT = UiTheme::TEXT;
+constexpr Color COL_DIM = UiTheme::DISABLED;
+constexpr Color COL_ERR = UiTheme::DANGER;
+constexpr Color COL_OK = UiTheme::HP;
 constexpr Color COL_BOSS     { 200, 50, 60, 255 };
 
 Color elementColor(Element e) {
     switch (e) {
-        case Element::KIM:  return Color{ 215, 215, 230, 255 };
-        case Element::MOC:  return Color{ 100, 210, 100, 255 };
-        case Element::THUY: return Color{ 90, 160, 255, 255 };
-        case Element::HOA:  return Color{ 255, 110, 80, 255 };
-        case Element::THO:  return Color{ 205, 160, 90, 255 };
+        case Element::KIM:  return UiTheme::elementColor(Element::KIM);
+        case Element::MOC:  return UiTheme::elementColor(Element::MOC);
+        case Element::THUY: return UiTheme::elementColor(Element::THUY);
+        case Element::HOA:  return UiTheme::elementColor(Element::HOA);
+        case Element::THO:  return UiTheme::elementColor(Element::THO);
     }
     return WHITE;
 }
@@ -62,8 +64,9 @@ SkillTipInfo toTipInfo(const PrepSkillInfo& s) {
     return t;
 }
 const char* tabLabel(int i) {
-    static const char* labels[] = { "DOI HINH", "Kỹ năng", "Túi đồ", "THONG TIN CONG" };
-    return labels[i];
+    static const Strings::Key keys[] = {Strings::Key::SQUAD,Strings::Key::SKILLS,
+        Strings::Key::INVENTORY,Strings::Key::WAVE_INFO};
+    return Strings::get(keys[i]);
 }
 
 void drawCenteredText(const char* text, float cx, float y, int size, Color c) {
@@ -231,7 +234,7 @@ void PrepMenuScreen::drawBackground() const {
         DrawTexturePro(m_background, Rectangle{ 0, 0, static_cast<float>(m_background.width), static_cast<float>(m_background.height) },
                        Rectangle{ 0, 0, static_cast<float>(W), static_cast<float>(H) }, Vector2{ 0, 0 }, 0.0f, WHITE);
     } else {
-        DrawRectangleGradientV(0, 0, W, H, Color{ 10, 8, 36, 255 }, Color{ 60, 30, 70, 255 });
+        DrawRectangleGradientV(0, 0, W, H, Color{ 18, 22, 30, 255 }, Color{ 54, 57, 70, 255 });
     }
     DrawRectangle(0, 0, W, H, Color{ 0, 0, 0, 160 });
 }
@@ -258,7 +261,7 @@ void PrepMenuScreen::drawPartyTab(const Rectangle& area) const {
         const float cx = r.x + r.width / 2.0f;
         if (h) {
             UiFrame::panel(r, hovered);
-            DrawRectangleRec(Rectangle{ r.x+12, r.y+9, r.width-24, 42.0f }, Color{ 55, 42, 43, 238 });
+            DrawRectangleRec(Rectangle{ r.x+12, r.y+9, r.width-24, 42.0f }, Color{ 47, 40, 46, 255 });
             drawCenteredText(h->m_name.c_str(), cx, r.y + 14.0f, 24, COL_TEXT);
             drawCenteredText(TextFormat("%s %s", h->m_race.c_str(), h->m_class.c_str()), cx, r.y + 68.0f, 17, COL_LABEL);
             DrawCircle(static_cast<int>(cx - 30), static_cast<int>(r.y + 106), 7.0f, elementColor(h->m_element));
@@ -275,14 +278,14 @@ void PrepMenuScreen::drawPartyTab(const Rectangle& area) const {
             drawCenteredText(i == 0 ? "Thủ lĩnh · Nhấp để đổi" : "Đồng đội · Nhấp để đổi",
                              cx, r.y + r.height - 29.0f, 14, COL_OK);
         } else {
-            DrawRectangleRec(r, Color{20,18,40,200});
+            UiFrame::panel(r,hovered);
             const float cy = r.y + r.height / 2.0f;
             DrawRectangle(static_cast<int>(cx - 3), static_cast<int>(cy - 28), 6, 56, COL_DIM);
             DrawRectangle(static_cast<int>(cx - 28), static_cast<int>(cy - 3), 56, 6, COL_DIM);
             drawCenteredText(TextFormat("Đồng đội %d", i + 1), cx, cy + 46.0f, 20, COL_LABEL);
             drawCenteredText("Nhấp để chọn", cx, cy + 74.0f, 16, COL_OK);
         }
-        DrawRectangleLinesEx(r, hovered ? 3.0f : 2.0f, hovered ? COL_EDGE_SEL : (h ? COL_EDGE_SEL : COL_DIM));
+        // Shard frame already marks hover/selection, no rectangular outlines.
     }
 }
 
@@ -304,8 +307,7 @@ void PrepMenuScreen::drawSkillsTab(const Rectangle& area) const {
         const Rectangle r = { area.x + 24.0f, y, area.width - 48.0f, rowH };
         const bool rowHover = CheckCollisionPointRec(UiInput::instance().mouse(), r);
         if (rowHover) m_hoverSkill = static_cast<int>(i);
-        DrawRectangleRec(r, rowHover ? Color{ 40, 34, 80, 245 } : Color{ 28, 24, 58, 235 });
-        DrawRectangleLinesEx(r, 2.0f, rowHover ? COL_EDGE_SEL : COL_EDGE);
+        UiFrame::plaque(r,rowHover,false,rowHover?1.f:0.f);
         DrawRectangle(static_cast<int>(r.x), static_cast<int>(r.y), 6, static_cast<int>(r.height), elementColor(s.m_element));
 
         UiText::draw(s.m_name.c_str(), static_cast<int>(r.x + 24), static_cast<int>(r.y + 10), 22, COL_TEXT);
@@ -333,13 +335,12 @@ void PrepMenuScreen::drawItemsTab(const Rectangle& area) const {
         const int col = i % cols, row = i / cols;
         const Rectangle r = { area.x + pad + col * (slotW + gap), area.y + top + row * (slotH + gap), slotW, slotH };
         const bool filled = static_cast<size_t>(i) < m_info.m_items.size();
-        DrawRectangleRec(r, filled ? Color{ 28, 24, 58, 235 } : Color{ 20, 18, 40, 170 });
-        DrawRectangleLinesEx(r, 2.0f, filled ? COL_EDGE : Color{ 70, 66, 96, 255 });
+        UiFrame::panel(r,filled);
         if (filled) {
             const PrepItemInfo& it = m_info.m_items[static_cast<size_t>(i)];
             const float cx = r.x + r.width / 2.0f;
             UiWidgets::itemIcon({cx-30,r.y+20,60,65}, it.m_name);
-            drawCenteredText(it.m_name.c_str(), cx, r.y + 92.0f, 20, COL_TEXT);
+            UiText::drawEllipsis(it.m_name,{r.x+12,r.y+92.f,r.width-24,26},20,COL_TEXT);
             drawCenteredText(TextFormat("x%d", it.m_count), cx, r.y + 118.0f, 18, COL_OK);
             if (UiInput::instance().hover(r))
                 UiWidgets::tooltip(it.m_name, TextFormat("Số lượng: %d", it.m_count), UiInput::instance().mouse());
@@ -357,7 +358,7 @@ void PrepMenuScreen::drawGateTab(const Rectangle& area) const {
     const float rightX = area.x + pad + leftW + 36.0f, rightW = area.x + area.width - pad - rightX;
 
     // ---- Cot trai: cong + thoi han ----
-    UiText::draw(g.m_title.empty() ? "CONG" : g.m_title.c_str(), static_cast<int>(leftX), static_cast<int>(area.y + 22), 34, COL_TITLE);
+    UiText::draw(g.m_title.empty() ? "Cổng" : g.m_title.c_str(), static_cast<int>(leftX), static_cast<int>(area.y + 22), 34, COL_TITLE);
     float y = area.y + 72.0f;
     for (const std::string& line : splitLines(g.m_description)) {
         UiText::draw(line.c_str(), static_cast<int>(leftX), static_cast<int>(y), 18, COL_LABEL);
@@ -367,8 +368,7 @@ void PrepMenuScreen::drawGateTab(const Rectangle& area) const {
     // Thoi han (dong ho cong)
     const Rectangle clockBox = { leftX, area.y + 170.0f, leftW, 120.0f };
     const bool hasDeadline = g.m_deadlineTurns >= 0;
-    DrawRectangleRec(clockBox, Color{ 28, 24, 58, 235 });
-    DrawRectangleLinesEx(clockBox, 2.0f, hasDeadline ? COL_EDGE_SEL : COL_EDGE);
+    UiFrame::panel(clockBox, hasDeadline);
     UiText::draw("THỜI HẠN", static_cast<int>(clockBox.x + 20), static_cast<int>(clockBox.y + 16), 16, COL_DIM);
     if (hasDeadline) {
         UiText::draw(TextFormat("%d", g.m_deadlineTurns), static_cast<int>(clockBox.x + 20), static_cast<int>(clockBox.y + 44), 56, COL_TITLE);
@@ -380,26 +380,39 @@ void PrepMenuScreen::drawGateTab(const Rectangle& area) const {
 
     // Goi y khac he
     const Rectangle hintBox = { leftX, area.y + 310.0f, leftW, 150.0f };
-    DrawRectangleRec(hintBox, Color{ 28, 24, 58, 235 });
-    DrawRectangleLinesEx(hintBox, 2.0f, COL_EDGE);
+    UiFrame::panel(hintBox);
     UiText::draw("VÒNG KHẮC HỆ", static_cast<int>(hintBox.x + 20), static_cast<int>(hintBox.y + 14), 16, COL_DIM);
-    const Element ring[] = { Element::KIM, Element::MOC, Element::THO, Element::THUY, Element::HOA };
-    float hx = hintBox.x + 20.0f;
-    for (int i = 0; i < 5; ++i) {
-        DrawCircle(static_cast<int>(hx + 8), static_cast<int>(hintBox.y + 58), 8.0f, elementColor(ring[i]));
-        UiText::draw(elementName(ring[i]), static_cast<int>(hx + 20), static_cast<int>(hintBox.y + 49), 16, elementColor(ring[i]));
-        hx += 78.0f;
+    const Element ring[]={Element::KIM,Element::MOC,Element::THO,Element::THUY,Element::HOA};
+    const char* names[]={"Kim","Mộc","Thổ","Thủy","Hỏa"};
+    const Vector2 center={hintBox.x+86,hintBox.y+92};
+    Vector2 nodes[5];
+    for(int i=0;i<5;++i){
+        const float theta=-1.5707963f+static_cast<float>(i)*6.2831853f/5.f;
+        nodes[i]={center.x+53.f*std::cos(theta),center.y+53.f*std::sin(theta)};
     }
-    UiText::draw("Khắc hệ: ×1.5 sát thương", static_cast<int>(hintBox.x + 20), static_cast<int>(hintBox.y + 84), 16, COL_OK);
-    UiText::draw("Bị khắc hệ: ×0.5 sát thương", static_cast<int>(hintBox.x + 20), static_cast<int>(hintBox.y + 108), 16, COL_ERR);
-    UiText::draw("Kim › Mộc › Thổ › Thủy › Hỏa › Kim", static_cast<int>(hintBox.x + 20), static_cast<int>(hintBox.y + 128), 14, COL_DIM);
+    for(int i=0;i<5;++i)DrawLineEx(nodes[i],nodes[(i+2)%5],1.5f,UiTheme::EMBER);
+    for(int i=0;i<5;++i){
+        DrawPoly(nodes[i],5,12,0,UiTheme::IRON);
+        DrawPolyLines(nodes[i],5,12,0,elementColor(ring[i]));
+        UiIcons::element(ring[i],nodes[i],6);
+        if(UiInput::instance().hover({nodes[i].x-16,nodes[i].y-16,32,32})){
+            const int e=static_cast<int>(ring[i]);
+            UiWidgets::tooltip(names[i],TextFormat("Kim ×%.1f · Mộc ×%.1f · Thủy ×%.1f · Hỏa ×%.1f · Thổ ×%.1f",
+                ELEMENT_MATRIX[e][0],ELEMENT_MATRIX[e][1],ELEMENT_MATRIX[e][2],ELEMENT_MATRIX[e][3],ELEMENT_MATRIX[e][4]),UiInput::instance().mouse());
+        }
+    }
+    UiText::draw("Chạm vào biểu tượng để xem hệ số",static_cast<int>(hintBox.x+154),
+       static_cast<int>(hintBox.y+52),16,UiTheme::TEXT);
+    UiText::draw("Khắc hệ  ×1.5",static_cast<int>(hintBox.x+154),
+       static_cast<int>(hintBox.y+84),18,UiTheme::HP);
+    UiText::draw("Bị khắc  ×0.5",static_cast<int>(hintBox.x+154),
+       static_cast<int>(hintBox.y+112),18,UiTheme::DANGER);
 
     // ---- Cot phai: boss + quai ----
     float ry = area.y + 22.0f;
     if (g.m_hasBoss) {
         const Rectangle boss = { rightX, ry, rightW, 130.0f };
-        DrawRectangleRec(boss, Color{ 60, 20, 30, 235 });
-        DrawRectangleLinesEx(boss, 3.0f, COL_BOSS);
+        UiFrame::panel(boss,true);
         DrawRectangleRec(Rectangle{ boss.x + 18, boss.y + 14, 68, 22 }, COL_BOSS);
         drawCenteredText("BOSS", boss.x + 18 + 34, boss.y + 17, 16, WHITE);
         UiText::draw(g.m_bossName.c_str(), static_cast<int>(boss.x + 100), static_cast<int>(boss.y + 12), 28, COL_TEXT);
@@ -427,13 +440,13 @@ void PrepMenuScreen::drawGateTab(const Rectangle& area) const {
 }
 
 void PrepMenuScreen::drawButtons() const {
-    const char* labels[BTN_COUNT] = { "Quay lại", "Vào trận" };
+    const char* labels[BTN_COUNT] = { Strings::get(Strings::Key::BACK), "Vào trận" };
     for (int i = 0; i < BTN_COUNT; ++i) {
         const Rectangle r = buttonRect(i);
         const bool hover = (m_hoverButton == i);
         const bool primary = (i == BTN_START);
         UiFrame::plaque(r, primary || hover, false, hover?1.f:0.f);
         drawCenteredText(labels[i], r.x + r.width / 2.0f, r.y + (r.height - 24.0f) / 2.0f, 24,
-                         hover ? Color{ 255, 240, 170, 255 } : COL_TEXT);
+                         hover ? UiTheme::AGED_GOLD : COL_TEXT);
     }
 }

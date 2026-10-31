@@ -48,3 +48,13 @@ void CombatantView::draw(const BattleMap& map, Color baseTint) const {
 }
 
 void CombatantView::unloadAll() { m_sprite->unload(); }
+// Draw first idle frame as a crisp, non-owning portrait crop inside HUD cards.
+void CombatantView::drawPortrait(Rectangle bounds, Color tint) const {
+    if(!m_sprite || !m_sprite->isLoaded())return;
+    const Texture2D& tex=m_sprite->getTexture();
+    const float fw=static_cast<float>(m_sprite->getFrameWidth());
+    const float fh=static_cast<float>(m_sprite->getFrameHeight());
+    // Upper 55% shows the face/shoulders rather than shrinking the entire body.
+    const Rectangle source={0.f,0.f,fw,fh*.55f};
+    DrawTexturePro(tex,source,bounds,{0.f,0.f},0.f,tint);
+}

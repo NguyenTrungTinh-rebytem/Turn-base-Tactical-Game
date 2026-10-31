@@ -33,3 +33,31 @@ void element(Element element, Vector2 center, float radius) {
     }
 }
 }
+namespace UiIcons {
+void action(Action kind,Vector2 c,float radius,Color tint){
+    const float r=radius;
+    switch(kind){
+        case Action::SWORD:
+            DrawLineEx({c.x-r*.6f,c.y+r*.7f},{c.x+r*.65f,c.y-r*.7f},4.f,tint);
+            DrawTriangle({c.x+r*.45f,c.y-r*.7f},{c.x+r*.85f,c.y-r*.95f},
+                         {c.x+r*.7f,c.y-r*.3f},tint);
+            DrawLineEx({c.x-r*.75f,c.y+r*.18f},{c.x-r*.1f,c.y+r*.78f},2.8f,tint);
+            break;
+        case Action::RUNE:
+            DrawPolyLines(c,6,r*.85f,30,tint);
+            DrawLineEx({c.x,c.y-r*.7f},{c.x+r*.62f,c.y+r*.44f},2.f,tint);
+            DrawLineEx({c.x+r*.62f,c.y+r*.44f},{c.x-r*.62f,c.y+r*.44f},2.f,tint);
+            DrawLineEx({c.x-r*.62f,c.y+r*.44f},{c.x,c.y-r*.7f},2.f,tint);
+            break;
+        case Action::POTION:
+            DrawRectangleRec({c.x-r*.35f,c.y-r*.75f,r*.7f,r*.3f},tint);
+            DrawPolyLines({c.x,c.y+r*.2f},6,r*.65f,30,tint);
+            DrawCircleV({c.x,c.y+r*.25f},r*.25f,tint);
+            break;
+        case Action::GEAR:
+            DrawPolyLines(c,8,r*.75f,22.5f,tint);
+            DrawCircleLines(static_cast<int>(c.x),static_cast<int>(c.y),r*.3f,tint);
+            break;
+    }
+}
+}

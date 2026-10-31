@@ -409,6 +409,16 @@ build CMakeFiles/game.dir/src/graphics/ui/FontManager.cpp.obj: CXX_COMPILER__gam
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics\ui
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
+build CMakeFiles/game.dir/src/graphics/ui/Strings.cpp.obj: CXX_COMPILER__game_unscanned_Release D$:/CODE/Turn-base-Tactical-Game/src/graphics/ui/Strings.cpp || cmake_object_order_depends_target_game
+  CONFIG = Release
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\game.dir\src\graphics\ui\Strings.cpp.obj.d
+  FLAGS = -O3 -DNDEBUG -std=gnu++17
+  INCLUDES = -ID:/CODE/Turn-base-Tactical-Game/src -ID:/CODE/Turn-base-Tactical-Game/src/core -ID:/CODE/Turn-base-Tactical-Game/src/data -ID:/CODE/Turn-base-Tactical-Game/src/dsa -ID:/CODE/Turn-base-Tactical-Game/src/entities -ID:/CODE/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\game.dir
+  OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics\ui
+  TARGET_SUPPORT_DIR = CMakeFiles\game.dir
+
 build CMakeFiles/game.dir/src/graphics/ui/UiFrame.cpp.obj: CXX_COMPILER__game_unscanned_Release D$:/CODE/Turn-base-Tactical-Game/src/graphics/ui/UiFrame.cpp || cmake_object_order_depends_target_game
   CONFIG = Release
   DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
@@ -433,6 +443,16 @@ build CMakeFiles/game.dir/src/graphics/ui/UiInput.cpp.obj: CXX_COMPILER__game_un
   CONFIG = Release
   DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
   DEP_FILE = CMakeFiles\game.dir\src\graphics\ui\UiInput.cpp.obj.d
+  FLAGS = -O3 -DNDEBUG -std=gnu++17
+  INCLUDES = -ID:/CODE/Turn-base-Tactical-Game/src -ID:/CODE/Turn-base-Tactical-Game/src/core -ID:/CODE/Turn-base-Tactical-Game/src/data -ID:/CODE/Turn-base-Tactical-Game/src/dsa -ID:/CODE/Turn-base-Tactical-Game/src/entities -ID:/CODE/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\game.dir
+  OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics\ui
+  TARGET_SUPPORT_DIR = CMakeFiles\game.dir
+
+build CMakeFiles/game.dir/src/graphics/ui/UiLayout.cpp.obj: CXX_COMPILER__game_unscanned_Release D$:/CODE/Turn-base-Tactical-Game/src/graphics/ui/UiLayout.cpp || cmake_object_order_depends_target_game
+  CONFIG = Release
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\game.dir\src\graphics\ui\UiLayout.cpp.obj.d
   FLAGS = -O3 -DNDEBUG -std=gnu++17
   INCLUDES = -ID:/CODE/Turn-base-Tactical-Game/src -ID:/CODE/Turn-base-Tactical-Game/src/core -ID:/CODE/Turn-base-Tactical-Game/src/data -ID:/CODE/Turn-base-Tactical-Game/src/dsa -ID:/CODE/Turn-base-Tactical-Game/src/entities -ID:/CODE/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
@@ -487,7 +507,7 @@ build CMakeFiles/game.dir/src/main.cpp.obj: CXX_COMPILER__game_unscanned_Release
 #############################################
 # Link the executable game.exe
 
-build game.exe: CXX_EXECUTABLE_LINKER__game_Release CMakeFiles/game.dir/src/core/AttackCommand.cpp.obj CMakeFiles/game.dir/src/core/CommandStack.cpp.obj CMakeFiles/game.dir/src/core/GameEngine.cpp.obj CMakeFiles/game.dir/src/core/GameStateMachine.cpp.obj CMakeFiles/game.dir/src/core/UseItemCommand.cpp.obj CMakeFiles/game.dir/src/core/UseSkillCommand.cpp.obj CMakeFiles/game.dir/src/data/CharacterRules.cpp.obj CMakeFiles/game.dir/src/data/GameData.cpp.obj CMakeFiles/game.dir/src/data/HeroPresetConfig.cpp.obj CMakeFiles/game.dir/src/data/SkillElementConfig.cpp.obj CMakeFiles/game.dir/src/dsa/CombatAI.cpp.obj CMakeFiles/game.dir/src/dsa/CombatObserver.cpp.obj CMakeFiles/game.dir/src/dsa/StatusEffect.cpp.obj CMakeFiles/game.dir/src/dsa/TurnManager.cpp.obj CMakeFiles/game.dir/src/dsa/WaveManager.cpp.obj CMakeFiles/game.dir/src/entities/Boss.cpp.obj CMakeFiles/game.dir/src/entities/Character.cpp.obj CMakeFiles/game.dir/src/entities/CharacterFactory.cpp.obj CMakeFiles/game.dir/src/entities/CombatModifiers.cpp.obj CMakeFiles/game.dir/src/entities/Enemy.cpp.obj CMakeFiles/game.dir/src/entities/Item.cpp.obj CMakeFiles/game.dir/src/entities/ItemDatabase.cpp.obj CMakeFiles/game.dir/src/entities/ItemFactory.cpp.obj CMakeFiles/game.dir/src/entities/Party.cpp.obj CMakeFiles/game.dir/src/entities/Player.cpp.obj CMakeFiles/game.dir/src/graphics/BattleMap.cpp.obj CMakeFiles/game.dir/src/graphics/Battleui.cpp.obj CMakeFiles/game.dir/src/graphics/Combatantview.cpp.obj CMakeFiles/game.dir/src/graphics/Herocreatescreen.cpp.obj CMakeFiles/game.dir/src/graphics/PrepMenuScreen.cpp.obj CMakeFiles/game.dir/src/graphics/Skilltooltip.cpp.obj CMakeFiles/game.dir/src/graphics/SpriteAnimation.cpp.obj CMakeFiles/game.dir/src/graphics/StartMenu.cpp.obj CMakeFiles/game.dir/src/graphics/Turnorderbar.cpp.obj CMakeFiles/game.dir/src/graphics/Waveselectscreen.cpp.obj CMakeFiles/game.dir/src/graphics/ui/FontManager.cpp.obj CMakeFiles/game.dir/src/graphics/ui/UiFrame.cpp.obj CMakeFiles/game.dir/src/graphics/ui/UiIcons.cpp.obj CMakeFiles/game.dir/src/graphics/ui/UiInput.cpp.obj CMakeFiles/game.dir/src/graphics/ui/UiText.cpp.obj CMakeFiles/game.dir/src/graphics/ui/UiTheme.cpp.obj CMakeFiles/game.dir/src/graphics/ui/UiWidgets.cpp.obj CMakeFiles/game.dir/src/main.cpp.obj | C$:/msys64/ucrt64/lib/libraylib.dll.a
+build game.exe: CXX_EXECUTABLE_LINKER__game_Release CMakeFiles/game.dir/src/core/AttackCommand.cpp.obj CMakeFiles/game.dir/src/core/CommandStack.cpp.obj CMakeFiles/game.dir/src/core/GameEngine.cpp.obj CMakeFiles/game.dir/src/core/GameStateMachine.cpp.obj CMakeFiles/game.dir/src/core/UseItemCommand.cpp.obj CMakeFiles/game.dir/src/core/UseSkillCommand.cpp.obj CMakeFiles/game.dir/src/data/CharacterRules.cpp.obj CMakeFiles/game.dir/src/data/GameData.cpp.obj CMakeFiles/game.dir/src/data/HeroPresetConfig.cpp.obj CMakeFiles/game.dir/src/data/SkillElementConfig.cpp.obj CMakeFiles/game.dir/src/dsa/CombatAI.cpp.obj CMakeFiles/game.dir/src/dsa/CombatObserver.cpp.obj CMakeFiles/game.dir/src/dsa/StatusEffect.cpp.obj CMakeFiles/game.dir/src/dsa/TurnManager.cpp.obj CMakeFiles/game.dir/src/dsa/WaveManager.cpp.obj CMakeFiles/game.dir/src/entities/Boss.cpp.obj CMakeFiles/game.dir/src/entities/Character.cpp.obj CMakeFiles/game.dir/src/entities/CharacterFactory.cpp.obj CMakeFiles/game.dir/src/entities/CombatModifiers.cpp.obj CMakeFiles/game.dir/src/entities/Enemy.cpp.obj CMakeFiles/game.dir/src/entities/Item.cpp.obj CMakeFiles/game.dir/src/entities/ItemDatabase.cpp.obj CMakeFiles/game.dir/src/entities/ItemFactory.cpp.obj CMakeFiles/game.dir/src/entities/Party.cpp.obj CMakeFiles/game.dir/src/entities/Player.cpp.obj CMakeFiles/game.dir/src/graphics/BattleMap.cpp.obj CMakeFiles/game.dir/src/graphics/Battleui.cpp.obj CMakeFiles/game.dir/src/graphics/Combatantview.cpp.obj CMakeFiles/game.dir/src/graphics/Herocreatescreen.cpp.obj CMakeFiles/game.dir/src/graphics/PrepMenuScreen.cpp.obj CMakeFiles/game.dir/src/graphics/Skilltooltip.cpp.obj CMakeFiles/game.dir/src/graphics/SpriteAnimation.cpp.obj CMakeFiles/game.dir/src/graphics/StartMenu.cpp.obj CMakeFiles/game.dir/src/graphics/Turnorderbar.cpp.obj CMakeFiles/game.dir/src/graphics/Waveselectscreen.cpp.obj CMakeFiles/game.dir/src/graphics/ui/FontManager.cpp.obj CMakeFiles/game.dir/src/graphics/ui/Strings.cpp.obj CMakeFiles/game.dir/src/graphics/ui/UiFrame.cpp.obj CMakeFiles/game.dir/src/graphics/ui/UiIcons.cpp.obj CMakeFiles/game.dir/src/graphics/ui/UiInput.cpp.obj CMakeFiles/game.dir/src/graphics/ui/UiLayout.cpp.obj CMakeFiles/game.dir/src/graphics/ui/UiText.cpp.obj CMakeFiles/game.dir/src/graphics/ui/UiTheme.cpp.obj CMakeFiles/game.dir/src/graphics/ui/UiWidgets.cpp.obj CMakeFiles/game.dir/src/main.cpp.obj | C$:/msys64/ucrt64/lib/libraylib.dll.a
   CONFIG = Release
   FLAGS = -O3 -DNDEBUG
   LINK_LIBRARIES = C:/msys64/ucrt64/lib/libraylib.dll.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32

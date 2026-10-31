@@ -1,4 +1,8 @@
 #include "graphics/ui/UiTheme.h"
+#include "graphics/ui/UiBattleLayout.h"
+#include "graphics/ui/UiLayout.h"
+#include "graphics/ui/UiIcons.h"
+#include "graphics/ui/Strings.h"
 #include "graphics/ui/UiInput.h"
 #include "graphics/ui/UiFrame.h"
 #include "graphics/ui/UiWidgets.h"
@@ -182,8 +186,6 @@ void GameEngine::initialize()
     SetWindowState(FLAG_WINDOW_RESIZABLE);
     SetWindowMinSize(800, 450);
     HideCursor();
-    m_logicalTarget = LoadRenderTexture(UiTheme::WIDTH, UiTheme::HEIGHT);
-    SetTextureFilter(m_logicalTarget.texture, TEXTURE_FILTER_BILINEAR);
     FontManager::instance().initialize(resolvePath("assets"));
     SetExitKey(KEY_NULL);   // ESC do game tu xu ly (Undo / ve Menu), khong thoat thang
 
@@ -630,8 +632,8 @@ void GameEngine::openPartyMemberSelection(int slot)
     m_selectingFromPrep = true;
     m_heroCreate.reset();
     m_heroCreate.setSlotLabel(m_editingPartySlot == 0
-        ? "CHON THU LINH (1/3)"
-        : "CHON DONG DOI " + std::to_string(m_editingPartySlot + 1) + "/3");
+        ? "CHỌN THỦ LĨNH (1/3)"
+        : "CHỌN ĐỒNG ĐỘI " + std::to_string(m_editingPartySlot + 1) + "/3");
     m_stateMachine.changeState(GameStateMachine::State::CREATE_HERO);
 }
 
@@ -798,7 +800,8 @@ void GameEngine::startNewGame(int startStage)
 
     m_logEntries.clear();
     m_logScroll = 0;
-    m_battleLog = "Trận đấu bắt đầu! Đến lượt: " + (m_currentCharacter ? m_currentCharacter->getName() : std::string("None"));
+    m_logExpanded = false;
+    m_battleLog = "Trận đấu bắt đầu! Đến lượt: " + (m_currentCharacter ? m_currentCharacter->getName() : std::string("không có"));
 }
 
 // =====================================================================
@@ -824,7 +827,16 @@ void GameEngine::processEvents()
             }
             return; // Modal consumes all input and stops battle commands
         }
-        if (input.click({1090, 624, 160, 50})) { m_pauseOpen = true; return; }
+        if (input.click(UiBattleLayout::MENU)) { m_pauseOpen = true; return; }
+        if(input.click(UiBattleLayout::LOG_TOGGLE)) {
+            m_logExpanded=!m_logExpanded;
+            if(m_logExpanded) {m_isSelectingItem=false;m_isSelectingSkill=false;}
+            return;
+        }
+        if(m_logExpanded && input.hover(UiBattleLayout::LOG_BODY) && input.wheel()!=0 && !m_logEntries.empty()) {
+            m_logScroll=std::max(0,std::min(static_cast<int>(m_logEntries.size())-1,
+                           m_logScroll+(input.wheel()>0?1:-1)));
+        }
     }
     if (input.isDebugShown()) return;
 
@@ -853,7 +865,7 @@ void GameEngine::processEvents()
     {
     m_editingPartySlot = 0;
     m_selectingFromPrep = false;
-    m_heroCreate.setSlotLabel("CHON THU LINH (1/3)");
+    m_heroCreate.setSlotLabel("CHỌN THỦ LĨNH (1/3)");
     m_stateMachine.changeState(GameStateMachine::State::CREATE_HERO);   // ESC o man Chon Wave = ve Tao Hero
     }
     else if (m_stateMachine.is(GameStateMachine::State::PREP_MENU))
@@ -882,7 +894,7 @@ void GameEngine::processEvents()
         m_editingPartySlot = 0;
         m_selectingFromPrep = false;
         m_heroCreate.reset(m_heroConfig.m_name);
-        m_heroCreate.setSlotLabel("CHON THU LINH (1/3)");
+        m_heroCreate.setSlotLabel("CHỌN THỦ LĨNH (1/3)");
         m_stateMachine.changeState(GameStateMachine::State::CREATE_HERO);
     }
     else   // chua co data CSV: vao tran luon voi hero mac dinh
@@ -936,7 +948,7 @@ void GameEngine::processEvents()
     case WaveSelectAction::BACK:
         m_editingPartySlot = 0;
         m_selectingFromPrep = false;
-        m_heroCreate.setSlotLabel("CHON THU LINH (1/3)");
+        m_heroCreate.setSlotLabel("CHỌN THỦ LĨNH (1/3)");
         m_stateMachine.changeState(GameStateMachine::State::CREATE_HERO);
         break;
     case WaveSelectAction::NONE:
@@ -1052,24 +1064,42 @@ void GameEngine::processPlayerInput()
     if (!m_currentCharacter || !isHero(m_currentCharacter)) return;
     auto& input = UiInput::instance();
 
-    if (input.hover({25,675,1230,29}) && input.wheel()!=0 && !m_logEntries.empty()) {
-        m_logScroll = std::max(0,std::min(static_cast<int>(m_logEntries.size())-1,m_logScroll+(input.wheel()>0?1:-1)));
+    if(m_logExpanded && input.leftPressed()&&!input.hover(UiBattleLayout::LOG_BODY)){
+        m_logExpanded=false; input.consume();return;
     }
-    if (input.rightClick() || input.click({940,624,136,50})) {
+    if(m_isSelectingSkill||m_isSelectingItem){
+        const int count=m_isSelectingSkill?static_cast<int>(m_heroSkills.size()):static_cast<int>(availableItems().size());
+        const int maxScroll=std::max(0,count-UiBattleLayout::VISIBLE_ROWS);
+        if(input.hover(UiBattleLayout::SKILL_POPUP)&&input.wheel()!=0){
+            m_listScroll=std::max(0,std::min(maxScroll,m_listScroll+(input.wheel()<0?1:-1)));
+        }
+        if(maxScroll>0&&input.leftPressed()&&input.hover({1247,252,9,259})){
+            m_draggingListScroll=true;input.consume();
+        }
+        if(!input.held())m_draggingListScroll=false;
+        if(m_draggingListScroll){
+            const float t=std::max(0.f,std::min(1.f,(input.mouse().y-252.f)/259.f));
+            m_listScroll=std::max(0,std::min(maxScroll,static_cast<int>(t*maxScroll+.5f)));
+            return;
+        }
+    }else m_draggingListScroll=false;
+    if (input.rightClick() || (m_waitingTarget && input.click(UiBattleLayout::CANCEL))) {
         m_isSelectingSkill = m_isSelectingItem = false;
         m_waitingTarget = m_pendingAttack = m_pendingItem = false;
         return;
     }
     if (m_battlePhase == BattlePhase::PLAYER_CONFIRM) {
-        if (input.click({42,624,183,50})) confirmTurn();
-        else if (input.click({250,624,183,50})) cancelLastAction();
+        if (input.click(UiBattleLayout::ATTACK)) confirmTurn();
+        else if (input.click(UiBattleLayout::SKILL)) cancelLastAction();
         return;
     }
 
     // Mouse action dock and anchored popup. Popup selection is separate from targeting.
     if (m_isSelectingSkill) {
-        for (size_t i = 0; i < m_heroSkills.size() && i < 4; ++i) {
-            if (input.click({360.0f, 340.0f + static_cast<float>(i)*35.0f, 560.0f, 35.0f})) {
+        for (int j=0;j<UiBattleLayout::VISIBLE_ROWS;++j) {
+            const size_t i=static_cast<size_t>(j+m_listScroll);
+            if(i>=m_heroSkills.size())break;
+            if (input.click(UiBattleLayout::skillRow(j))) {
                 if (hero() && hero()->getCurrentMp() >= m_heroSkills[i].m_mpCost) {
                     m_selectedSkillIndex = static_cast<int>(i);
                     m_isSelectingSkill = false;
@@ -1079,12 +1109,14 @@ void GameEngine::processPlayerInput()
                 return;
             }
         }
-        if (input.leftPressed() && input.hover({360,290,560,210})) {input.consume();return;}
+        if (input.leftPressed() && input.hover(UiBattleLayout::SKILL_POPUP)) {input.consume();return;}
     }
     if (m_isSelectingItem) {
         const auto items = availableItems();
-        for (size_t i = 0; i < items.size() && i < 9; ++i) {
-            if (input.click({355.0f, 240.0f + static_cast<float>(i)*28.0f, 555.0f, 28.0f})) {
+        for (int j=0;j<UiBattleLayout::VISIBLE_ROWS;++j) {
+            const size_t i=static_cast<size_t>(j+m_listScroll);
+            if(i>=items.size())break;
+            if (input.click(UiBattleLayout::itemRow(j))) {
                 m_selectedItemIndex = static_cast<int>(i);
                 m_isSelectingItem = false;
                 m_waitingTarget = m_pendingItem = true;
@@ -1092,6 +1124,12 @@ void GameEngine::processPlayerInput()
                 return;
             }
         }
+        if(input.leftPressed()&&input.hover(UiBattleLayout::ITEM_POPUP)){
+            input.consume();return; // no click-through into battlefield
+        }
+    }
+    if(m_waitingTarget && input.leftPressed() && input.hover(UiBattleLayout::COMMAND)) {
+        input.consume();return;
     }
     if (m_waitingTarget) {
         const bool targetEnemy = !m_pendingItem &&
@@ -1122,18 +1160,23 @@ void GameEngine::processPlayerInput()
             if (input.click({head.x-70,head.y-20,140,135})) {m_selectedTarget=m_combatants[i].get(); return;}
         }
     }
-    if (input.click({42,624,183,50})) {
+    if (input.click(UiBattleLayout::ATTACK)) {
         m_isSelectingSkill = m_isSelectingItem = m_pendingItem = false;
         m_pendingAttack = m_waitingTarget = true;
         return;
     }
-    if (input.click({250,624,183,50})) {
+    if (input.click(UiBattleLayout::SKILL)) {
         m_isSelectingSkill = !m_isSelectingSkill;
+        m_listScroll = 0; m_logExpanded = false;
         m_isSelectingItem = m_waitingTarget = m_pendingAttack = m_pendingItem = false;
         return;
     }
-    if (input.click({458,624,183,50})) {openItemMenu();m_waitingTarget=m_pendingAttack=m_pendingItem=false;return;}
+    if (input.click(UiBattleLayout::ITEM)) {openItemMenu();m_listScroll=0;m_logExpanded=false;m_waitingTarget=m_pendingAttack=m_pendingItem=false;return;}
 
+    if(input.leftPressed()&&(input.hover(UiBattleLayout::COMMAND)||
+                             input.hover(UiBattleLayout::SKILL_POPUP)&&(m_isSelectingSkill||m_isSelectingItem))){
+        input.consume();return;
+    }
     // Da hanh dong -> cho xac nhan (ENTER) hoac Undo (ESC/Z xu ly o processEvents)
     if (m_battlePhase == BattlePhase::PLAYER_CONFIRM)
     {
@@ -1649,8 +1692,17 @@ BattleSlot GameEngine::slotOf(int index) const
 
 void GameEngine::render()
 {
-    BeginTextureMode(m_logicalTarget);
+    const float sw=static_cast<float>(GetScreenWidth());
+    const float sh=static_cast<float>(GetScreenHeight());
+    const float scale=std::max(0.01f,std::min(sw/UiTheme::WIDTH,sh/UiTheme::HEIGHT));
+    FontManager::instance().setRenderScale(scale);
+    BeginDrawing();
     ClearBackground(UiTheme::ASH);
+    Camera2D uiCamera{};
+    uiCamera.offset={(sw-UiTheme::WIDTH*scale)*0.5f,(sh-UiTheme::HEIGHT*scale)*0.5f};
+    uiCamera.target={0.f,0.f};
+    uiCamera.zoom=scale;
+    BeginMode2D(uiCamera);
        switch (m_stateMachine.getState())
     {
     case GameStateMachine::State::MENU:
@@ -1674,54 +1726,48 @@ void GameEngine::render()
 
     case GameStateMachine::State::VICTORY:
         UiFrame::panel({350,205,580,365}, true);
-        UiText::drawShadowed("CHIẾN THẮNG", 458, 240, 50, UiTheme::AGED_GOLD);
-        UiWidgets::button({465,384,350,58}, "Về menu", UiInput::instance().hover({465,384,350,58}));
-        UiWidgets::button({465,456,350,58}, "Chơi lại", UiInput::instance().hover({465,456,350,58}));
+        UiText::drawShadowed(Strings::get(Strings::Key::VICTORY), 458, 240, 50, UiTheme::AGED_GOLD);
+        UiWidgets::button({465,384,350,58}, Strings::get(Strings::Key::MAIN_MENU), UiInput::instance().hover({465,384,350,58}));
+        UiWidgets::button({465,456,350,58}, Strings::get(Strings::Key::RETRY), UiInput::instance().hover({465,456,350,58}));
         break;
 
     case GameStateMachine::State::GAME_OVER:
         UiFrame::panel({350,205,580,365}, true);
-        UiText::drawShadowed("THẤT BẠI", 488, 240, 50, UiTheme::DANGER);
-        UiWidgets::button({465,384,350,58}, "Về menu", UiInput::instance().hover({465,384,350,58}));
-        UiWidgets::button({465,456,350,58}, "Thử lại", UiInput::instance().hover({465,456,350,58}));
+        UiText::drawShadowed(Strings::get(Strings::Key::DEFEAT), 488, 240, 50, UiTheme::DANGER);
+        UiWidgets::button({465,384,350,58}, Strings::get(Strings::Key::MAIN_MENU), UiInput::instance().hover({465,384,350,58}));
+        UiWidgets::button({465,456,350,58}, Strings::get(Strings::Key::RETRY), UiInput::instance().hover({465,456,350,58}));
         break;
     }
 
     if (m_pauseOpen) {
         DrawRectangle(0,0,1280,720,Color{0,0,0,175});
         UiFrame::panel({390,215,500,300},true);
-        UiText::draw("TẠM DỪNG",510,249,40,UiTheme::AGED_GOLD);
+        UiText::draw("Tạm dừng",510,249,40,UiTheme::AGED_GOLD);
         if (m_pauseConfirm) {
             UiText::draw("Trở về menu chính?",483,338,24,UiTheme::TEXT);
             UiWidgets::button({463,418,165,52},"Ở lại",UiInput::instance().hover({463,418,165,52}));
             UiWidgets::button({654,418,165,52},"Rời trận",UiInput::instance().hover({654,418,165,52}),false,true,true);
         } else {
-            UiWidgets::button({465,320,350,54},"Tiếp tục",UiInput::instance().hover({465,320,350,54}));
-            UiWidgets::button({465,393,350,54},"Về menu",UiInput::instance().hover({465,393,350,54}),false,true,true);
+            UiWidgets::button({465,320,350,54},Strings::get(Strings::Key::RESUME),UiInput::instance().hover({465,320,350,54}));
+            UiWidgets::button({465,393,350,54},Strings::get(Strings::Key::MAIN_MENU),UiInput::instance().hover({465,393,350,54}),false,true,true);
         }
     }
     UiInput::instance().drawFontDebug();
     UiInput::instance().drawCursor();
-    EndTextureMode();
-    BeginDrawing();
-    ClearBackground(BLACK);
-    const float sw = static_cast<float>(GetScreenWidth()), sh = static_cast<float>(GetScreenHeight());
-    const float scale = std::min(sw/1280.f, sh/720.f);
-    const Rectangle dest = {(sw-1280.f*scale)*0.5f,(sh-720.f*scale)*0.5f,1280.f*scale,720.f*scale};
-    DrawTexturePro(m_logicalTarget.texture,{0,0,1280,-720},dest,{0,0},0.f,WHITE);
+    EndMode2D();
     EndDrawing();
 }
 
 void GameEngine::renderCombatants()
 {
     // 2.5D: ve hang xa truoc, hang gan sau (sap theo y cua chan)
-    std::vector<size_t> order(m_views.size());
-    std::iota(order.begin(), order.end(), size_t{ 0 });
-    std::sort(order.begin(), order.end(), [&](size_t a, size_t b) {
+    m_renderOrder.resize(m_views.size());
+    std::iota(m_renderOrder.begin(), m_renderOrder.end(), size_t{0});
+    std::sort(m_renderOrder.begin(), m_renderOrder.end(), [&](size_t a, size_t b) {
         return m_views[a]->getSlot().m_feetPos.y < m_views[b]->getSlot().m_feetPos.y;
     });
 
-    for (size_t i : order)
+    for (size_t i : m_renderOrder)
     {
         const Color tint = (i < m_party.size()) ? WHITE : elementColor(m_combatants[i]->getElement());
         m_views[i]->draw(m_battleMap, tint);   // da gom bong + mo dan khi chet
@@ -1730,100 +1776,142 @@ void GameEngine::renderCombatants()
 
 void GameEngine::renderBattleUI()
 {
-    // ----- HP/MP + con tro muc tieu + hieu ung tung nhan vat -----
-    std::vector<Rectangle> usedLabelBounds;
-    for (size_t i = 0; i < m_combatants.size(); ++i)
-    {
-        const Character* c = m_combatants[i].get();
-        if (!c->isAlive()) continue;
-
-        const Vector2 head = m_views[i]->getHeadPos();
-        Vector2 barHead = head;
-        Rectangle label{barHead.x-77,barHead.y-60,154,64};
-        bool changed = true;
-        for (int attempt = 0; attempt < 8 && changed; ++attempt) {
-            changed = false;
-            for (const Rectangle& used : usedLabelBounds) {
-                if (CheckCollisionRecs(label,used)) {
-                    label.y = used.y - label.height - 5;
-                    changed = true;
-                }
-            }
+    auto& input=UiInput::instance();
+    for(size_t i=0;i<m_combatants.size()&&i<m_views.size();++i){
+        const Character* c=m_combatants[i].get();
+        if(!c||!c->isAlive())continue;
+        const BattleSlot slot=m_views[i]->getSlot();
+        m_ui.drawHpMpBar(*c,slot.m_feetPos);
+        if(c==m_selectedTarget&&m_waitingTarget)m_ui.drawTargetCursor(slot);
+    }
+    m_turnOrderBar.draw(upcomingOrder(),m_currentCharacter,m_combatants,m_views,m_party.size());
+    // Three compact solid cards. No full-width bar behind them.
+    for(size_t i=0;i<m_party.size()&&i<3;++i){
+        const Character* c=m_party.getMember(i);if(!c)continue;
+        Rectangle card=UiBattleLayout::heroCard(static_cast<int>(i));
+        const bool active=c==m_currentCharacter;
+        if(active)card.y-=8.f;
+        UiFrame::panel(card,active);
+        const Color status=c->isAlive()?UiTheme::TEXT:UiTheme::DISABLED;
+        DrawPoly({card.x+24,card.y+25},6,19,30,{32,29,42,255});
+        if(i<m_views.size()&&m_views[i])m_views[i]->drawPortrait(
+             {card.x+10,card.y+10,29,32},c->isAlive()?WHITE:UiTheme::DISABLED);
+        DrawPolyLines({card.x+24,card.y+25},6,19,30,UiTheme::elementColor(c->getElement()));
+        UiIcons::element(c->getElement(),{card.x+35,card.y+36},6);
+        UiText::drawEllipsis(c->getName(),{card.x+48,card.y+8,card.width-55,23},18,status);
+        if(!c->isAlive())UiText::draw("Gục ngã",static_cast<int>(card.x+66),static_cast<int>(card.y+40),16,UiTheme::DANGER);
+        const float hp=static_cast<float>(std::max(1,c->getStats().m_hp));
+        const float mp=static_cast<float>(std::max(1,c->getStats().m_mp));
+        UiText::draw("HP",static_cast<int>(card.x+7),static_cast<int>(card.y+42),16,UiTheme::HP);
+        UiText::draw("MP",static_cast<int>(card.x+7),static_cast<int>(card.y+58),16,UiTheme::MP);
+        UiText::draw(TextFormat("%d",c->getCurrentHp()),static_cast<int>(card.x+52),static_cast<int>(card.y+37),20,status);
+        UiText::draw(TextFormat("%d",c->getCurrentMp()),static_cast<int>(card.x+52),static_cast<int>(card.y+54),18,status);
+        UiFrame::gauge({card.x+108,card.y+44,card.width-118,6},c->getCurrentHp()/hp,UiTheme::HP);
+        UiFrame::gauge({card.x+108,card.y+61,card.width-118,6},c->getCurrentMp()/mp,UiTheme::MP);
+    }
+    const bool heroTurn=m_currentCharacter&&isHero(m_currentCharacter);
+    const bool confirm=m_battlePhase==BattlePhase::PLAYER_CONFIRM;
+    const bool targeting=heroTurn&&m_waitingTarget;
+    if(heroTurn){
+        m_ui.drawControlPanel();
+        if(targeting){
+            UiText::draw(Strings::get(Strings::Key::TARGET_HINT),1026,581,18,UiTheme::TEXT);
+            UiWidgets::button(UiBattleLayout::CANCEL,Strings::get(Strings::Key::CANCEL),
+                              input.hover(UiBattleLayout::CANCEL));
+        }else{
+            UiWidgets::commandButton(UiBattleLayout::ATTACK,
+                Strings::get(confirm?Strings::Key::END_TURN:Strings::Key::ATTACK),0,
+                input.hover(UiBattleLayout::ATTACK));
+            UiWidgets::commandButton(UiBattleLayout::SKILL,
+                Strings::get(confirm?Strings::Key::UNDO:Strings::Key::SKILL),1,
+                input.hover(UiBattleLayout::SKILL));
+            if(!confirm)UiWidgets::commandButton(UiBattleLayout::ITEM,
+                Strings::get(Strings::Key::ITEM),2,input.hover(UiBattleLayout::ITEM));
+            const char* help=Strings::get(Strings::Key::COMMAND_HINT);
+            if(input.hover(UiBattleLayout::ATTACK))help="Đòn đánh vật lý cơ bản";
+            else if(input.hover(UiBattleLayout::SKILL))help="Xem và chọn kỹ năng";
+            else if(input.hover(UiBattleLayout::ITEM))help="Chọn vật phẩm để sử dụng";
+            m_ui.drawCommandHelp(help);
         }
-        barHead.y = label.y + 60;
-        usedLabelBounds.push_back(label);
-        m_ui.drawHpMpBar(*c, barHead);
-
-        if (c == m_selectedTarget)
-            m_ui.drawTargetCursor(m_views[i]->getSlot());
-
-        // Hieu ung dang co (giu logic cu cua Core; BattleUI chua ve phan nay)
-        auto fx = m_statusEffects.find(c);
-        if (fx != m_statusEffects.end())
+    }
+    m_ui.drawTurnBanner(m_stage,m_currentCharacter,heroTurn,confirm);
+    // Settings gear is inside the command header: no separate floating Menu label.
+    UiFrame::plaque(UiBattleLayout::MENU,false,false,input.hover(UiBattleLayout::MENU)?1.f:0.f);
+    UiIcons::action(UiIcons::Action::GEAR,{1233,555},11,UiTheme::TEXT);
+    const std::string& ticker=m_logEntries.empty()?m_battleLog:m_logEntries.back();
+    m_ui.drawBattleLog(ticker);
+    if(m_logExpanded){
+        UiFrame::panel(UiBattleLayout::LOG_BODY);
+        UiLayout::Scissor clip({25,402,235,171});
+        const int limit=5;
+        for(int j=0;j<limit&&static_cast<size_t>(j+m_logScroll)<m_logEntries.size();++j){
+            const size_t index=m_logEntries.size()-1-static_cast<size_t>(j+m_logScroll);
+            UiText::drawEllipsis(m_logEntries[index],{30,411.f+j*31.f,223,27},18,UiTheme::TEXT);
+        }
+    }
+    // One popup only; the log and popup are mutually exclusive.
+    if(m_isSelectingSkill&&!targeting)m_ui.drawSkillMenu(m_heroSkills,m_selectedSkillIndex,
+                                         hero()?hero()->getCurrentMp():0,m_listScroll);
+    if(m_isSelectingItem&&!targeting){
+        const auto items=availableItems();
+        UiFrame::panel(UiBattleLayout::ITEM_POPUP);
+        UiText::draw(Strings::get(Strings::Key::INVENTORY),1026,226,20,UiTheme::TEXT);
         {
-            int ex = static_cast<int>(head.x) - 60;
-            const int ey = static_cast<int>(head.y) - 12;
-            for (const StatusEffect& effect : fx->second.getEffects())
-            {
-                const char* label = TextFormat("%s(%d)", statusName(effect.type), effect.durationTurns);
-                UiText::draw(label, ex, ey, 12, ORANGE);
-                ex += UiText::measure(label, 12) + 6;
+            UiLayout::Scissor clip({1018,249,234,267});
+            for(int j=0;j<UiBattleLayout::VISIBLE_ROWS;++j){
+                const size_t i=static_cast<size_t>(j+m_listScroll);
+                if(i>=items.size())break;
+                const Rectangle row=UiBattleLayout::itemRow(j);
+                const bool hover=input.hover(row);
+                const std::string& title=items[i]->getNameVi().empty()?items[i]->getName():items[i]->getNameVi();
+                const auto& inventory=m_party.getInventory().getItems();
+                const int quantity=static_cast<int>(std::count_if(inventory.begin(),inventory.end(),
+                     [&](const ItemPtr& other){return other && other->getId()==items[i]->getId();}));
+                UiWidgets::listRow(row,title,TextFormat("×%d",quantity),items[i]->getId(),
+                     hover,static_cast<int>(i)==m_selectedItemIndex,quantity>0,false);
+            }
+        }
+        if(static_cast<int>(items.size())>UiBattleLayout::VISIBLE_ROWS){
+            const float thumb=std::max(18.f,260.f*UiBattleLayout::VISIBLE_ROWS/static_cast<float>(items.size()));
+            const float y=252.f+(260.f-thumb)*m_listScroll/
+                       std::max(1.f,static_cast<float>(items.size()-UiBattleLayout::VISIBLE_ROWS));
+            DrawRectangleRec({1251,y,3,thumb},UiTheme::AGED_GOLD);
+        }
+        const ItemPtr* hoveredItem=nullptr;
+        for(int j=0;j<UiBattleLayout::VISIBLE_ROWS;++j){
+            const size_t i=static_cast<size_t>(j+m_listScroll);
+            if(i<items.size()&&input.hover(UiBattleLayout::itemRow(j))){hoveredItem=&items[i];break;}
+        }
+        UiText::drawEllipsis(hoveredItem?(*hoveredItem)->getDescription():"Nhấp để chọn vật phẩm",
+                             {1024,513,223,17},16,UiTheme::MUTED);
+    }
+    if(m_waitingTarget){
+        const bool offensive=m_pendingAttack||(!m_pendingItem&&m_selectedSkillIndex>=0&&
+          static_cast<size_t>(m_selectedSkillIndex)<m_heroSkills.size()&&
+          m_heroSkills[static_cast<size_t>(m_selectedSkillIndex)].m_type==SkillType::DAMAGE);
+        if(offensive)input.setTargetCursor(true);
+    }
+    // Exactly one tooltip per frame, after every HUD panel and popup.
+    const Character* hovered=m_turnOrderBar.hovered();
+    Rectangle trigger=UiBattleLayout::TIMELINE;
+    if(!hovered && !input.hover(UiBattleLayout::COMMAND) &&
+       !(m_isSelectingItem||m_isSelectingSkill?input.hover(UiBattleLayout::ITEM_POPUP):false) &&
+       !(m_logExpanded&&input.hover(UiBattleLayout::LOG_BODY))){
+        for(size_t i=0;i<m_combatants.size()&&i<m_views.size();++i){
+            const Character* c=m_combatants[i].get();if(!c||!c->isAlive())continue;
+            const Vector2 head=m_views[i]->getHeadPos();
+            const Rectangle hit={head.x-55,head.y-15,110,118};
+            if(input.hover(hit)){
+                hovered=c;trigger=hit;
+                if(!isHero(c))DrawEllipseLines(static_cast<int>(head.x),
+                    static_cast<int>(m_views[i]->getSlot().m_feetPos.y),36,11,UiTheme::VERDIGRIS);
+                break;
             }
         }
     }
-
-    // ----- Danh sach luot (goc phai tren) -----
-       m_turnOrderBar.draw(upcomingOrder(), m_currentCharacter);
-
-    // ----- Bang dieu khien -----
-    m_ui.drawControlPanel();
-    m_ui.drawTurnBanner(m_stage, m_currentCharacter,
-                        m_currentCharacter && isHero(m_currentCharacter),
-                        m_battlePhase == BattlePhase::PLAYER_CONFIRM);
-
-    const bool confirm = m_battlePhase == BattlePhase::PLAYER_CONFIRM;
-    m_ui.drawCommandHelp(m_waitingTarget ? "Nhấp mục tiêu trên chiến trường · Chuột phải để hủy" : "Chọn hành động bằng chuột");
-    m_ui.drawBattleLog(m_logEntries.empty()?m_battleLog:m_logEntries[m_logEntries.size()-1-static_cast<size_t>(std::min(m_logScroll,static_cast<int>(m_logEntries.size())-1))]);
-    const char* names[] = {confirm?"Kết thúc lượt":"Tấn công", confirm?"Hoàn tác":"Kỹ năng", "Vật phẩm", "Hủy", "Menu"};
-    const Rectangle rects[] = {{42,624,183,50},{250,624,183,50},{458,624,183,50},{940,624,136,50},{1090,624,160,50}};
-    auto& input = UiInput::instance();
-    for (int i = 0; i < 5; ++i) {
-        if (i == 2 && confirm) continue;
-        UiWidgets::button(rects[i],names[i],input.hover(rects[i]),false,true,i==4);
-    }
-    if (m_waitingTarget) {
-        const bool offensive = m_pendingAttack || (!m_pendingItem &&
-            m_selectedSkillIndex>=0 && static_cast<size_t>(m_selectedSkillIndex)<m_heroSkills.size() &&
-            m_heroSkills[static_cast<size_t>(m_selectedSkillIndex)].m_type==SkillType::DAMAGE);
-        if (offensive) input.setTargetCursor(true);
-    }
-    for (size_t i = 0; i < m_combatants.size(); ++i) {
-        if (!m_combatants[i]->isAlive()) continue;
-        const Vector2 head=m_views[i]->getHeadPos();
-        const Rectangle hit={head.x-70,head.y-20,140,135};
-        if (input.hover(hit)) {
-            const Character& c=*m_combatants[i];
-            if (!isHero(&c)) DrawCircleLines(static_cast<int>(head.x),static_cast<int>(m_views[i]->getSlot().m_feetPos.y),38,
-                                             m_waitingTarget?UiTheme::EMBER:UiTheme::AGED_GOLD);
-            UiWidgets::tooltip(c.getName(),TextFormat("HP %d/%d · MP %d/%d · SPD %d",c.getCurrentHp(),c.getStats().m_hp,c.getCurrentMp(),c.getStats().m_mp,c.getSpeed()),input.mouse());
-        }
-    }
-
-    // ----- Menu ky nang (popup giua man hinh, ve cuoi cung de nam tren cung) -----
-    if (m_isSelectingSkill)
-        m_ui.drawSkillMenu(m_heroSkills, m_selectedSkillIndex, hero() ? hero()->getCurrentMp() : 0);
-    if (m_isSelectingItem) {
-        const auto items = availableItems();
-        UiFrame::panel({340, 160, 600, 390},true);
-        UiText::draw("TÚI ĐỒ · Nhấp vật phẩm, sau đó nhấp đồng đội", 355, 177, 18, WHITE);
-        if (m_selectedAlly) UiText::draw(TextFormat("Mục tiêu: %s", m_selectedAlly->getName().c_str()), 355, 209, 18, YELLOW);
-        for (std::size_t i = 0; i < items.size() && i < 9; ++i) {
-            const int y=246+static_cast<int>(i)*28;
-            UiWidgets::itemIcon({365.0f,static_cast<float>(y)-9,37,32},items[i]->getName());
-            UiText::drawEllipsis(items[i]->getName(),{412.0f,static_cast<float>(y),480,23},18,
-                     static_cast<int>(i) == m_selectedItemIndex ? YELLOW : RAYWHITE);
-            if (UiInput::instance().hover({355.0f,static_cast<float>(y)-5,550,34}))
-                UiWidgets::tooltip(items[i]->getName(),"Nhấp để chọn, sau đó nhấp vào một đồng đội",UiInput::instance().mouse());
-        }
-    }
+    if(hovered)UiWidgets::tooltip(hovered->getName(),
+        TextFormat("HP %d/%d · MP %d/%d · SPD %d",hovered->getCurrentHp(),
+         hovered->getStats().m_hp,hovered->getCurrentMp(),
+         hovered->getStats().m_mp,hovered->getSpeed()),input.mouse(),trigger);
 }
+

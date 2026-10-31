@@ -23,7 +23,8 @@ public:
     // ---- API cho Core ----
     void play(AnimState state, bool restart = true);
     void update(float deltaTime);
-    void draw(const BattleMap& map, Color baseTint = WHITE) const;   // bong + sprite (co lam mo khi chet)
+    void draw(const BattleMap& map, Color baseTint = WHITE) const;
+    void drawPortrait(Rectangle bounds, Color tint = WHITE) const;   // bong + sprite (co lam mo khi chet)
     bool isOneShotFinished() const;
 
     // ---- Tien ich ----

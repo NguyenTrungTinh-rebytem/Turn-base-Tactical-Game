@@ -29,7 +29,7 @@ public:
     void drawBattleLog(const std::string& message) const;
 
     // Popup chon ky nang o giua man hinh (nam tren khung dieu khien). Skill thieu MP thi mo.
-    void drawSkillMenu(const std::vector<Skill>& skills, int selectedIndex, int currentMp) const;
+    void drawSkillMenu(const std::vector<Skill>& skills, int selectedIndex, int currentMp, int scroll = 0) const;
     void drawTargetCursor(const BattleSlot& slot) const;
 
     // ---- Chu bay (damage / heal) ----

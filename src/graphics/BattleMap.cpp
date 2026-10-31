@@ -15,7 +15,8 @@ constexpr float FRONT_X_PLAYER = 0.41f;  // tuyen dau cua phe nguoi choi (de kho
 constexpr float FRONT_X_ENEMY = 0.41f;   // tuyen dau cua phe dich (de khong che menu dieu khien)
 constexpr float PLAYER_SIZE_MUL = 1.3f;   // THÊM MỚI: độ to của hero (1.0 = như cũ)
 constexpr float EDGE_X     = 0.09f;     // don vi xa nhat cach mep >= 9%
-constexpr float STEP_X     = 0.085f;    // moi don vi lui ra mep them 8.5% chieu rong
+constexpr float STEP_X     = 0.085f;
+constexpr float STEP_X_ENEMY = 0.062f; // Visual layout only: keep rightmost enemies clear of anchored HUD    // moi don vi lui ra mep them 8.5% chieu rong
 constexpr float GAP_FACTOR = 0.80f;     // 2 don vi CUNG hang: khoang cach tam >= 80% tong nua do rong
 float lerpf(float a, float b, float t) { return a + (b - a) * t; }
 }
@@ -107,7 +108,7 @@ std::vector<BattleSlot> BattleMap::layoutSide(const std::vector<float>& scaleMul
     // do lech (px) tu tuyen dau ra phia mep man hinh
     std::vector<float> offset(n, 0.0f);
     for (size_t i = 1; i < n; ++i) {
-        offset[i] = offset[i - 1] + STEP_X * W;
+        offset[i] = offset[i - 1] + (isPlayer ? STEP_X : STEP_X_ENEMY) * W;
         if (i >= 2)   // cung hang voi i-2
             offset[i] = std::max(offset[i], offset[i - 2] + 0.5f * (widthOf(i) + widthOf(i - 2)) * GAP_FACTOR);
     }
