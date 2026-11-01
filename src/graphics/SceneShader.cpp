@@ -66,14 +66,17 @@ void main()
     col += glow / 16.0 * bloom * 2.2;
 
     // --- Chieu sang theo be mat (gia lap normal map tu do sang cua tranh) ---
+    if (relief > 0.001) {
     float hl = lum(samp(uv + vec2(-2.0, 0.0) * px)), hr = lum(samp(uv + vec2(2.0, 0.0) * px));
     float hu = lum(samp(uv + vec2(0.0, -2.0) * px)), hd = lum(samp(uv + vec2(0.0, 2.0) * px));
     vec2 grad = vec2(hr - hl, hd - hu);
     vec2 toLight = normalize(lightPos - uv + vec2(0.0001));
     float lit = dot(-grad, toLight) * 6.0;                 // mat huong ve nguon sang -> sang, nguoc lai -> toi
     col *= 1.0 + clamp(lit, -0.6, 0.8) * relief;
+    }
 
     // --- Ambient occlusion man hinh: khe/goc toi hon xung quanh thi bi toi them ---
+    if (ao > 0.001) {
     float avg = 0.0;
     for (int i = 0; i < 8; ++i) {
         float a = float(i) * 0.785398;
@@ -81,34 +84,39 @@ void main()
     }
     avg /= 8.0;
     col *= 1.0 - clamp((avg - lum(col)) * 1.6, 0.0, 0.5) * ao;
-
-    // --- Nguon sang chinh: vung sang mem + do tat dan theo khoang cach ---
-    vec2 dl = (uv - lightPos) * vec2(resolution.x / resolution.y, 1.0);
-    float fall = exp(-dot(dl, dl) * 2.4);
-    col += lightColor * fall * 0.42;
-    col *= 0.78 + 0.45 * fall;                             // gan nguon sang thi sang, xa thi toi
+    }
 
     // --- Suong xa: phia tren (xa) mo ao va dam mau suong; phia duoi (gan) toi hon ---
     float farK = smoothstep(0.75, 0.05, uv.y);
     col = mix(col, hazeColor, farK * haze);
     col *= 1.0 - smoothstep(0.72, 1.0, uv.y) * 0.30;
 
-    // --- Tia sang xien tu goc tren ---
-    vec2 ray = uv - lightPos;
-    float d = ray.x * 0.9 + ray.y * 0.5 + atan(ray.y, ray.x) * 0.0;
-    float shafts = sin(d * 17.0 + time * 0.25) * 0.5 + 0.5;
-    shafts *= sin(d * 7.3 - time * 0.15) * 0.5 + 0.5;
-    shafts = pow(shafts, 1.6);
-    float fade = exp(-length(ray) * 1.5);
-    col += rayColor * shafts * fade * rays;
+    // --- Tia sang xuyen tan la: nhieu soi manh, nghieng, chi o phan tren; bi "dut quang" boi la ---
+    float beams = 0.0;
+    for (int i = 0; i < 8; ++i) {
+        float fi = float(i);
+        float x0 = -0.05 + fi * 0.16 + 0.02 * sin(time * 0.25 + fi * 2.3);  // chan tia o dinh man hinh
+        float w  = 0.016 + 0.020 * fract(fi * 0.618 + 0.13);                 // soi manh
+        float u  = uv.x - (x0 + 0.30 * uv.y);                                // nghieng ve phai khi di xuong
+        float widen = w * (1.0 + 1.2 * uv.y);
+        float b = exp(-(u * u) / (widen * widen));
+        // la che: tia bi cat thanh tung doan sang/toi doc theo chieu dai
+        float leaf = sin(uv.y * (9.0 + fi * 1.7) + fi * 3.1 + time * 0.35) * 0.5 + 0.5;
+        leaf = smoothstep(0.30, 0.85, leaf);
+        b *= leaf * (0.70 + 0.30 * sin(time * 0.7 + fi * 1.9));
+        beams += b;
+    }
+    // chi sang o khong trung tren, tat han truoc khi cham dat (khong lam sang nen dat)
+    float beamFade = pow(clamp(1.0 - uv.y / 0.60, 0.0, 1.0), 0.9);
+    col += rayColor * beams * beamFade * rays;
 
     // --- Chinh mau ---
     float luma = dot(col, vec3(0.299, 0.587, 0.114));
     col = mix(vec3(luma), col, saturation);
     col = (col - 0.5) * contrast + 0.5;
     // split-tone: bong ngả xanh ngoc, vung sang ngả am
-    col += vec3(-0.03, 0.02, 0.04) * (1.0 - smoothstep(0.0, 0.5, luma));
-    col += vec3(0.05, 0.025, -0.02) * smoothstep(0.5, 1.0, luma);
+    col += vec3(0.0) * (1.0 - smoothstep(0.0, 0.5, luma));
+    col += vec3(0.0) * smoothstep(0.5, 1.0, luma);
     col *= tint;
 
     // --- Vignette ---
@@ -154,7 +162,7 @@ bool SceneShader::init(int width, int height)
     m_locHazeColor = GetShaderLocation(m_shader, "hazeColor");
     m_locAo = GetShaderLocation(m_shader, "ao");
     // Bien dich loi -> raylib tra ve shader mac dinh (khong co cac uniform tren)
-    if (m_locVignette < 0 || m_locTint < 0 || m_locContrast < 0 || m_locSaturation < 0 || m_locBloom < 0 || m_locDof < 0 || m_locRays < 0 || m_locRes < 0 || m_locLightPos < 0 || m_locRelief < 0) {
+    if (m_locVignette < 0 || m_locTint < 0 || m_locContrast < 0 || m_locSaturation < 0 || m_locBloom < 0 || m_locDof < 0 || m_locRays < 0 || m_locRes < 0) {
         TraceLog(LOG_WARNING, "SceneShader: shader khong bien dich duoc -> game ve khong shader.");
         UnloadRenderTexture(m_target);
         m_target = RenderTexture2D{};
@@ -198,25 +206,25 @@ void SceneShader::draw(SceneMood mood, float timeSeconds)
     if (mood == SceneMood::BOSS) {
         // Boss: lanh/do toi, tia sang do, bloom manh
         tint[0] = 1.00f; tint[1] = 0.86f; tint[2] = 0.90f;
-        rayColor[0] = 0.55f; rayColor[1] = 0.12f; rayColor[2] = 0.08f;
+        rayColor[0] = 1.00f; rayColor[1] = 0.40f; rayColor[2] = 0.22f;
         vignette = 0.60f + 0.06f * std::sin(timeSeconds * 1.6f);
-        contrast = 1.14f; saturation = 1.00f;
-        bloom = 0.95f; dof = 5.0f; rays = 0.32f;
+        contrast = 1.08f; saturation = 1.0f;
+        bloom = 0.25f; dof = 2.5f; rays = 0.42f;
         lightPos[0] = 0.70f; lightPos[1] = 0.12f;                 // nui lua phia tren
         lightColor[0] = 1.00f; lightColor[1] = 0.38f; lightColor[2] = 0.16f;
         hazeColor[0] = 0.20f; hazeColor[1] = 0.07f; hazeColor[2] = 0.09f;
-        relief = 0.85f; haze = 0.38f; ao = 0.9f;
+        relief = 0.0f; haze = 0.18f; ao = 0.0f;
     } else {
         // Wave thuong: xanh ngoc am, tia sang vang nhe
-        tint[0] = 1.02f; tint[1] = 1.02f; tint[2] = 0.96f;
-        rayColor[0] = 0.40f; rayColor[1] = 0.50f; rayColor[2] = 0.30f;
-        vignette = 0.38f;
-        contrast = 1.10f; saturation = 1.15f;
-        bloom = 0.80f; dof = 4.0f; rays = 0.28f;
+        tint[0] = 1.0f; tint[1] = 1.0f; tint[2] = 1.0f;
+        rayColor[0] = 1.00f; rayColor[1] = 0.92f; rayColor[2] = 0.65f;
+        vignette = 0.28f;
+        contrast = 1.0f; saturation = 1.0f;
+        bloom = 0.18f; dof = 2.0f; rays = 0.45f;
         lightPos[0] = 0.28f; lightPos[1] = 0.00f;                 // anh sang xuyen tu tren-trai
         lightColor[0] = 0.85f; lightColor[1] = 0.95f; lightColor[2] = 0.55f;
         hazeColor[0] = 0.12f; hazeColor[1] = 0.30f; hazeColor[2] = 0.28f;
-        relief = 0.75f; haze = 0.32f; ao = 0.8f;
+        relief = 0.0f; haze = 0.14f; ao = 0.0f;
     }
     float res[2] = { static_cast<float>(m_width), static_cast<float>(m_height) };
     SetShaderValue(m_shader, m_locRes, res, SHADER_UNIFORM_VEC2);
@@ -249,7 +257,7 @@ void SceneShader::draw(SceneMood mood, float timeSeconds)
 
 void SceneShader::updateEmbers(float dt, SceneMood mood)
 {
-    const size_t target = (mood == SceneMood::BOSS) ? 70 : 45;
+    const size_t target = (mood == SceneMood::BOSS) ? 45 : 18;
     if (dt > 0.1f) dt = 0.1f;
     while (m_embers.size() < target) {
         Ember e;
@@ -274,7 +282,7 @@ void SceneShader::updateEmbers(float dt, SceneMood mood)
 
 void SceneShader::drawEmbers(SceneMood mood, float t)
 {
-    const Color core = (mood == SceneMood::BOSS) ? Color{ 255, 90, 50, 255 } : Color{ 255, 190, 90, 255 };
+    const Color core = (mood == SceneMood::BOSS) ? Color{ 255, 90, 50, 255 } : Color{ 210, 230, 255, 255 };
     BeginBlendMode(BLEND_ADDITIVE);
     for (const Ember& e : m_embers) {
         float tw = 0.55f + 0.45f * std::sin(t * 4.0f + e.phase);
