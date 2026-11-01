@@ -36,6 +36,7 @@ private:
     Shader        m_shader{};
     int m_locTint = -1, m_locVignette = -1, m_locContrast = -1, m_locSaturation = -1;
     int m_locRes = -1, m_locTime = -1, m_locBloom = -1, m_locDof = -1, m_locRays = -1, m_locRayColor = -1;
+    int m_locLightPos = -1, m_locLightColor = -1, m_locRelief = -1, m_locHaze = -1, m_locHazeColor = -1, m_locAo = -1;
 
     struct Ember { float x, y, vx, vy, size, phase, life; };
     std::vector<Ember> m_embers;
