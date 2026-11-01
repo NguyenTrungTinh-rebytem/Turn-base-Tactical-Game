@@ -72,6 +72,11 @@ namespace
         { "M_IMP_HOA",    "assets/images/imp_sheet.png"    },
         { "M_GOLEM_THO",  "assets/images/golem_sheet.png"  },
         { "B_DRAGON_HOA", "assets/images/boss_dragon_sheet.png" },
+        { "M_GOBLIN_KIM_E", "assets/images/goblin_sheet.png" },
+        { "M_WOLF_MOC_E", "assets/images/wolf_sheet.png" },
+        { "M_SLIME_THUY_E", "assets/images/slime_sheet.png" },
+        { "M_IMP_HOA_E", "assets/images/imp_sheet.png" },
+        { "M_GOLEM_THO_E", "assets/images/golem_sheet.png" },
     };
     const auto it = SPRITES.find(monsterId);
     return it != SPRITES.end() ? it->second : std::string(SPRITE_SHEET_PATH);
