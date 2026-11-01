@@ -1,6 +1,7 @@
 // src/graphics/PrepMenuScreen.cpp
 #include "PrepMenuScreen.h"
 #include "SkillTooltip.h"
+#include "graphics/ItemIcons.h"
 #include <algorithm>
 #include <cmath>
 
@@ -339,8 +340,12 @@ void PrepMenuScreen::drawItemsTab(const Rectangle& area) const {
         if (filled) {
             const PrepItemInfo& it = m_info.m_items[static_cast<size_t>(i)];
             const float cx = r.x + r.width / 2.0f;
-            DrawCircle(static_cast<int>(cx), static_cast<int>(r.y + 52), 24.0f, Color{ 220, 80, 100, 255 });   // bieu tuong tam
-            DrawRectangle(static_cast<int>(cx - 7), static_cast<int>(r.y + 22), 14, 12, Color{ 200, 190, 220, 255 });
+            if (m_icons && !it.m_id.empty()) {
+                m_icons->draw(it.m_id, Rectangle{ cx - 32.0f, r.y + 14.0f, 64.0f, 64.0f }, WHITE);
+            } else {
+                DrawCircle(static_cast<int>(cx), static_cast<int>(r.y + 52), 24.0f, Color{ 220, 80, 100, 255 });   // bieu tuong tam
+                DrawRectangle(static_cast<int>(cx - 7), static_cast<int>(r.y + 22), 14, 12, Color{ 200, 190, 220, 255 });
+            }
             drawCenteredText(it.m_name.c_str(), cx, r.y + 92.0f, 20, COL_TEXT);
             drawCenteredText(TextFormat("x%d", it.m_count), cx, r.y + 118.0f, 18, COL_OK);
         } else {

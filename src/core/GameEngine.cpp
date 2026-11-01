@@ -13,6 +13,7 @@
 #include <iostream>
 #include "data/HeroPresetConfig.h"
 #include "data/CharacterRules.h"
+#include "graphics/SceneShader.h"
 #include <cctype>
 
 namespace
@@ -42,6 +43,25 @@ namespace
         return "assets/images/hero_" + id + "_battle.png";
     }
     
+    // Tuong nu (giong hero_<id> trong heroes.csv) -> dung tieng nu. Con lai dung tieng nam.
+    bool isFemaleHeroName(const std::string& heroName)
+    {
+        std::string id;
+        for (char ch : heroName) id += static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+        while (!id.empty() && (std::isdigit(static_cast<unsigned char>(id.back())) || id.back() == ' ')) id.pop_back();
+        return id == "lyra" || id == "sylwen" || id == "kael";
+    }
+    int itemCategoryIndex(ItemCategory c)
+    {
+        switch (c) {
+            case ItemCategory::CONSUMABLE: return 0;
+            case ItemCategory::BOOSTER:    return 1;
+            case ItemCategory::HELD:       return 2;
+        }
+        return 0;
+    }
+    constexpr float GOLD_POPUP_LIFE = 1.4f;
+
     // Sprite sheet rieng cho tung quai (theo id trong monsters.csv). Id la -> dung SPRITE_SHEET_PATH.
     std::string monsterSpritePath(const std::string& monsterId)
     {
@@ -52,6 +72,11 @@ namespace
         { "M_IMP_HOA",    "assets/images/imp_sheet.png"    },
         { "M_GOLEM_THO",  "assets/images/golem_sheet.png"  },
         { "B_DRAGON_HOA", "assets/images/boss_dragon_sheet.png" },
+        { "M_GOBLIN_KIM_E", "assets/images/goblin_sheet.png" },
+        { "M_WOLF_MOC_E", "assets/images/wolf_sheet.png" },
+        { "M_SLIME_THUY_E", "assets/images/slime_sheet.png" },
+        { "M_IMP_HOA_E", "assets/images/imp_sheet.png" },
+        { "M_GOLEM_THO_E", "assets/images/golem_sheet.png" },
     };
     const auto it = SPRITES.find(monsterId);
     return it != SPRITES.end() ? it->second : std::string(SPRITE_SHEET_PATH);
@@ -65,8 +90,10 @@ namespace
     // ----- Gameplay -----
     constexpr float AI_TURN_DELAY = 1.2f;
     constexpr int   INITIAL_POTIONS = 3;
+    constexpr int   STARTER_POTIONS = 3;   // bo do khoi dau (con lai phai mua o Shop)
+    constexpr int   STARTER_ENERGY = 1;
     constexpr int   STAGE1_ENEMY_COUNT = 3;
-    constexpr float STAGE_CLEAR_HEAL_RATE = 0.3f;   // hoi 30% HP khi qua man
+    constexpr float WAVE_CLEAR_RECOVER_RATE = 0.2f; // sau moi wave: hoi 20% HP va 20% MP (nguoi con song)
     const char* const POTION_NAME = "ITM_HP_MINOR";
     const char* skillTypeText(SkillType t) {
     switch (t) {
@@ -174,6 +201,9 @@ void GameEngine::initialize()
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "2.5D RPG Battle Engine - Demo");
     SetTargetFPS(60);
     SetExitKey(KEY_NULL);   // ESC do game tu xu ly (Undo / ve Menu), khong thoat thang
+    m_audio.init();                                          // khong co loa -> game van chay, chi im lang
+    m_audio.loadAll(resolvePath("assets/audio"));
+    m_sceneShader.init(SCREEN_WIDTH, SCREEN_HEIGHT);         // loi shader -> tu tat, game ve binh thuong
 
     try {
         m_gameData.loadAll(resolvePath("data"));
@@ -194,6 +224,24 @@ void GameEngine::initialize()
                 if (item.m_category == ItemCategory::HELD) m_gearIds.push_back(item.m_id);
         }
     }
+    {
+        // Gia ban + cau hinh tien roi (data/shop.csv, data/economy.csv) va icon vat pham (assets/images/items/<id>.png)
+        m_shopConfig.load(resolvePath("data"));
+        if (m_itemsLoaded) {
+            if (m_shopConfig.getEntries().empty()) {        // thieu shop.csv -> ban het, gia theo nhom
+                std::vector<ShopEntry> entries;
+                for (const ItemData& item : m_itemDatabase.getItems())
+                    entries.push_back({ item.m_id, item.m_category == ItemCategory::HELD ? 140
+                                                 : item.m_category == ItemCategory::BOOSTER ? 60 : 40 });
+                m_shopConfig.setEntries(entries);
+            }
+            for (const ItemData& item : m_itemDatabase.getItems())
+                m_itemIcons.load(item.m_id, resolvePath("assets/images/items/" + item.m_id + ".png"),
+                                 itemCategoryIndex(item.m_category));
+        }
+        m_prepMenu.setItemIcons(&m_itemIcons);
+        m_shop.setIcons(&m_itemIcons);
+    }
     m_startMenu.loadBackground(resolvePath("assets/images/bg_menu.png"));   // thieu anh -> nen thu tuc
     m_startMenu.setStatusText(m_dataLoaded ? "Data: CSV OK" : "Data: CSV loi -> dung du lieu du phong", m_dataLoaded);
     m_heroConfig = { HERO_NAME, HERO_RACE, HERO_CLASS, HERO_ELEMENT };
@@ -204,9 +252,12 @@ void GameEngine::initialize()
     m_heroCreate.loadPreviewSprite(resolvePath(SPRITE_SHEET_PATH), FRAME_W, FRAME_H);
     setupHeroCreateScreen();
     m_combatSubject.addObserver(this);
-    m_battleMap.setStage(m_stage == 1 ? StageId::STAGE_1 : StageId::STAGE_2,
-    resolvePath(m_stage == 1 ? "assets/images/bg_wave1.png"
-                           : "assets/images/bg_wave2.png"));
+    {
+        const bool bossBg = isBossStage(m_stage);
+        m_battleMap.setStage(bossBg ? StageId::STAGE_2 : StageId::STAGE_1,
+                             resolvePath(bossBg ? "assets/images/bg_wave2.png"
+                                                : "assets/images/bg_wave1.png"));
+    }
     m_waveManager.reset();
     m_waveManager.unlockWave(1);
     m_stateMachine.changeState(GameStateMachine::State::MENU);
@@ -226,6 +277,9 @@ void GameEngine::shutdown()
     m_waveSelect.unloadAll();
     m_prepMenu.unloadAll();
     m_battleMap.unloadAll();
+    m_itemIcons.unloadAll();
+    m_sceneShader.unload();
+    m_audio.unloadAll();                 // dong thiet bi am thanh TRUOC CloseWindow
     m_combatants.clear();
     m_party.clear();
     m_baseSpeed.clear();
@@ -290,9 +344,28 @@ std::string GameEngine::resolvePath(const std::string& relativePath) const
     return relativePath;
 }
 
-int GameEngine::finalStage() const
+int GameEngine::finalStage()
 {
-    return m_dataLoaded ? 2 : 1;
+    if (!m_dataLoaded) return 1;
+    if (m_finalStageCache > 0) return m_finalStageCache;
+    // Wave cuoi = wave lon nhat co quai trong data/monsters.csv (3 wave: 2 thuong + Boss)
+    int last = 1;
+    for (int s = 1; s <= 10; ++s)
+    {
+        try
+        {
+            if (m_gameData.getMonstersByStage(s).empty()) break;
+            last = s;
+        }
+        catch (const std::exception&) { break; }
+    }
+    m_finalStageCache = last;
+    return last;
+}
+
+bool GameEngine::isBossStage(int stage)
+{
+    return m_dataLoaded && waveHasBoss(stage);
 }
 
 Skill GameEngine::toBattleSkill(const SkillData& data, Element heroElement)
@@ -432,8 +505,8 @@ void GameEngine::openWaveSelect()
             if (m.m_isBoss) w.m_isBoss = true;
         }
 
-        // Wave 1 chi xuat hien ngau nhien STAGE1_ENEMY_COUNT quai trong so quai co the gap (xem spawnEnemies)
-        const int appear = (stage == 1) ? std::min(static_cast<int>(monsters.size()), STAGE1_ENEMY_COUNT)
+        // Wave thuong chi xuat hien ngau nhien STAGE1_ENEMY_COUNT quai trong so quai co the gap (xem spawnEnemies)
+        const int appear = (!w.m_isBoss) ? std::min(static_cast<int>(monsters.size()), STAGE1_ENEMY_COUNT)
                                         : static_cast<int>(monsters.size());
         w.m_description = w.m_isBoss ? std::string("Tran chien voi Boss")
                                      : "Xuat hien ngau nhien " + std::to_string(appear) + " quai";
@@ -491,12 +564,21 @@ void GameEngine::openPrepMenu(int wave)
     catch (const std::exception& e) {
         std::cerr << "Prep menu data error: " << e.what() << std::endl;
     }
-    // Tab 3: Tui do
+    // Tab 3: Tui do (giua 2 wave: tui that cua doi; luc bat dau: bo do khoi dau)
     if (m_itemsLoaded) {
-        const auto& all = m_itemDatabase.getItems();
-        for (const ItemData& item : all)
-            info.m_items.push_back({ item.m_name, item.m_id == POTION_NAME ? INITIAL_POTIONS :
-                                                 item.m_category == ItemCategory::HELD ? 1 : 1 });
+        if (m_resumeRun) {
+            std::vector<std::string> seen;
+            for (const ItemPtr& item : m_party.getInventory().getItems()) {
+                if (!item || std::find(seen.begin(), seen.end(), item->getId()) != seen.end()) continue;
+                seen.push_back(item->getId());
+                info.m_items.push_back({ item->getName(), static_cast<int>(m_party.countItem(item->getId())), item->getId() });
+            }
+            for (const ItemPtr& gear : m_equippedGear)
+                if (gear) info.m_items.push_back({ gear->getName() + " (dang deo)", 1, gear->getId() });
+        } else {
+            info.m_items.push_back({ "Minor Health Potion", STARTER_POTIONS, "ITM_HP_MINOR" });
+            info.m_items.push_back({ "Energy Capsule", STARTER_ENERGY, "ITM_ENERGY" });
+        }
     }
 
     // Tab 4: Thong tin cong
@@ -623,6 +705,7 @@ void GameEngine::createHero()
 {
     m_heroSkills.clear();
     m_party.clear();
+    for (ItemPtr& gear : m_equippedGear) gear.reset();
     auto addPartyHero = [this](std::unique_ptr<Player> player) {
         if (!player) return;
         const std::string sprite = heroSpritePath(player->getName());   // hero_<ten>_battle.png (thieu -> sheet mac dinh)
@@ -665,27 +748,15 @@ void GameEngine::refreshCurrentSkills()
 
 void GameEngine::seedItems()
 {
+    // Bo do khoi dau. Muon them do: mua o Shop (mo truoc wave Boss) bang tien roi tu quai.
     if (!m_itemsLoaded) return;
     auto seed = [this](const char* id, int count) {
         if (!m_itemDatabase.findItem(id)) return;
         for (int i = 0; i < count; ++i)
             m_party.addItem(ItemFactory::createItem(m_itemDatabase, id));
     };
-    seed(POTION_NAME, INITIAL_POTIONS);
-    seed("ITM_HP_MAJOR", 1);
-    seed("ITM_ENERGY", 2);
-    seed("ITM_PHOENIX", 2);
-    seed("ITM_POWER_SERUM", 1);
-    seed("ITM_IRON_SHIELD", 1);
-    seed("ITM_HASTE", 1);
-    seed("ITM_PRECISION", 1);
-    for (const std::string& id : m_gearIds) seed(id.c_str(), 1);
-    if (!m_gearIds.empty() && m_prepGearIndex > 0) {
-        const std::string& id = m_gearIds[static_cast<std::size_t>(m_prepGearIndex - 1)];
-        const auto& items = m_party.getInventory().getItems();
-        auto it = std::find_if(items.begin(), items.end(), [&](const ItemPtr& p) { return p->getId() == id; });
-        if (it != items.end()) m_party.equipGear(0, *it);
-    }
+    seed(POTION_NAME, STARTER_POTIONS);
+    seed("ITM_ENERGY", STARTER_ENERGY);
 }
 
 void GameEngine::spawnEnemies(int stage)
@@ -693,7 +764,9 @@ void GameEngine::spawnEnemies(int stage)
     if (m_dataLoaded)
     {
         std::vector<MonsterData> monsters = m_gameData.getMonstersByStage(stage);
-        if (stage == 1)
+        const bool hasBoss = std::any_of(monsters.begin(), monsters.end(),
+                                         [](const MonsterData& md) { return md.m_isBoss; });
+        if (!hasBoss)
         {
             std::shuffle(monsters.begin(), monsters.end(), m_rng);
             if (monsters.size() > static_cast<size_t>(STAGE1_ENEMY_COUNT))
@@ -731,6 +804,7 @@ void GameEngine::loadStage(int stage)
     m_commandStack.clear();
     m_statusEffects.clear();
     m_lastHp.clear();
+    m_goldPaid.clear();      // quai moi co the trung dia chi voi quai cu da bi huy
     m_ui.unloadAll();
     m_isSelectingSkill = false;
     m_isSelectingItem = false;
@@ -738,8 +812,6 @@ void GameEngine::loadStage(int stage)
 
     for (const auto& member : m_party.getMembers()) {
         Character* h = member.get();
-        if (stage > 1 && h->isAlive())
-            h->heal(static_cast<int>(static_cast<float>(h->getMaxHp()) * STAGE_CLEAR_HEAL_RATE));
         h->resetBattleState();
         auto speed = m_baseSpeed.find(h);
         if (speed != m_baseSpeed.end()) h->setSpeed(speed->second);
@@ -752,16 +824,19 @@ void GameEngine::loadStage(int stage)
 
     m_selectedAlly = m_party.getLeader();
     m_selectedTarget = (m_combatants.size() > m_party.size()) ? m_combatants[m_party.size()].get() : nullptr;
-    m_battleMap.setStage(m_stage == 1 ? StageId::STAGE_1 : StageId::STAGE_2,
-    resolvePath(m_stage == 1 ? "assets/images/bg_wave1.png"
-                           : "assets/images/bg_wave2.png"));
+    {
+        const bool bossBg = isBossStage(m_stage);
+        m_battleMap.setStage(bossBg ? StageId::STAGE_2 : StageId::STAGE_1,
+                             resolvePath(bossBg ? "assets/images/bg_wave2.png"
+                                                : "assets/images/bg_wave1.png"));
+    }
 
     m_currentCharacter = nullptr;   // update() se goi advanceTurn() de lay luot dau tien
     m_battlePhase = BattlePhase::AI_THINKING;
     m_battleLog = "MAN " + std::to_string(stage) + " bat dau!";
 }
 
-void GameEngine::startNewGame(int startStage)
+void GameEngine::beginRun(int startStage)
 {
     m_currentCharacter = nullptr;
     m_selectedTarget = nullptr;
@@ -774,13 +849,357 @@ void GameEngine::startNewGame(int startStage)
     m_scaleMul.clear();
     m_views.clear();
     m_ui.unloadAll();
+    m_goldPaid.clear();
+    m_goldPopups.clear();
+    m_shopOpen = false;
+    m_resumeRun = false;
 
     createHero();
     seedItems();
-    loadStage(startStage); 
+
+    // Tien khoi dau; vao thang wave cao thi duoc tang bu cho cac wave bi bo qua
+    const EconomyConfig& eco = m_shopConfig.getEconomy();
+    m_gold = eco.m_startGold + std::max(0, startStage - 1) * eco.m_skipWaveGold;
+}
+
+void GameEngine::startNewGame(int startStage)
+{
+    beginRun(startStage);
+    loadStage(startStage);
     advanceTurn();
 
     m_battleLog = "Tran dau bat dau! Den luot: " + (m_currentCharacter ? m_currentCharacter->getName() : std::string("None"));
+}
+
+bool GameEngine::waveHasBoss(int wave)
+{
+    if (!m_dataLoaded) return false;
+    for (const MonsterData& m : m_gameData.getMonstersByStage(wave))
+        if (m.m_isBoss) return true;
+    return false;
+}
+
+void GameEngine::recoverPartyAfterWave()
+{
+    // Hoi 20% HP + 20% MP toi da cho nguoi con song. Nguoi da guc phai dung Revive.
+    int hpTotal = 0, mpTotal = 0;
+    for (const auto& member : m_party.getMembers())
+    {
+        Character* h = member.get();
+        if (!h->isAlive()) continue;
+
+        const int hpAdd = static_cast<int>(static_cast<float>(h->getMaxHp()) * WAVE_CLEAR_RECOVER_RATE);
+        const int hpBefore = h->getCurrentHp();
+        h->heal(hpAdd);
+        hpTotal += h->getCurrentHp() - hpBefore;
+
+        const int maxMp = h->getStats().m_mp;
+        const int mpAdd = std::min(static_cast<int>(static_cast<float>(maxMp) * WAVE_CLEAR_RECOVER_RATE),
+                                   std::max(0, maxMp - h->getCurrentMp()));
+        if (mpAdd > 0) h->consumeMp(-mpAdd);     // tieu hao am = hoi MP (da gioi han khong vuot toi da)
+        mpTotal += mpAdd;
+    }
+    m_battleLog += "  [Hoi sau wave: +" + std::to_string(hpTotal) + " HP, +" + std::to_string(mpTotal) + " MP (20%)]";
+}
+
+void GameEngine::enterBossBreak(int nextWave)
+{
+    // Giu nguyen doi hinh / HP / tui do; chi mo man Chuan bi (co Shop) roi vao wave tiep
+    m_resumeRun = true;
+    m_shopOpen = false;
+    m_isSelectingSkill = false;
+    m_isSelectingItem = false;
+    m_commandStack.clear();
+    openPrepMenu(nextWave);
+    m_battleLog = "Chuan bi cho wave Boss! Mo Cua Hang de mua do va trang bi.";
+}
+
+void GameEngine::beginBattleAfterBreak()
+{
+    m_resumeRun = false;
+    m_shopOpen = false;
+    m_stateMachine.changeState(GameStateMachine::State::IN_BATTLE);
+    loadStage(m_pendingWave);
+    advanceTurn();
+    m_battleLog = "Tran dau bat dau! Den luot: " + (m_currentCharacter ? m_currentCharacter->getName() : std::string("None"));
+}
+
+// =====================================================================
+//  TIEN ROI + CUA HANG
+// =====================================================================
+
+int GameEngine::computeGoldDrop(const Character* enemy)
+{
+    if (!enemy) return 0;
+    const EconomyConfig& eco = m_shopConfig.getEconomy();
+    int gold = eco.m_enemyBaseGold;
+    if (eco.m_enemyHpDivisor > 0) gold += enemy->getStats().m_hp / eco.m_enemyHpDivisor;
+    if (dynamic_cast<const Boss*>(enemy)) gold *= eco.m_bossMultiplier;
+    if (eco.m_variancePercent > 0) {
+        std::uniform_int_distribution<int> dist(100 - eco.m_variancePercent, 100 + eco.m_variancePercent);
+        gold = gold * dist(m_rng) / 100;
+    }
+    return std::max(1, gold);
+}
+
+void GameEngine::addGoldPopup(Vector2 pos, int amount)
+{
+    GoldPopup popup;
+    popup.m_pos = pos;
+    popup.m_amount = amount;
+    popup.m_life = GOLD_POPUP_LIFE;
+    m_goldPopups.push_back(popup);
+}
+
+void GameEngine::settleGold()
+{
+    // Chi tra tien khi hanh dong da chot (khong con Undo) -> Undo hoi sinh quai khong lam tien bi cong thua.
+    int total = 0;
+    for (std::size_t i = m_party.size(); i < m_combatants.size() && i < m_views.size(); ++i) {
+        const Character* enemy = m_combatants[i].get();
+        if (!enemy || enemy->isAlive()) continue;
+        if (!m_goldPaid.insert(enemy).second) continue;
+        const int drop = computeGoldDrop(enemy);
+        total += drop;
+        Vector2 pos = m_views[i]->getHeadPos();
+        pos.y -= 30.0f;
+        addGoldPopup(pos, drop);
+    }
+    if (total > 0) {
+        m_gold += total;
+        m_battleLog += "  [+" + std::to_string(total) + " vang]";
+    }
+}
+
+int GameEngine::ownedCount(const std::string& itemId) const
+{
+    int count = static_cast<int>(m_party.countItem(itemId));
+    for (const ItemPtr& gear : m_equippedGear)
+        if (gear && gear->getId() == itemId) ++count;
+    return count;
+}
+
+Rectangle GameEngine::shopButtonRect() const
+{
+    return Rectangle{ 40.0f, 640.0f, 250.0f, 52.0f };
+}
+
+void GameEngine::openShop()
+{
+    if (!m_itemsLoaded) return;
+    m_shopOpen = true;
+    m_shop.open(0);
+    refreshShop();
+}
+
+void GameEngine::closeShop()
+{
+    m_shopOpen = false;
+    openPrepMenu(m_pendingWave);          // cap nhat lai tab Tui do cua man Chuan bi
+}
+
+void GameEngine::refreshShop()
+{
+    ShopInfo info;
+    info.m_gold = m_gold;
+
+    for (const ShopEntry& entry : m_shopConfig.getEntries()) {
+        const ItemData* data = m_itemDatabase.findItem(entry.m_id);
+        if (!data) continue;
+        ShopStockInfo s;
+        s.m_id = data->m_id;
+        s.m_name = data->m_name;
+        try { s.m_description = ItemFactory::createItem(*data)->getDescription(); }
+        catch (const std::exception&) { s.m_description = ""; }
+        s.m_category = itemCategoryIndex(data->m_category);
+        s.m_price = entry.m_price;
+        s.m_owned = ownedCount(data->m_id);
+        s.m_limit = data->m_maxCarry;
+        info.m_stock.push_back(s);
+    }
+
+    std::vector<std::string> seen;
+    for (const ItemPtr& item : m_party.getInventory().getItems()) {
+        if (!item || std::find(seen.begin(), seen.end(), item->getId()) != seen.end()) continue;
+        seen.push_back(item->getId());
+        ShopBagInfo b;
+        b.m_id = item->getId();
+        b.m_name = item->getName();
+        b.m_description = item->getDescription();
+        b.m_category = itemCategoryIndex(item->getCategory());
+        b.m_count = static_cast<int>(m_party.countItem(item->getId()));
+        info.m_bag.push_back(b);
+    }
+
+    for (std::size_t i = 0; i < m_party.size(); ++i) {
+        ShopMemberInfo m;
+        m.m_name = m_party.getMember(i)->getName();
+        if (i < Party::MAX_SIZE && m_equippedGear[i]) {
+            m.m_gearId = m_equippedGear[i]->getId();
+            m.m_gearName = m_equippedGear[i]->getName();
+        }
+        info.m_members.push_back(m);
+    }
+    m_shop.setInfo(info);
+}
+
+void GameEngine::buyShopItem(int stockIndex)
+{
+    const auto& entries = m_shopConfig.getEntries();
+    std::vector<const ShopEntry*> sold;
+    for (const ShopEntry& e : entries)
+        if (m_itemDatabase.findItem(e.m_id)) sold.push_back(&e);
+    if (stockIndex < 0 || static_cast<std::size_t>(stockIndex) >= sold.size()) return;
+
+    const ShopEntry& entry = *sold[static_cast<std::size_t>(stockIndex)];
+    const ItemData& data = m_itemDatabase.getItem(entry.m_id);
+
+    if (data.m_maxCarry > 0 && ownedCount(entry.m_id) >= data.m_maxCarry) {
+        m_shop.setMessage("Ban da mang du so luong " + data.m_name + "!", false);
+        return;
+    }
+    if (m_gold < entry.m_price) {
+        m_shop.setMessage("Khong du vang de mua " + data.m_name + "!", false);
+        return;
+    }
+    if (!m_party.addItem(ItemFactory::createItem(data))) {
+        m_shop.setMessage("Tui do da day, khong the mua them " + data.m_name + "!", false);
+        return;
+    }
+    m_gold -= entry.m_price;
+    m_audio.playSfx(SfxId::CLICK);
+    m_shop.setMessage("Da mua " + data.m_name + " (-" + std::to_string(entry.m_price) + " vang)", true);
+    refreshShop();
+}
+
+void GameEngine::equipFromBag(int bagIndex, int memberIndex)
+{
+    // Danh sach tui hien thi gom theo id (cung thu tu voi refreshShop)
+    std::vector<std::string> ids;
+    for (const ItemPtr& item : m_party.getInventory().getItems())
+        if (item && std::find(ids.begin(), ids.end(), item->getId()) == ids.end()) ids.push_back(item->getId());
+    if (bagIndex < 0 || static_cast<std::size_t>(bagIndex) >= ids.size()) {
+        m_shop.setMessage("Chua chon vat pham de trang bi.", false);
+        return;
+    }
+    if (memberIndex < 0 || static_cast<std::size_t>(memberIndex) >= m_party.size() ||
+        static_cast<std::size_t>(memberIndex) >= Party::MAX_SIZE) return;
+
+    const std::string& id = ids[static_cast<std::size_t>(bagIndex)];
+    ItemPtr gear;
+    for (const ItemPtr& item : m_party.getInventory().getItems())
+        if (item && item->getId() == id) { gear = item; break; }
+    if (!gear || gear->getCategory() != ItemCategory::HELD) {
+        m_shop.setMessage("Chi Trang bi (Held Gear) moi deo duoc cho hero.", false);
+        return;
+    }
+    const ItemPtr previous = m_equippedGear[memberIndex];
+    if (!m_party.equipGear(static_cast<std::size_t>(memberIndex), gear)) {
+        m_shop.setMessage("Khong the trang bi vat pham nay.", false);
+        return;
+    }
+    m_equippedGear[memberIndex] = gear;
+    m_audio.playSfx(SfxId::CLICK);
+    m_shop.setMessage(m_party.getMember(static_cast<std::size_t>(memberIndex))->getName() + " da deo " + gear->getName() +
+                      (previous ? " (cat " + previous->getName() + " vao tui)" : ""), true);
+    refreshShop();
+}
+
+void GameEngine::unequipMember(int memberIndex)
+{
+    if (memberIndex < 0 || static_cast<std::size_t>(memberIndex) >= m_party.size() ||
+        static_cast<std::size_t>(memberIndex) >= Party::MAX_SIZE) return;
+    const ItemPtr gear = m_equippedGear[memberIndex];
+    if (!gear || !m_party.unequipGear(static_cast<std::size_t>(memberIndex))) {
+        m_shop.setMessage("Hero nay chua deo trang bi.", false);
+        return;
+    }
+    m_equippedGear[memberIndex].reset();
+    m_audio.playSfx(SfxId::CLICK);
+    m_shop.setMessage("Da thao " + gear->getName() + " vao tui.", true);
+    refreshShop();
+}
+
+void GameEngine::handleShopInput()
+{
+    switch (m_shop.handleInput())
+    {
+    case ShopAction::CLOSE:   closeShop(); break;
+    case ShopAction::BUY:     buyShopItem(m_shop.getStockIndex()); break;
+    case ShopAction::EQUIP:   equipFromBag(m_shop.getBagIndex(), m_shop.getMemberIndex()); break;
+    case ShopAction::UNEQUIP: unequipMember(m_shop.getMemberIndex()); break;
+    case ShopAction::NONE:    break;
+    }
+}
+
+void GameEngine::drawGoldHud(float x, float y) const
+{
+    DrawRectangleRounded(Rectangle{ x, y, 190.0f, 34.0f }, 0.3f, 6, Color{ 15, 15, 30, 215 });
+    DrawRectangleLinesEx(Rectangle{ x, y, 190.0f, 34.0f }, 2.0f, Color{ 200, 170, 80, 255 });
+    DrawCircle(static_cast<int>(x + 20), static_cast<int>(y + 17), 10.0f, Color{ 255, 205, 60, 255 });
+    DrawCircleLines(static_cast<int>(x + 20), static_cast<int>(y + 17), 10.0f, Color{ 120, 80, 10, 255 });
+    DrawText(TextFormat("%d vang", m_gold), static_cast<int>(x + 40), static_cast<int>(y + 7), 20, Color{ 255, 225, 120, 255 });
+}
+
+void GameEngine::drawPrepExtras() const
+{
+    if (!m_resumeRun) return;
+    drawGoldHud(1280.0f - 230.0f, 20.0f);
+
+    const Rectangle r = shopButtonRect();
+    const bool hover = CheckCollisionPointRec(GetMousePosition(), r);
+    DrawRectangleRec(Rectangle{ r.x + 4, r.y + 5, r.width, r.height }, Color{ 0, 0, 0, 110 });
+    DrawRectangleRec(r, hover ? Color{ 90, 60, 20, 235 } : Color{ 50, 40, 14, 230 });
+    DrawRectangleLinesEx(r, hover ? 3.0f : 2.0f, Color{ 255, 214, 96, 255 });
+    const char* label = "CUA HANG [B]";
+    DrawText(label, static_cast<int>(r.x + (r.width - MeasureText(label, 24)) / 2.0f),
+             static_cast<int>(r.y + (r.height - 24.0f) / 2.0f), 24, hover ? Color{ 255, 240, 170, 255 } : Color{ 238, 235, 252, 255 });
+    DrawText("Dang nghi giua 2 wave: mua do, trang bi cho tuong, roi [ENTER] de vao Boss",
+             40, 702, 14, Color{ 255, 214, 96, 220 });
+}
+
+// =====================================================================
+//  AM THANH
+// =====================================================================
+
+void GameEngine::updateMusic()
+{
+    switch (m_stateMachine.getState())
+    {
+    case GameStateMachine::State::MENU:       m_audio.playMusic(MusicId::MENU);      break;
+    case GameStateMachine::State::IN_BATTLE:  m_audio.playMusic(MusicId::BATTLE);    break;
+    case GameStateMachine::State::GAME_OVER:  m_audio.playMusic(MusicId::GAME_OVER); break;
+    default:                                  m_audio.playMusic(MusicId::AMBIENT);   break;   // chon tuong / wave / chuan bi / thang
+    }
+}
+
+void GameEngine::playActionSfx(Character* character, AnimState state)
+{
+    if (!character) return;
+    const bool attack = (state == AnimState::ATTACK);
+    const bool hurt = (state == AnimState::TAKE_DAMAGE);
+    if (!attack && !hurt) return;
+
+    if (isHero(character)) {
+        const bool female = isFemaleHeroName(character->getName());
+        if (attack) m_audio.playSfx(female ? SfxId::HERO_FEMALE_ATTACK : SfxId::HERO_MALE_ATTACK);
+        else        m_audio.playSfx(female ? SfxId::HERO_FEMALE_HURT : SfxId::HERO_MALE_HURT);
+    } else if (dynamic_cast<const Boss*>(character)) {
+        m_audio.playSfx(attack ? SfxId::DRAGON_ATTACK : SfxId::DRAGON_HURT);        // boss hien tai la Rong
+    } else {
+        m_audio.playSfx(attack ? SfxId::MONSTER_ATTACK : SfxId::MONSTER_HURT);
+    }
+}
+
+void GameEngine::playDeathSfx(Character* character)
+{
+    if (!character) return;
+    if (isHero(character))
+        m_audio.playSfx(isFemaleHeroName(character->getName()) ? SfxId::HERO_FEMALE_DEATH : SfxId::HERO_MALE_DEATH);
+    else if (dynamic_cast<const Boss*>(character))
+        m_audio.playSfx(SfxId::DRAGON_HURT);        // chua co tieng chet rieng cho quai: dung tieng bi danh
+    else
+        m_audio.playSfx(SfxId::MONSTER_HURT);
 }
 
 // =====================================================================
@@ -789,6 +1208,11 @@ void GameEngine::startNewGame(int startStage)
 
 void GameEngine::processEvents()
 {
+    // Tieng click cho cac man hinh menu (chuot trai / ENTER / SPACE)
+    if (!m_stateMachine.is(GameStateMachine::State::IN_BATTLE) &&
+        (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER)))
+        m_audio.playSfx(SfxId::CLICK);
+
     if (IsKeyPressed(KEY_ESCAPE))
     {
         if (m_stateMachine.is(GameStateMachine::State::IN_BATTLE))
@@ -819,7 +1243,8 @@ void GameEngine::processEvents()
     }
     else if (m_stateMachine.is(GameStateMachine::State::PREP_MENU))
     {
-    leavePrepMenu();
+        if (m_shopOpen) { /* ESC do ShopScreen xu ly */ }
+        else if (!m_resumeRun) leavePrepMenu();     // giua 2 wave khong cho thoat ve menu bang ESC
     }
         else
         {
@@ -840,6 +1265,8 @@ void GameEngine::processEvents()
     if (m_heroCreate.hasOptions())
     {
         m_partyConfigs.clear();
+        m_resumeRun = false;
+        m_shopOpen = false;
         m_editingPartySlot = 0;
         m_selectingFromPrep = false;
         m_heroCreate.reset(m_heroConfig.m_name);
@@ -905,33 +1332,46 @@ void GameEngine::processEvents()
     }
     break;
     case GameStateMachine::State::PREP_MENU:
-    if (IsKeyPressed(KEY_T)) {
-        openPartyMemberSelection(std::min(static_cast<int>(m_partyConfigs.size()),
-                                          static_cast<int>(Party::MAX_SIZE) - 1));
+    if (m_shopOpen) {
+        handleShopInput();
         break;
     }
-    if (IsKeyPressed(KEY_G) && !m_gearIds.empty()) {
-        m_prepGearIndex = (m_prepGearIndex + 1) % (static_cast<int>(m_gearIds.size()) + 1);
-        openPrepMenu(m_pendingWave);
+    if (m_resumeRun && m_itemsLoaded &&
+        (IsKeyPressed(KEY_B) ||
+         (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), shopButtonRect())))) {
+        openShop();
+        break;
+    }
+    if (!m_resumeRun && IsKeyPressed(KEY_T)) {
+        openPartyMemberSelection(std::min(static_cast<int>(m_partyConfigs.size()),
+                                          static_cast<int>(Party::MAX_SIZE) - 1));
         break;
     }
     switch (m_prepMenu.handleInput())
     {
     case PrepMenuAction::EDIT_MEMBER_1:
-        openPartyMemberSelection(0);
+        if (!m_resumeRun) openPartyMemberSelection(0);
         break;
     case PrepMenuAction::EDIT_MEMBER_2:
-        openPartyMemberSelection(1);
+        if (!m_resumeRun) openPartyMemberSelection(1);
         break;
     case PrepMenuAction::EDIT_MEMBER_3:
-        openPartyMemberSelection(2);
+        if (!m_resumeRun) openPartyMemberSelection(2);
         break;
     case PrepMenuAction::START:
-        m_stateMachine.changeState(GameStateMachine::State::IN_BATTLE);
-        startNewGame(m_pendingWave);
+        if (m_resumeRun) {
+            beginBattleAfterBreak();                      // tiep tuc chuyen di dang dang do
+        } else if (m_itemsLoaded && m_pendingWave > 1 && waveHasBoss(m_pendingWave)) {
+            beginRun(m_pendingWave);                      // vao thang wave Boss: cho mua do truoc khi danh
+            m_resumeRun = true;
+            openPrepMenu(m_pendingWave);
+        } else {
+            m_stateMachine.changeState(GameStateMachine::State::IN_BATTLE);
+            startNewGame(m_pendingWave);
+        }
         break;
     case PrepMenuAction::BACK:
-        leavePrepMenu();
+        if (!m_resumeRun) leavePrepMenu();
         break;
     case PrepMenuAction::NONE:
         break;
@@ -1309,6 +1749,10 @@ void GameEngine::executeAiTurn(Character* aiChar)
 
 void GameEngine::update(float deltaTime)
 {   
+    m_audio.update(deltaTime);
+    updateMusic();
+    if (IsKeyPressed(KEY_F9)) m_sceneShader.setEnabled(!m_sceneShader.isEnabled());   // bat/tat shader canh
+    if (m_shopOpen) m_shop.update(deltaTime);
     if (m_stateMachine.is(GameStateMachine::State::MENU))
     m_startMenu.update(deltaTime);
     if (m_stateMachine.is(GameStateMachine::State::CREATE_HERO))
@@ -1322,6 +1766,9 @@ void GameEngine::update(float deltaTime)
     // Cap nhat sprite + hieu ung UI (chu bay)
     for (auto& v : m_views) v->update(deltaTime);
     m_ui.update(deltaTime);
+    for (GoldPopup& p : m_goldPopups) { p.m_life -= deltaTime; p.m_pos.y -= 35.0f * deltaTime; }
+    m_goldPopups.erase(std::remove_if(m_goldPopups.begin(), m_goldPopups.end(),
+                                      [](const GoldPopup& p) { return p.m_life <= 0.0f; }), m_goldPopups.end());
 
     // Dang cho nguoi choi xac nhan/undo: khong xet ket thuc tran (muc tieu co the hoi sinh khi undo)
     if (m_battlePhase != BattlePhase::PLAYER_CONFIRM)
@@ -1355,6 +1802,7 @@ void GameEngine::update(float deltaTime)
 void GameEngine::checkBattleCondition()
 {
     if (m_combatants.empty()) return;
+    settleGold();                      // tra tien cho quai chet (chi duoc goi khi khong con cho Undo)
 
     if (m_party.isDefeated())
     {
@@ -1370,8 +1818,19 @@ void GameEngine::checkBattleCondition()
 
     // Tat ca quai da chet
     markWaveCleared(m_stage);
+    recoverPartyAfterWave();
+    const int clearBonus = m_shopConfig.getEconomy().m_waveClearBonus;
+    if (clearBonus > 0) {
+        m_gold += clearBonus;
+        m_battleLog += "  [Qua man: +" + std::to_string(clearBonus) + " vang]";
+    }
     if (m_stage < finalStage())
-        loadStage(m_stage + 1);
+    {
+        if (m_itemsLoaded && waveHasBoss(m_stage + 1))
+            enterBossBreak(m_stage + 1);       // nghi truoc wave Boss: Shop + trang bi
+        else
+            loadStage(m_stage + 1);
+    }
     else
         m_stateMachine.changeState(GameStateMachine::State::VICTORY);
 }
@@ -1429,6 +1888,7 @@ void GameEngine::playAnimation(Character* character, AnimState state)
     const int idx = indexOf(character);
     if (idx >= 0 && static_cast<size_t>(idx) < m_views.size())
         m_views[static_cast<size_t>(idx)]->play(state, true);
+    playActionSfx(character, state);
 }
 
 // =====================================================================
@@ -1478,8 +1938,10 @@ void GameEngine::onHealthChanged(Character* character, int newHealth)
 
 void GameEngine::onCharacterDied(Character* character)
 {
-    if (character)
+    if (character) {
         m_battleLog += "  >> " + character->getName() + " guc nga!";
+        playDeathSfx(character);
+    }
 }
 
 // =====================================================================
@@ -1533,11 +1995,25 @@ void GameEngine::render()
     break;
     case GameStateMachine::State::PREP_MENU:
     m_prepMenu.draw();
+    drawPrepExtras();
+    if (m_shopOpen) m_shop.draw();
     break;
     case GameStateMachine::State::IN_BATTLE:
-        m_battleMap.draw();
-        renderCombatants();
-        renderBattleUI();
+        if (m_sceneShader.isActive())
+        {
+            m_sceneShader.begin();            // nen + nhan vat -> RenderTexture
+            m_battleMap.draw();
+            renderCombatants();
+            m_sceneShader.end();
+            m_sceneShader.draw(isBossStage(m_stage) ? SceneMood::BOSS : SceneMood::NORMAL,
+                               static_cast<float>(GetTime()));
+        }
+        else
+        {
+            m_battleMap.draw();
+            renderCombatants();
+        }
+        renderBattleUI();                     // UI ve sau shader -> van sac net
         m_ui.drawFloatingTexts();
         break;
 
@@ -1563,6 +2039,23 @@ void GameEngine::renderCombatants()
     std::sort(order.begin(), order.end(), [&](size_t a, size_t b) {
         return m_views[a]->getSlot().m_feetPos.y < m_views[b]->getSlot().m_feetPos.y;
     });
+
+    // Bong do: nguon sang o tren-trai -> bong keo dai sang phai-xuong, mem o mep
+    for (size_t i : order)
+    {
+        if (!m_combatants[i]->isAlive()) continue;
+        const Vector2 f = m_views[i]->getSlot().m_feetPos;
+        const bool big = (i >= m_party.size()) && isBossStage(m_stage);
+        const float k = big ? 1.9f : 1.0f;
+        for (int layer = 0; layer < 3; ++layer)            // 3 lop chong nhau -> mep mem
+        {
+            const float g = 1.0f - 0.22f * static_cast<float>(layer);
+            DrawEllipse(static_cast<int>(f.x + 26.0f * k), static_cast<int>(f.y + 3.0f),
+                        62.0f * k * g, 15.0f * k * g, Color{ 0, 0, 0, 38 });
+        }
+        DrawEllipse(static_cast<int>(f.x + 4.0f), static_cast<int>(f.y + 1.0f),
+                    30.0f * k, 8.0f * k, Color{ 0, 0, 0, 90 });       // bong tiep dat dam o chan
+    }
 
     for (size_t i : order)
     {
@@ -1600,6 +2093,17 @@ void GameEngine::renderBattleUI()
         }
     }
 
+    // ----- Tien + chu bay "+N vang" -----
+    drawGoldHud(20.0f, 14.0f);
+    for (const GoldPopup& p : m_goldPopups) {
+        const float t = std::max(0.0f, std::min(1.0f, p.m_life / GOLD_POPUP_LIFE));
+        const unsigned char a = static_cast<unsigned char>(255.0f * t);
+        const char* text = TextFormat("+%d vang", p.m_amount);
+        const int w = MeasureText(text, 22);
+        DrawText(text, static_cast<int>(p.m_pos.x - w / 2.0f) + 2, static_cast<int>(p.m_pos.y) + 2, 22, Color{ 0, 0, 0, a });
+        DrawText(text, static_cast<int>(p.m_pos.x - w / 2.0f), static_cast<int>(p.m_pos.y), 22, Color{ 255, 215, 70, a });
+    }
+
     // ----- Danh sach luot (goc phai tren) -----
        m_turnOrderBar.draw(upcomingOrder(), m_currentCharacter);
 
@@ -1624,9 +2128,15 @@ void GameEngine::renderBattleUI()
         DrawRectangle(340, 160, 600, 390, Color{20, 25, 40, 235});
         DrawText("TUI DO: [1-9] Chon  [F1-F3] Dong doi  [ENTER] Dung", 355, 177, 18, WHITE);
         if (m_selectedAlly) DrawText(TextFormat("Muc tieu: %s", m_selectedAlly->getName().c_str()), 355, 209, 18, YELLOW);
-        for (std::size_t i = 0; i < items.size() && i < 9; ++i)
-            DrawText(TextFormat("%d. %s", static_cast<int>(i + 1), items[i]->getName().c_str()),
-                     365, 246 + static_cast<int>(i) * 28, 18,
+        for (std::size_t i = 0; i < items.size() && i < 9; ++i) {
+            const int rowY = 246 + static_cast<int>(i) * 28;
+            m_itemIcons.draw(items[i]->getId(), Rectangle{ 362.0f, static_cast<float>(rowY) - 4.0f, 26.0f, 26.0f }, WHITE);
+            DrawText(TextFormat("%d. %s  x%d", static_cast<int>(i + 1), items[i]->getName().c_str(),
+                                static_cast<int>(m_party.countItem(items[i]->getId()))),
+                     396, rowY, 18,
                      static_cast<int>(i) == m_selectedItemIndex ? YELLOW : RAYWHITE);
+        }
+        if (m_selectedItemIndex >= 0 && static_cast<std::size_t>(m_selectedItemIndex) < items.size())
+            DrawText(items[static_cast<std::size_t>(m_selectedItemIndex)]->getDescription().c_str(), 355, 515, 16, LIGHTGRAY);
     }
 }

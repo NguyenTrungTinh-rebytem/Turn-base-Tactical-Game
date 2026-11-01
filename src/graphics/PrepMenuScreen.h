@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+class ItemIcons;   // graphics/ItemIcons.h
+
 struct PrepHeroInfo {
     std::string m_name;
     std::string m_race;
@@ -29,6 +31,7 @@ struct PrepSkillInfo {
 struct PrepItemInfo {
     std::string m_name;
     int         m_count = 0;
+    std::string m_id;            // id vat pham (de ve icon); rong = ve o thay the
 };
 
 struct PrepEnemyInfo {
@@ -71,6 +74,7 @@ public:
     void unloadAll();                               // Core goi trong shutdown(), TRUOC CloseWindow()
 
     void setInfo(const PrepInfo& info);
+    void setItemIcons(const ItemIcons* icons) { m_icons = icons; }   // khong so huu; nullptr = ve bieu tuong tam
     void reset(int tab = 0);
 
     void update(float deltaTime);
@@ -100,6 +104,8 @@ private:
     int      m_hoverButton = -1;
     mutable int m_hoverSkill = -1;   // dong skill dang tro chuot (draw() cap nhat moi frame)
     float    m_time = 0.0f;
+
+    const ItemIcons* m_icons = nullptr;
 
     Texture2D m_background{};
     bool      m_hasBackground = false;

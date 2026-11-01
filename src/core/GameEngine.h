@@ -26,11 +26,17 @@
 #include "entities/Party.h"
 #include "entities/ItemDatabase.h"
 #include "entities/ItemFactory.h"
+#include "audio/AudioManager.h"
+#include "data/ShopConfig.h"
+#include "graphics/ItemIcons.h"
+#include "graphics/SceneShader.h"
+#include "graphics/ShopScreen.h"
 #include "raylib.h"
 #include <memory>
 #include <random>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 // GameEngine (Core) la noi NOI tat ca module:
@@ -71,7 +77,9 @@ private:
     void addCombatant(std::unique_ptr<Character> character, const std::string& spritePath = "");
     void layoutViews();
     std::vector<Character*> upcomingOrder() const;   // thu tu luot de hien thi (Turn Order)
-    int  finalStage() const;
+    int  finalStage();
+    bool isBossStage(int stage);
+    int  m_finalStageCache = 0;
     void setupHeroCreateScreen();
     void openWaveSelect();  
     void leavePrepMenu();
@@ -80,6 +88,32 @@ private:
     void applyHeroSelection(const HeroSelection& selection);
     void openPartyMemberSelection(int slot);
     static Skill toBattleSkill(const SkillData& data, Element heroElement);
+
+    // ----- chuyen di (run), tien, cua hang -----
+    void beginRun(int startStage);                       // dung doi hinh + tui do + tien (chua vao tran)
+    bool waveHasBoss(int wave);
+    void recoverPartyAfterWave();
+    void enterBossBreak(int nextWave);                   // dung chan truoc wave boss: mo man Chuan bi co Shop
+    void beginBattleAfterBreak();
+    void settleGold();                                   // tra tien cho quai da chet (chi khi khong con Undo)
+    int  computeGoldDrop(const Character* enemy);
+    void addGoldPopup(Vector2 pos, int amount);
+    void openShop();
+    void closeShop();
+    void refreshShop();
+    void handleShopInput();
+    void buyShopItem(int stockIndex);
+    void equipFromBag(int bagIndex, int memberIndex);
+    void unequipMember(int memberIndex);
+    int  ownedCount(const std::string& itemId) const;    // trong tui + dang deo
+    Rectangle shopButtonRect() const;
+    void drawGoldHud(float x, float y) const;
+    void drawPrepExtras() const;
+
+    // ----- am thanh -----
+    void updateMusic();
+    void playActionSfx(Character* character, AnimState state);
+    void playDeathSfx(Character* character);
 
     // ----- input nguoi choi -----
     enum class BattlePhase {
@@ -170,6 +204,20 @@ HeroConfig m_heroConfig;
     Character* m_selectedAlly = nullptr;
     bool m_isSelectingItem = false;
     int m_selectedItemIndex = 0;
+
+    // ----- Tien / Shop / Am thanh -----
+    struct GoldPopup { Vector2 m_pos{}; int m_amount = 0; float m_life = 1.4f; };
+    AudioManager m_audio;
+    ItemIcons m_itemIcons;
+    SceneShader m_sceneShader;
+    ShopConfig m_shopConfig;
+    ShopScreen m_shop;
+    int m_gold = 0;
+    bool m_shopOpen = false;
+    bool m_resumeRun = false;                            // true = dang nghi giua 2 wave (Chuan bi + Shop), KHONG tao lai doi hinh
+    ItemPtr m_equippedGear[Party::MAX_SIZE];             // trang bi dang deo cua tung hero (theo vi tri trong Party)
+    std::unordered_set<const Character*> m_goldPaid;     // quai da tra tien (chong tra 2 lan)
+    std::vector<GoldPopup> m_goldPopups;
 
     // ----- Tracking State -----
     Character* m_currentCharacter = nullptr;
