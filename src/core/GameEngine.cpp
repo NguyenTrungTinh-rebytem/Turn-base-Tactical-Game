@@ -1079,7 +1079,7 @@ void GameEngine::handleShopInput()
 void GameEngine::drawGoldHud(float x, float y) const
 {
     DrawRectangleRounded(Rectangle{ x, y, 190.0f, 34.0f }, 0.3f, 6, Color{ 15, 15, 30, 215 });
-    DrawRectangleRoundedLines(Rectangle{ x, y, 190.0f, 34.0f }, 0.3f, 6, 2.0f, Color{ 200, 170, 80, 255 });
+    DrawRectangleLinesEx(Rectangle{ x, y, 190.0f, 34.0f }, 2.0f, Color{ 200, 170, 80, 255 });
     DrawCircle(static_cast<int>(x + 20), static_cast<int>(y + 17), 10.0f, Color{ 255, 205, 60, 255 });
     DrawCircleLines(static_cast<int>(x + 20), static_cast<int>(y + 17), 10.0f, Color{ 120, 80, 10, 255 });
     DrawText(TextFormat("%d vang", m_gold), static_cast<int>(x + 40), static_cast<int>(y + 7), 20, Color{ 255, 225, 120, 255 });
