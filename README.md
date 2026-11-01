@@ -2,7 +2,7 @@
 
 > **Môn học:** Lập trình Hướng đối tượng (OOP) & Cấu trúc Dữ liệu và Giải thuật (DSA)  
 > **Đề tài:** ĐT10 - Động cơ Game Nhập vai Chiến thuật Turn-based RPG (Battle Engine)  
-> **Ngôn ngữ:** C++17 | **Môi trường:** Visual Studio 2022 | **Thư viện đồ họa:** Raylib  
+> **Ngôn ngữ:** C++17 | **Build:** CMake + Ninja (MinGW/MSYS2) hoặc Visual Studio 2022 | **Thư viện đồ họa:** Raylib  
 
 ---
 
@@ -23,62 +23,128 @@
 
 ## 📌 Giới thiệu Dự án (Overview)
 
-**[THE FIRST STEP]** là trò chơi nhập vai chiến thuật theo lượt (Turn-based RPG) góc nhìn 2.5D sử dụng đồ họa Pixel Art. Trò chơi trải qua 2 màn đấu chính (Stage 1: Trận chiến với Quái thường, Stage 2: Trận chiến sinh tồn với Boss) với cơ chế tính lượt theo Tốc độ (Speed) và Ma trận Khắc hệ Ngũ Hành.
+**[THE FIRST STEP]** là trò chơi nhập vai chiến thuật theo lượt (Turn-based RPG) góc nhìn 2.5D sử dụng đồ họa Pixel Art. Người chơi lập đội tối đa **3 anh hùng**, vượt qua **3 wave**: 2 wave Quái thường và 1 wave **Boss**. Có **Shop + Trang bị** mở ngay trước wave Boss. Trận đấu tính lượt theo Tốc độ (Speed) và Ma trận Khắc hệ Ngũ Hành.
 
-Dự án được xây dựng nhằm ứng dụng các nguyên lý lập trình hướng đối tượng (OOP) nâng cao, các cấu trúc dữ liệu - giải thuật cốt lõi trong C++17 và áp dụng các Design Patterns thực tế trong thiết kế Game Engine.
+Dự án ứng dụng các nguyên lý OOP nâng cao, cấu trúc dữ liệu - giải thuật cốt lõi trong C++17 và các Design Patterns thực tế trong thiết kế Game Engine.
+
+### Vòng chơi (Game Flow)
+
+```text
+MENU -> CREATE_HERO (chọn / tạo đội) -> WAVE_SELECT -> PREP_MENU (chuẩn bị) -> IN_BATTLE
+        Wave 1 (3 quái thường ngẫu nhiên) -> Wave 2 (3 quái tinh anh ngẫu nhiên)
+        -> PREP_MENU + SHOP (nghỉ trước Boss) -> Wave 3 (Boss) -> VICTORY / GAME_OVER
+```
+
+| Wave | Nội dung | Ghi chú |
+| :-: | :--- | :--- |
+| 1 | Ngẫu nhiên 3 trong 5 quái thường (Goblin, Wolf, Slime, Imp, Golem) | Nền `bg_wave1` |
+| 2 | Ngẫu nhiên 3 trong 5 quái tinh anh (mạnh hơn khoảng 1.6 lần) | Sau wave này mở Shop |
+| 3 | Boss Ember Dragon | Nền `bg_wave2`, shader tông Boss |
+
+* **Hồi phục sau mỗi wave:** mọi nhân vật còn sống hồi **20% HP và 20% MP** tối đa. Nhân vật đã gục phải dùng vật phẩm hồi sinh.
+* **Số wave tự suy ra từ dữ liệu:** wave cuối là `stage` lớn nhất trong `data/monsters.csv`; wave có Boss được nhận biết bằng cột `isBoss`. Muốn thêm wave chỉ cần thêm dòng quái vào CSV.
 
 ---
 
 ## 💡 Kiến trúc OOP, DSA & Design Patterns Áp dụng
 
 ### 1. Lập trình Hướng đối tượng (OOP)
-* **Encapsulation (Đóng gói):** Các thuộc tính chỉ số (`m_hp`, `m_maxHp`, `m_mp`, `m_spd`, `m_a`, `m_ma`, `m_d`, `m_md`) được bảo vệ bằng `private`/`protected`, chỉ truy cập qua Getter/Setter chuẩn.
-* **Inheritance (Kế thừa):** Cây kế thừa mở rộng từ `Character` $\rightarrow$ `Player`, `Enemy`, `Boss`.
-* **Polymorphism (Đa hình):** Ghi đè các phương thức ảo `virtual void takeDamage()` và `virtual void executeSkill()` để xử lý riêng biệt cho từng loại nhân vật và kỹ năng.
-* **Operator Overloading:** Nạp chồng toán tử `+` cho struct `Stats` (cộng dồn chỉ số) và toán tử `<` hỗ trợ so sánh Tốc độ.
-* **Template Class:** Xây dựng `Inventory<T>` quản lý túi đồ/trang bị linh hoạt.
-* **Smart Pointers:** Quản lý vòng đời đối tượng an toàn bằng `std::unique_ptr` và `std::shared_ptr`, tuyệt đối chống thất thoát bộ nhớ (Memory Leak).
+* **Encapsulation (Đóng gói):** Chỉ số (`m_hp`, `m_mp`, `m_spd`, `m_a`, `m_ma`, `m_d`, `m_md`) được bảo vệ bằng `private`/`protected`, truy cập qua Getter/Setter.
+* **Inheritance (Kế thừa):** `Character` $\rightarrow$ `Player`, `Enemy`, `Boss`; `Item` $\rightarrow$ `Potion`, `ManaPotion`, `ReviveItem`, `BoosterItem`, `HeldGear`.
+* **Polymorphism (Đa hình):** Ghi đè `virtual takeDamage()`, `virtual executeSkill()`, và hiệu ứng sử dụng vật phẩm (`Item`).
+* **Operator Overloading:** Toán tử `+` cho `Stats` và toán tử `<` so sánh Tốc độ.
+* **Template Class:** `Inventory<T>` quản lý túi đồ dùng chung cho cả đội (giới hạn số lượng mang theo theo từng vật phẩm).
+* **Smart Pointers:** `std::unique_ptr`, `std::shared_ptr` (`ItemPtr`) quản lý vòng đời đối tượng.
 
 ### 2. Cấu trúc Dữ liệu & Giải thuật (DSA)
-* **Priority Queue (`std::priority_queue`):** Quản lý thứ tự lượt đánh (Turn Order) tự động theo chỉ số Speed (`m_spd`). Nhân vật có tốc độ cao hơn sẽ được đi trước.
-* **Finite State Machine (FSM):** Quản lý luồng trạng thái game (`State::MENU`, `State::IN_BATTLE`, `State::VICTORY`, `State::GAME_OVER`).
-* **AI Decision Tree (Cây quyết định):** Xử lý lượt đi tự động cho Enemy/Boss (tự động chọn đánh thường, tung skill sát thương lớn hoặc hồi máu/buff khi HP xuống dưới 30%).
-* **Vector (`std::vector`):** Quản lý danh sách Kẻ địch, danh sách Kỹ năng (`Skills`), Túi đồ và hàng đợi Command.
+* **Priority Queue:** `TurnManager` xếp thứ tự lượt theo `m_spd`.
+* **Finite State Machine (FSM):** `GameStateMachine` với các trạng thái `MENU`, `CREATE_HERO`, `WAVE_SELECT`, `PREP_MENU`, `IN_BATTLE`, `VICTORY`, `GAME_OVER`. Shop là lớp phủ (overlay) trong `PREP_MENU`, không phải trạng thái riêng.
+* **AI Decision Tree:** Enemy/Boss tự chọn đánh thường, skill mạnh hoặc hồi máu/buff khi HP dưới 30%.
+* **Hash Map (`std::unordered_map`):** Tra cứu vật phẩm, giá Shop, sprite quái theo id.
+* **Vector (`std::vector`):** Danh sách kẻ địch, kỹ năng, túi đồ, hàng đợi Command.
+* **Random shuffle (`std::shuffle`):** Chọn ngẫu nhiên 3 quái cho mỗi wave thường.
 
 ### 3. Design Patterns
-* **Observer Pattern:** Class `SubjectCombat` phát sự kiện `onHealthChanged()` và `onCharacterDied()`. Modules UI và Sound đăng ký làm `ICombatObserver` để cập nhật thanh máu và phát hiệu ứng âm thanh.
-* **Command Pattern:** Đóng gói hành động chiến đấu vào `ICommand` (`AttackCommand`, `UseSkillCommand`, `UseItemCommand`). Hỗ trợ danh sách `CommandStack` cho phép người chơi bấm **Cancel / Back (Undo chọn lại nước đi)** trước khi chốt lượt.
-* **Factory Method:** Class `CharacterFactory` khởi tạo ngẫu nhiên Nhân vật/Quái vật dựa trên chỉ số gốc Race + Class + Element.
+* **Observer:** `SubjectCombat` phát `onHealthChanged()` / `onCharacterDied()`; UI và Âm thanh đăng ký làm `ICombatObserver`.
+* **Command:** `AttackCommand`, `UseSkillCommand`, `UseItemCommand` trong `CommandStack` cho phép **Cancel / Back (Undo)** trước khi chốt lượt (Undo khôi phục cả HP, MP, hiệu ứng; vàng chỉ được cộng khi chốt lượt nên Undo không bị lợi dụng).
+* **Factory Method:** `CharacterFactory` (nhân vật/quái theo Race + Class + Element) và `ItemFactory` (tạo vật phẩm từ `data/items.csv`).
+* **Data-Driven Design:** Chỉ số quái, vật phẩm, giá Shop, kinh tế, anh hùng dựng sẵn đều đọc từ CSV, chỉnh cân bằng không cần biên dịch lại.
 
 ---
 
 ## 📐 Quy chuẩn Code & Đặt tên (Naming Conventions)
 
-Để đảm bảo đồng bộ 100% giữa 5 thành viên khi merge code trên GitHub, toàn bộ dự án BẮT BUỘC tuân thủ:
+Toàn bộ dự án BẮT BUỘC tuân thủ:
 
-* **Biến thành viên Class (Member variables):** Bắt buộc có tiền tố `m_` và dùng `camelCase` (Ví dụ: `m_hp`, `m_maxHp`, `m_mp`, `m_spd`, `m_element`, `m_skills`).
-* **Tên Class / Struct / Enum:** Dùng `PascalCase` (Ví dụ: `Character`, `TurnManager`, `CombatObserver`, `CommandStack`).
-* **Tên Hàm (Methods):** Dùng `camelCase` (Ví dụ: `takeDamage()`, `executeSkill()`, `getSpeed()`, `cancelLastAction()`).
-* **Hằng số / Enum Values:** Dùng `UPPER_SNAKE_CASE` (Ví dụ: `KIM`, `MOC`, `THUY`, `HOA`, `THO`, `ATK_BOOST`, `STUN`).
+* **Biến thành viên:** tiền tố `m_` + `camelCase` (`m_hp`, `m_maxHp`, `m_gold`, `m_shopOpen`).
+* **Class / Struct / Enum:** `PascalCase` (`Character`, `TurnManager`, `ShopScreen`).
+* **Hàm:** `camelCase` (`takeDamage()`, `recoverPartyAfterWave()`).
+* **Hằng số / Enum values:** `UPPER_SNAKE_CASE` (`KIM`, `ATK_BOOST`, `WAVE_CLEAR_RECOVER_RATE`).
+* **Chuỗi hiển thị trong game:** tiếng Việt **không dấu** (font mặc định của Raylib không có dấu tiếng Việt).
 
 ---
 
 ## 🎮 Cơ chế Game (Game Mechanics)
 
 ### A. Công thức Chỉ số (Base Stats)
-Chỉ số khởi tạo của Anh hùng dựa trên sự kết hợp giữa Chủng tộc và Lớp nhân vật:
 $$\text{Base Stats} = \text{Race Stats} + \text{Class Stats}$$
-* **6 Chủng tộc (Races):** Ogre, Human, Dwarf, Elf, Oni, Beastman.
+* **6 Chủng tộc:** Ogre, Human, Dwarf, Elf, Oni, Beastman.
 * **6 Class:** Mage, Swordman, Assassin, Tanker, Enchanter, Paladin.
+* Luật Race x Class (được phép / không) nằm trong `data/CharacterRules`.
 
 ### B. Ma trận Khắc hệ Ngũ Hành ($5 \times 5$)
-* **5 Hệ:** Kim (0), Mộc (1), Thủy (2), Hỏa (3), Thổ (4).
-* **Công thức Dame:** 
-* **Hệ số:** Tương khắc (+50% Dame $\rightarrow 1.5$), Bị khắc (-50% Dame $\rightarrow 0.5$), Bình hòa ($1.0$).
+* **5 Hệ:** Kim, Mộc, Thủy, Hỏa, Thổ.
+* **Hệ số:** Tương khắc $\rightarrow 1.5$, Bị khắc $\rightarrow 0.5$, Bình hòa $\rightarrow 1.0$.
+* Nguyên tố của từng skill cấu hình trong `data/skill_elements.csv`.
 
 ### C. Kỹ năng & Hiệu ứng
-* **34 Skill:** Mỗi nhân vật khi khởi tạo được cấp 4 Skill ($1 \text{ Race Skill} + 1 \text{ Class Skill} + 2 \text{ Element Skills}$).
-* **7 Hiệu ứng Buff/Debuff:** `ATK_BOOST`, `DEF_BOOST`, `REGEN`, `STUN` (bỏ lượt), `BURN` (mất HP theo turn), `SLOW` (giảm Speed), `WEAKNESS`.
+* **34 Skill:** mỗi nhân vật có 4 Skill ($1$ Race + $1$ Class + $2$ Element).
+* **7 Hiệu ứng:** `ATK_BOOST`, `DEF_BOOST`, `REGEN`, `STUN`, `BURN`, `SLOW`, `WEAKNESS`.
+
+### D. Đội hình & Anh hùng dựng sẵn
+* Đội tối đa **3 anh hùng**, chọn ở màn hình tạo đội / chuẩn bị.
+* **10 anh hùng dựng sẵn** (`data/heroes.csv`): Lyra, Kael, Sylwen, Kurogane, Fenrir, Grumm, Thorin, Aldric, Roland, Brokk. Mỗi người có sprite chiến đấu và bộ animation riêng (idle / attack / hurt / death).
+
+### E. Kinh tế, Vật phẩm, Shop & Trang bị
+* **Vàng:** quái chết rơi vàng (dựa trên HP, có dao động ngẫu nhiên; Boss nhân hệ số lớn) + thưởng qua màn. Thông số trong `data/economy.csv` (`start_gold`, `enemy_base_gold`, `enemy_hp_divisor`, `variance_percent`, `boss_multiplier`, `wave_clear_bonus`, `skip_wave_gold`).
+* **16 vật phẩm** (`data/items.csv`, ảnh `assets/images/items/ITM_*.png`):
+  * Tiêu hao: HP Minor/Major, Energy, Phoenix (hồi sinh).
+  * Buff trận: Power, Iron, Haste, Precision.
+  * Trang bị mang theo (`HeldGear`, mỗi người 1 món): Leftover, Vampiric, Survival Sash, Guardian, Berserk, Executioner, Heavy, Counter.
+* **Shop** (`data/shop.csv` - id, giá): mở ở màn Chuẩn bị trước wave Boss (nút Shop hoặc phím **B**). Hai tab: **Cửa hàng** và **Kho đồ / Trang bị**.
+* Mỗi vật phẩm có giới hạn mang theo (`maxCarry`); túi đồ dùng chung cả đội.
+
+### F. Âm thanh & Hiệu ứng hình ảnh
+* **AudioManager** (`src/audio`): nhạc nền theo trạng thái (menu, thám hiểm, chiến đấu, game over), tiếng click, tiếng đánh/bị đánh/chết riêng cho anh hùng nam, nữ, quái thường và Rồng.
+* **SceneShader** (`src/graphics`): hậu kỳ cho cảnh chiến đấu - tối viền (vignette), bloom nhẹ, mờ tilt-shift, chỉnh màu, tia nắng xuyên tán lá chuyển động và hạt bụi/tàn lửa; tông màu khác nhau cho wave thường và Boss. UI vẽ sau shader nên vẫn sắc nét. Nếu GPU không hỗ trợ, game tự chạy không shader. Bóng đổ dưới chân nhân vật vẽ riêng trong `GameEngine`.
+
+### G. Điều khiển chính
+| Phím | Chức năng |
+| :-: | :--- |
+| **A** | Tấn công thường |
+| **S** | Mở menu Kỹ năng |
+| **I** | Mở túi Vật phẩm trong trận |
+| **TAB** | Đổi mục tiêu |
+| **F1 - F3** | Chọn đồng đội |
+| **ESC** | Quay lại / Menu |
+| **B** | Mở / đóng Shop (màn Chuẩn bị trước Boss) |
+| **F9** | Bật / tắt shader cảnh |
+
+---
+
+## 🛠️ Hướng dẫn Build & Chạy
+
+**Yêu cầu:** CMake, Ninja, trình biên dịch C++17 (MinGW-w64 / MSYS2 ucrt64 hoặc MSVC), Raylib 5.5.
+
+```powershell
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+.\build\game.exe
+```
+
+* CMake dùng `file(GLOB_RECURSE ...)` nên **khi thêm file `.cpp` mới phải xóa thư mục `build` và cấu hình lại**:
+  `Remove-Item -Recurse -Force build` rồi chạy lại lệnh cmake ở trên.
+* Game tìm thư mục `assets/` và `data/` theo đường dẫn tương đối; thiếu ảnh vật phẩm sẽ hiện ô chữ cái thay thế, thiếu âm thanh game chạy im lặng.
 
 ---
 
@@ -86,19 +152,25 @@ $$\text{Base Stats} = \text{Race Stats} + \text{Class Stats}$$
 
 ```text
 RPG_Game_DT10/
-├── assets/                 # Tài nguyên game do Director quản lý
-│   ├── images/             # Sprite sheets Pixel Art, Background, Icons
-│   └── audio/              # Sound FX (SFX) & Music (BGM)
-├── src/                    # Source Code C++
-│   ├── core/               # Member 1: (Võ Tấn Tiến) Game Loop, FSM, Command Pattern
-│   ├── entities/           # Member 2: (Nguyễn Quang Nhân Kiệt) Character, Player, Enemy, Factory, Inventory<T>
-│   ├── dsa/                # Member 3:  (Nguyễn Quốc Đạt) TurnManager (Priority Queue), Status Effects, Observer
-│   ├── graphics/           # Member 4: (Huỳnh Quang Khải) Raylib Renderer, Sprite Animation, Map, UI
-│   └── data/               # Member 5: (Nguyễn Trung Tỉnh): GameData, SoundManager, Start Menu
-├── .gitignore              # Git Ignore file cho Visual Studio 2022
+├── assets/
+│   ├── images/             # Sprite anh hùng (hero_<id>_idle/attack/hurt/death/battle.png),
+│   │   │                   # sprite quái (*_sheet.png), background wave
+│   │   └── items/          # Icon vật phẩm ITM_*.png
+│   └── audio/              # Nhạc nền (mp3) & SFX (wav/ogg)
+├── data/                   # Dữ liệu CSV: heroes, monsters, items, shop, economy,
+│                           #   races, classes, skills, skill_elements
+├── src/
+│   ├── core/               # Member 1 (Võ Tấn Tiến): GameEngine, FSM, Command Pattern
+│   ├── entities/           # Member 2 (Nguyễn Quang Nhân Kiệt): Character, Player, Enemy, Boss,
+│   │                       #   Factory, Inventory<T>, Item, ItemFactory, Party
+│   ├── dsa/                # Member 3 (Nguyễn Quốc Đạt): TurnManager, Status Effects, Observer, AI
+│   ├── graphics/           # Member 4 (Huỳnh Quang Khải): Sprite Animation, Map, BattleUI,
+│   │                       #   PrepMenuScreen, ShopScreen, ItemIcons, SceneShader
+│   ├── audio/              # AudioManager (nhạc nền + SFX)
+│   └── data/               # Member 5 (Nguyễn Trung Tỉnh): GameData, ItemDatabase, ShopConfig,
+│                           #   HeroPresetConfig, CharacterRules, Start Menu
+├── CMakeLists.txt          # Build bằng CMake + Ninja
+├── .gitignore
 ├── PROMPT_SYSTEM.md        # Bộ Prompt đồng bộ AI cho 5 thành viên
 └── README.md               # Tài liệu dự án
-
-
-
-
+```
