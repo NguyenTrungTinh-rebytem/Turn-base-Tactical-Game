@@ -317,6 +317,7 @@ bool GameEngine::cancelLastAction()
     const bool result = m_commandStack.cancelLastAction();
     if (result) {
         for (auto& c : m_combatants) syncHealth(c.get());
+        m_isSelectingTarget = false;
         m_battlePhase = BattlePhase::PLAYER_TURN;
         m_battleLog = "Da hoan tac (Undo) hanh dong vua roi! Chon lenh khac.";
     }
@@ -808,6 +809,7 @@ void GameEngine::loadStage(int stage)
     m_ui.unloadAll();
     m_isSelectingSkill = false;
     m_isSelectingItem = false;
+    m_isSelectingTarget = false;
     m_aiTurnTimer = 0.0f;
 
     for (const auto& member : m_party.getMembers()) {
@@ -1217,9 +1219,10 @@ void GameEngine::processEvents()
     {
         if (m_stateMachine.is(GameStateMachine::State::IN_BATTLE))
         {
-            if (m_isSelectingSkill || m_isSelectingItem) {
+            if (m_isSelectingSkill || m_isSelectingItem || m_isSelectingTarget) {
                 m_isSelectingSkill = false;
                 m_isSelectingItem = false;
+                m_isSelectingTarget = false;
             } else if (!cancelLastAction()) {
                 m_stateMachine.changeState(GameStateMachine::State::MENU);
             }
@@ -1440,13 +1443,169 @@ void GameEngine::openItemMenu()
 {
     m_isSelectingItem = !m_isSelectingItem;
     m_isSelectingSkill = false;
+    m_isSelectingTarget = false;
     m_selectedItemIndex = 0;
     m_selectedAlly = hero();
+}
+
+void GameEngine::rejectTargetClick(const char* reason, Vector2 position) const
+{
+    std::cerr << "[battle] target click rejected: " << reason
+              << " at (" << position.x << ", " << position.y << ")\n";
+}
+
+void GameEngine::handleBattleClick(Vector2 position)
+{
+    if (!m_stateMachine.is(GameStateMachine::State::IN_BATTLE)) {
+        rejectTargetClick("battle is not active", position);
+        return;
+    }
+
+    if (m_battlePhase == BattlePhase::PLAYER_CONFIRM) {
+        if (CheckCollisionPointRec(position, BattleUI::buttonBounds(BattleUIButton::END_TURN))) {
+            confirmTurn();
+        } else if (CheckCollisionPointRec(position, BattleUI::buttonBounds(BattleUIButton::UNDO))) {
+            if (!cancelLastAction())
+                rejectTargetClick("there is no pending action to undo", position);
+        } else {
+            rejectTargetClick("confirmation phase accepts only end-turn or undo controls", position);
+        }
+        return;
+    }
+
+    if (m_battlePhase != BattlePhase::PLAYER_TURN ||
+        !m_currentCharacter || !isHero(m_currentCharacter)) {
+        rejectTargetClick("it is not a hero action phase", position);
+        return;
+    }
+
+    if (m_isSelectingItem) {
+        const auto items = availableItems();
+        if (CheckCollisionPointRec(position, BattleUI::itemMenuBounds())) {
+            for (std::size_t i = 0; i < items.size() && i < 9; ++i) {
+                if (CheckCollisionPointRec(position, BattleUI::itemRowBounds(static_cast<int>(i)))) {
+                    m_selectedItemIndex = static_cast<int>(i);
+                    doUseItem();
+                    return;
+                }
+            }
+            rejectTargetClick("item menu has priority over battlefield clicks", position);
+            return;
+        }
+        rejectTargetClick("item menu is active; select an item row first", position);
+        return;
+    }
+
+    if (m_isSelectingTarget) {
+        if (CheckCollisionPointRec(position, BattleUI::buttonBounds(BattleUIButton::CANCEL_TARGET))) {
+            m_isSelectingTarget = false;
+            return;
+        }
+        if (CheckCollisionPointRec(position, BattleUI::controlPanelBounds())) {
+            rejectTargetClick("control panel has priority over combatant bounds", position);
+            return;
+        }
+
+        std::size_t livingCandidates = 0;
+        for (std::size_t i = m_party.size(); i < m_combatants.size(); ++i) {
+            Character* candidate = m_combatants[i].get();
+            if (!candidate || !candidate->isAlive() || isHero(candidate)) continue;
+            ++livingCandidates;
+            if (i >= m_views.size() || !m_views[i] || !m_views[i]->containsPoint(position)) continue;
+
+            m_selectedTarget = candidate;
+            m_isSelectingTarget = false;
+            if (m_targetAction == TargetAction::BASIC_ATTACK) {
+                doBasicAttack();
+            } else if (castSkill(static_cast<std::size_t>(m_selectedSkillIndex))) {
+                m_isSelectingSkill = false;
+                m_battlePhase = BattlePhase::PLAYER_CONFIRM;
+            }
+            return;
+        }
+
+        rejectTargetClick(livingCandidates == 0
+            ? "no living non-hero targets are available"
+            : "click missed all living non-hero draw bounds", position);
+        return;
+    }
+
+    if (CheckCollisionPointRec(position, BattleUI::buttonBounds(BattleUIButton::ATTACK))) {
+        m_isSelectingSkill = false;
+        m_isSelectingItem = false;
+        m_targetAction = TargetAction::BASIC_ATTACK;
+        m_isSelectingTarget = true;
+        const bool hasTarget = std::any_of(m_combatants.begin() + static_cast<std::ptrdiff_t>(
+                std::min(m_party.size(), m_combatants.size())), m_combatants.end(),
+            [this](const std::shared_ptr<Character>& character) {
+                return character && character->isAlive() && !isHero(character.get());
+            });
+        if (!hasTarget) {
+            m_isSelectingTarget = false;
+            rejectTargetClick("attack has no living non-hero targets", position);
+        }
+        return;
+    }
+
+    if (CheckCollisionPointRec(position, BattleUI::buttonBounds(BattleUIButton::SKILL))) {
+        m_isSelectingTarget = false;
+        m_isSelectingItem = false;
+        m_isSelectingSkill = !m_isSelectingSkill;
+        return;
+    }
+
+    if (CheckCollisionPointRec(position, BattleUI::buttonBounds(BattleUIButton::ITEM))) {
+        openItemMenu();
+        if (availableItems().empty()) {
+            m_battleLog = "Tui do khong co vat pham dung trong tran!";
+            m_isSelectingItem = false;
+        }
+        return;
+    }
+
+    if (m_isSelectingSkill) {
+        for (std::size_t i = 0; i < m_heroSkills.size(); ++i) {
+            if (!CheckCollisionPointRec(position, BattleUI::skillRowBounds(
+                    static_cast<int>(i), static_cast<int>(m_heroSkills.size()), m_selectedSkillIndex)))
+                continue;
+            m_selectedSkillIndex = static_cast<int>(i);
+            const Skill& skill = m_heroSkills[i];
+            const bool offensive = skill.m_type == SkillType::DAMAGE ||
+                (skill.m_type == SkillType::DEBUFF && skill.m_power > 0);
+            if (offensive) {
+                m_isSelectingSkill = false;
+                m_targetAction = TargetAction::SKILL;
+                m_isSelectingTarget = true;
+                const bool hasTarget = std::any_of(m_combatants.begin() + static_cast<std::ptrdiff_t>(
+                        std::min(m_party.size(), m_combatants.size())), m_combatants.end(),
+                    [this](const std::shared_ptr<Character>& character) {
+                        return character && character->isAlive() && !isHero(character.get());
+                    });
+                if (!hasTarget) {
+                    m_isSelectingTarget = false;
+                    rejectTargetClick("skill has no living non-hero targets", position);
+                }
+            } else if (castSkill(i)) {
+                m_isSelectingSkill = false;
+                m_battlePhase = BattlePhase::PLAYER_CONFIRM;
+            }
+            return;
+        }
+        rejectTargetClick("skill menu is active; click a visible skill row", position);
+        return;
+    }
+
+    rejectTargetClick("target mode is inactive; choose attack or an offensive skill first", position);
 }
 
 void GameEngine::processPlayerInput()
 {
     if (!m_currentCharacter || !isHero(m_currentCharacter)) return;
+
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        handleBattleClick(GetMousePosition());
+        return;
+    }
 
     // Da hanh dong -> cho xac nhan (ENTER) hoac Undo (ESC/Z xu ly o processEvents)
     if (m_battlePhase == BattlePhase::PLAYER_CONFIRM)
@@ -1518,7 +1677,9 @@ void GameEngine::doBasicAttack()
     const int hpBefore = target->getCurrentHp();
 
     // AttackCommand co undo(): hoan lai HP cho muc tieu
-    queuePlayerCommand(std::make_unique<AttackCommand>(attacker, target, damageMultiplier(attacker, target)));
+    if (!queuePlayerCommand(std::make_unique<AttackCommand>(
+            attacker, target, damageMultiplier(attacker, target))))
+        return;
 
     const int dealt = hpBefore - target->getCurrentHp();
     playAnimation(attacker, AnimState::ATTACK);
@@ -1634,6 +1795,7 @@ void GameEngine::confirmTurn()
     m_commandStack.clear();    // chot hanh dong: het kha nang Undo
     m_isSelectingSkill = false;
     m_isSelectingItem = false;
+    m_isSelectingTarget = false;
     Character* actor = m_currentCharacter;
     if (actor) {
         actor->onTurnEnd();
@@ -1686,6 +1848,7 @@ void GameEngine::advanceTurn()
     m_aiTurnTimer = 0.0f;
     m_isSelectingSkill = false;
     m_isSelectingItem = false;
+    m_isSelectingTarget = false;
 
     // Gioi han vong lap: phong truong hop moi nhan vat deu mat luot lien tuc
     for (int guard = 0; guard < 64; ++guard)
@@ -2113,11 +2276,11 @@ void GameEngine::renderBattleUI()
                         m_currentCharacter && isHero(m_currentCharacter),
                         m_battlePhase == BattlePhase::PLAYER_CONFIRM);
 
-    if (m_battlePhase == BattlePhase::PLAYER_CONFIRM)
-        m_ui.drawCommandHelp("[ENTER] Ket thuc luot  |  [ESC/Z] Hoan tac (Undo)");
-    else
-        m_ui.drawCommandHelp(TextFormat("[A] Tan Cong | [S] Ky Nang | [I] Vat pham x%d | [TAB] Doi Muc Tieu | [ESC] Menu",
-                                        static_cast<int>(availableItems().size())));
+    if (m_battlePhase == BattlePhase::PLAYER_CONFIRM ||
+        (m_battlePhase == BattlePhase::PLAYER_TURN && m_currentCharacter &&
+         isHero(m_currentCharacter) && !m_isSelectingItem))
+        m_ui.drawBattleControls(m_battlePhase == BattlePhase::PLAYER_CONFIRM,
+                                m_isSelectingTarget, !m_commandStack.empty());
     m_ui.drawBattleLog("BATTLE LOG: " + m_battleLog);
 
     // ----- Menu ky nang (popup giua man hinh, ve cuoi cung de nam tren cung) -----
@@ -2125,7 +2288,7 @@ void GameEngine::renderBattleUI()
         m_ui.drawSkillMenu(m_heroSkills, m_selectedSkillIndex, hero() ? hero()->getCurrentMp() : 0);
     if (m_isSelectingItem) {
         const auto items = availableItems();
-        DrawRectangle(340, 160, 600, 390, Color{20, 25, 40, 235});
+        DrawRectangleRec(BattleUI::itemMenuBounds(), Color{20, 25, 40, 235});
         DrawText("TUI DO: [1-9] Chon  [F1-F3] Dong doi  [ENTER] Dung", 355, 177, 18, WHITE);
         if (m_selectedAlly) DrawText(TextFormat("Muc tieu: %s", m_selectedAlly->getName().c_str()), 355, 209, 18, YELLOW);
         for (std::size_t i = 0; i < items.size() && i < 9; ++i) {

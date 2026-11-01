@@ -47,6 +47,8 @@
 // GameEngine ke thua rieng ICombatObserver de tu nhan thong bao mau/chet.
 class GameEngine : private ICombatObserver
 {
+    friend struct GameEngineTestAccess;
+
 public:
     GameEngine() = default;
     ~GameEngine() override = default;
@@ -121,8 +123,11 @@ private:
         PLAYER_CONFIRM,   // da danh/dung item -> ENTER ket thuc luot, ESC/Z hoan tac
         AI_THINKING       // quai dang suy nghi
     };
+    enum class TargetAction { BASIC_ATTACK, SKILL };
 
     void processPlayerInput();
+    void handleBattleClick(Vector2 position);
+    void rejectTargetClick(const char* reason, Vector2 position) const;
     void cycleTarget();
     void ensureValidTarget();
     void doBasicAttack();
@@ -229,6 +234,8 @@ HeroConfig m_heroConfig;
     // ----- UI & Timer -----
     int m_selectedSkillIndex = 0;
     bool m_isSelectingSkill = false;
+    bool m_isSelectingTarget = false;
+    TargetAction m_targetAction = TargetAction::BASIC_ATTACK;
     float m_aiTurnTimer = 0.0f;
     std::string m_battleLog = "Chao mung den voi Battle Engine!";
 

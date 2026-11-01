@@ -34,6 +34,17 @@ void CombatantView::triggerHitFlash() { m_flashTimer = FLASH_SECONDS; }
 
 Vector2 CombatantView::getHeadPos() const { return BattleMap::getHeadPos(m_slot, m_frameHeight); }
 
+Rectangle CombatantView::getDrawBounds() const {
+    const Vector2 topLeft = BattleMap::toTopLeft(m_slot, m_frameWidth, m_frameHeight);
+    return { topLeft.x, topLeft.y,
+             static_cast<float>(m_frameWidth) * m_slot.m_scale,
+             static_cast<float>(m_frameHeight) * m_slot.m_scale };
+}
+
+bool CombatantView::containsPoint(Vector2 point) const {
+    return isVisible() && CheckCollisionPointRec(point, getDrawBounds());
+}
+
 void CombatantView::draw(const BattleMap& map, Color baseTint) const {
     if (m_alpha <= 0.01f) return;   // da chet han => khong ve
 
@@ -43,8 +54,8 @@ void CombatantView::draw(const BattleMap& map, Color baseTint) const {
     tint.a = static_cast<unsigned char>(tint.a * m_alpha);
 
     map.drawShadow(m_slot, static_cast<float>(m_frameWidth), m_alpha);
-    m_sprite->drawFrame(BattleMap::toTopLeft(m_slot, m_frameWidth, m_frameHeight),
-                        m_slot.m_flipX, m_slot.m_scale, tint);
+    const Rectangle bounds = getDrawBounds();
+    m_sprite->drawFrame(Vector2{ bounds.x, bounds.y }, m_slot.m_flipX, m_slot.m_scale, tint);
 }
 
 void CombatantView::unloadAll() { m_sprite->unload(); }

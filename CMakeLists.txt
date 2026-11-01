@@ -61,3 +61,13 @@ add_executable(test_core_integration EXCLUDE_FROM_ALL
     src/data/SkillElementConfig.cpp
 )
 add_test(NAME test_core_integration COMMAND test_core_integration ${CMAKE_CURRENT_SOURCE_DIR}/data)
+
+# Mouse targeting and turn progression through a boss-sized combatant (no window).
+set(BATTLE_TEST_SOURCES ${SOURCES})
+list(FILTER BATTLE_TEST_SOURCES EXCLUDE REGEX "src/main\\.cpp$")
+add_executable(test_boss_mouse EXCLUDE_FROM_ALL
+    tests/test_boss_mouse.cpp
+    ${BATTLE_TEST_SOURCES}
+)
+target_link_libraries(test_boss_mouse PRIVATE raylib)
+add_test(NAME test_boss_mouse COMMAND test_boss_mouse)

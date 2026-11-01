@@ -30,6 +30,8 @@ public:
     void triggerHitFlash();                         // nhap nhay do ~0.4s
     void setSlot(const BattleSlot& slot) { m_slot = slot; }
     const BattleSlot& getSlot() const { return m_slot; }
+    Rectangle getDrawBounds() const;
+    bool containsPoint(Vector2 point) const;
     Vector2 getHeadPos() const;                     // dung cho BattleUI::drawHpMpBar / spawnFloatingText
     const Character* getCharacter() const { return m_character; }
     bool isVisible() const { return m_alpha > 0.01f; }

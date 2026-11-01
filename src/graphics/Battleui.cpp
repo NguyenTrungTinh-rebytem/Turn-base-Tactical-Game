@@ -12,6 +12,7 @@ constexpr float BAR_W = 120.0f, HP_H = 12.0f, MP_H = 8.0f;
 constexpr float TURN_BOX_W = 170.0f, TURN_BOX_H = 30.0f, TURN_GAP = 4.0f, TURN_MARGIN = 10.0f;
 constexpr int   TURN_MAX_SHOWN = 8;
 constexpr int   SKILL_BOX_W = 560, SKILL_BOX_Y = 290, SKILL_ROW_H = 35, SKILL_MAX_VISIBLE = 4;
+constexpr int   ITEM_BOX_X = 340, ITEM_BOX_Y = 160, ITEM_BOX_W = 600, ITEM_BOX_H = 390;
 constexpr float FLOAT_SPEED = 45.0f, FLOAT_LIFE = 1.0f;
 constexpr float FRAME_H_REF = 64.0f;     // chieu cao frame tham chieu cho con tro muc tieu
 
@@ -40,6 +41,18 @@ void drawBar(Vector2 pos, float w, float h, float ratio, Color fill) {
     DrawRectangleLinesEx(bg, 1.5f, BLACK);
 }
 
+void drawButton(Rectangle bounds, const char* label, bool enabled = true) {
+    const Color fill = enabled ? Color{ 45, 70, 105, 245 } : Color{ 55, 55, 65, 220 };
+    const Color edge = enabled ? SKYBLUE : DARKGRAY;
+    DrawRectangleRec(bounds, fill);
+    DrawRectangleLinesEx(bounds, 1.5f, edge);
+    const int textSize = 16;
+    const int textWidth = MeasureText(label, textSize);
+    DrawText(label, static_cast<int>(bounds.x + (bounds.width - textWidth) / 2.0f),
+             static_cast<int>(bounds.y + (bounds.height - textSize) / 2.0f),
+             textSize, enabled ? RAYWHITE : GRAY);
+}
+
 const char* elementName(Element e) {
     switch (e) {
         case Element::KIM:  return "Kim";
@@ -52,6 +65,47 @@ const char* elementName(Element e) {
 }
 
 } // namespace
+
+Rectangle BattleUI::buttonBounds(BattleUIButton button) {
+    constexpr float y = 607.0f;
+    switch (button) {
+        case BattleUIButton::ATTACK:        return { 40.0f, y, 128.0f, 36.0f };
+        case BattleUIButton::SKILL:         return { 180.0f, y, 128.0f, 36.0f };
+        case BattleUIButton::ITEM:          return { 320.0f, y, 128.0f, 36.0f };
+        case BattleUIButton::END_TURN:      return { 40.0f, y, 180.0f, 36.0f };
+        case BattleUIButton::UNDO:           return { 232.0f, y, 140.0f, 36.0f };
+        case BattleUIButton::CANCEL_TARGET: return { 40.0f, y, 200.0f, 36.0f };
+    }
+    return {};
+}
+
+Rectangle BattleUI::controlPanelBounds() {
+    return { static_cast<float>(PANEL_X), static_cast<float>(PANEL_Y),
+             static_cast<float>(PANEL_W), static_cast<float>(PANEL_H) };
+}
+
+Rectangle BattleUI::itemMenuBounds() {
+    return { static_cast<float>(ITEM_BOX_X), static_cast<float>(ITEM_BOX_Y),
+             static_cast<float>(ITEM_BOX_W), static_cast<float>(ITEM_BOX_H) };
+}
+
+Rectangle BattleUI::skillRowBounds(int skillIndex, int skillCount, int selectedIndex) {
+    if (skillIndex < 0 || skillIndex >= skillCount || skillCount <= 0) return {};
+    const int visible = std::min(skillCount, SKILL_MAX_VISIBLE);
+    const int first = std::max(0, std::min(selectedIndex - visible + 1, skillCount - visible));
+    if (skillIndex < first || skillIndex >= first + visible) return {};
+    const int boxX = (GetScreenWidth() - SKILL_BOX_W) / 2;
+    const int rowY = SKILL_BOX_Y + 50 + (skillIndex - first) * SKILL_ROW_H;
+    return { static_cast<float>(boxX + 20), static_cast<float>(rowY - 5),
+             static_cast<float>(SKILL_BOX_W - 40), static_cast<float>(SKILL_ROW_H) };
+}
+
+Rectangle BattleUI::itemRowBounds(int itemIndex) {
+    if (itemIndex < 0 || itemIndex >= 9) return {};
+    return { static_cast<float>(ITEM_BOX_X + 10),
+             static_cast<float>(ITEM_BOX_Y + 80 + itemIndex * 28),
+             static_cast<float>(ITEM_BOX_W - 20), 28.0f };
+}
 
 // ============ HP / MP tren dau nhan vat ============
 void BattleUI::drawHpMpBar(const Character& c, Vector2 anchor) const {
@@ -124,6 +178,20 @@ void BattleUI::drawCommandHelp(const std::string& helpText) const {
         ? "[A] Tan Cong | [S] Ky Nang | [I] Vat pham | [TAB] Doi Muc Tieu | [ESC] Menu"
         : helpText.c_str();
     DrawText(text, PANEL_X + 20, HELP_Y, 18, LIGHTGRAY);
+}
+
+void BattleUI::drawBattleControls(bool waitingConfirm, bool selectingTarget, bool canUndo) const {
+    if (waitingConfirm) {
+        drawButton(buttonBounds(BattleUIButton::END_TURN), "KET THUC LUOT");
+        drawButton(buttonBounds(BattleUIButton::UNDO), "HOAN TAC", canUndo);
+    } else if (selectingTarget) {
+        drawButton(buttonBounds(BattleUIButton::CANCEL_TARGET), "HUY CHON MUC TIEU");
+        DrawText("Click vao muc tieu song", 260, HELP_Y, 18, LIGHTGRAY);
+    } else {
+        drawButton(buttonBounds(BattleUIButton::ATTACK), "TAN CONG");
+        drawButton(buttonBounds(BattleUIButton::SKILL), "KY NANG");
+        drawButton(buttonBounds(BattleUIButton::ITEM), "VAT PHAM");
+    }
 }
 
 void BattleUI::drawBattleLog(const std::string& message) const {

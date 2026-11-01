@@ -10,9 +10,24 @@
 
 class Character;   // Forward declaration
 
+enum class BattleUIButton {
+    ATTACK,
+    SKILL,
+    ITEM,
+    END_TURN,
+    UNDO,
+    CANCEL_TARGET
+};
+
 class BattleUI {
 public:
     BattleUI() = default;
+
+    static Rectangle buttonBounds(BattleUIButton button);
+    static Rectangle controlPanelBounds();
+    static Rectangle itemMenuBounds();
+    static Rectangle skillRowBounds(int skillIndex, int skillCount, int selectedIndex);
+    static Rectangle itemRowBounds(int itemIndex);
 
     // ---- HUD tren dau nhan vat ----
     // anchor = vi tri tren dau nhan vat (BattleMap::getHeadPos). Chia 0 an toan.
@@ -26,6 +41,7 @@ public:
     // "MAN n" + "DEN LUOT: <ten>". isPlayerTurn chi quyet dinh mau/chu, BattleUI khong biet logic game.
     void drawTurnBanner(int stage, const Character* current, bool isPlayerTurn, bool waitingConfirm) const;
     void drawCommandHelp(const std::string& helpText = "") const;     // rong = dung chu mac dinh
+    void drawBattleControls(bool waitingConfirm, bool selectingTarget, bool canUndo) const;
     void drawBattleLog(const std::string& message) const;
 
     // Popup chon ky nang o giua man hinh (nam tren khung dieu khien). Skill thieu MP thi mo.
