@@ -1,9 +1,11 @@
 #pragma once
 // src/graphics/SceneShader.h
-// Shader hau ky (post-process) cho CANH tran dau: vignette (toi vien) + chinh mau (tong mau, tuong phan, bao hoa).
+// Shader hau ky cho CANH tran dau, phong cach HD-2D: bloom (toa sang), lam mo tilt-shift (xa mo/gan net),
+// tia sang tu tren xuong, chinh mau split-tone (bong xanh ngoc / sang am), vignette + tro bay (ember).
 // Chi ap dung cho nen + nhan vat; UI/HP bar/chu ve SAU nen van sac net.
 // Khong tao duoc shader (may cu / loi GLSL) -> isActive() = false, game ve binh thuong.
 #include "raylib.h"
+#include <vector>
 
 enum class SceneMood { NORMAL = 0, BOSS };
 
@@ -33,4 +35,10 @@ private:
     RenderTexture2D m_target{};
     Shader        m_shader{};
     int m_locTint = -1, m_locVignette = -1, m_locContrast = -1, m_locSaturation = -1;
+    int m_locRes = -1, m_locTime = -1, m_locBloom = -1, m_locDof = -1, m_locRays = -1, m_locRayColor = -1;
+
+    struct Ember { float x, y, vx, vy, size, phase, life; };
+    std::vector<Ember> m_embers;
+    void updateEmbers(float dt, SceneMood mood);
+    void drawEmbers(SceneMood mood, float t);
 };
