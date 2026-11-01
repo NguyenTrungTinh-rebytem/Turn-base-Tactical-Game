@@ -93,7 +93,7 @@ namespace
     constexpr int   STARTER_POTIONS = 3;   // bo do khoi dau (con lai phai mua o Shop)
     constexpr int   STARTER_ENERGY = 1;
     constexpr int   STAGE1_ENEMY_COUNT = 3;
-    constexpr float STAGE_CLEAR_HEAL_RATE = 0.3f;   // hoi 30% HP khi qua man
+    constexpr float WAVE_CLEAR_RECOVER_RATE = 0.2f; // sau moi wave: hoi 20% HP va 20% MP (nguoi con song)
     const char* const POTION_NAME = "ITM_HP_MINOR";
     const char* skillTypeText(SkillType t) {
     switch (t) {
@@ -812,8 +812,6 @@ void GameEngine::loadStage(int stage)
 
     for (const auto& member : m_party.getMembers()) {
         Character* h = member.get();
-        if (stage > 1 && h->isAlive())
-            h->heal(static_cast<int>(static_cast<float>(h->getMaxHp()) * STAGE_CLEAR_HEAL_RATE));
         h->resetBattleState();
         auto speed = m_baseSpeed.find(h);
         if (speed != m_baseSpeed.end()) h->setSpeed(speed->second);
@@ -879,6 +877,29 @@ bool GameEngine::waveHasBoss(int wave)
     for (const MonsterData& m : m_gameData.getMonstersByStage(wave))
         if (m.m_isBoss) return true;
     return false;
+}
+
+void GameEngine::recoverPartyAfterWave()
+{
+    // Hoi 20% HP + 20% MP toi da cho nguoi con song. Nguoi da guc phai dung Revive.
+    int hpTotal = 0, mpTotal = 0;
+    for (const auto& member : m_party.getMembers())
+    {
+        Character* h = member.get();
+        if (!h->isAlive()) continue;
+
+        const int hpAdd = static_cast<int>(static_cast<float>(h->getMaxHp()) * WAVE_CLEAR_RECOVER_RATE);
+        const int hpBefore = h->getCurrentHp();
+        h->heal(hpAdd);
+        hpTotal += h->getCurrentHp() - hpBefore;
+
+        const int maxMp = h->getStats().m_mp;
+        const int mpAdd = std::min(static_cast<int>(static_cast<float>(maxMp) * WAVE_CLEAR_RECOVER_RATE),
+                                   std::max(0, maxMp - h->getCurrentMp()));
+        if (mpAdd > 0) h->consumeMp(-mpAdd);     // tieu hao am = hoi MP (da gioi han khong vuot toi da)
+        mpTotal += mpAdd;
+    }
+    m_battleLog += "  [Hoi sau wave: +" + std::to_string(hpTotal) + " HP, +" + std::to_string(mpTotal) + " MP (20%)]";
 }
 
 void GameEngine::enterBossBreak(int nextWave)
@@ -1797,6 +1818,7 @@ void GameEngine::checkBattleCondition()
 
     // Tat ca quai da chet
     markWaveCleared(m_stage);
+    recoverPartyAfterWave();
     const int clearBonus = m_shopConfig.getEconomy().m_waveClearBonus;
     if (clearBonus > 0) {
         m_gold += clearBonus;
@@ -2017,6 +2039,23 @@ void GameEngine::renderCombatants()
     std::sort(order.begin(), order.end(), [&](size_t a, size_t b) {
         return m_views[a]->getSlot().m_feetPos.y < m_views[b]->getSlot().m_feetPos.y;
     });
+
+    // Bong do: nguon sang o tren-trai -> bong keo dai sang phai-xuong, mem o mep
+    for (size_t i : order)
+    {
+        if (!m_combatants[i]->isAlive()) continue;
+        const Vector2 f = m_views[i]->getSlot().m_feetPos;
+        const bool big = (i >= m_party.size()) && isBossStage(m_stage);
+        const float k = big ? 1.9f : 1.0f;
+        for (int layer = 0; layer < 3; ++layer)            // 3 lop chong nhau -> mep mem
+        {
+            const float g = 1.0f - 0.22f * static_cast<float>(layer);
+            DrawEllipse(static_cast<int>(f.x + 26.0f * k), static_cast<int>(f.y + 3.0f),
+                        62.0f * k * g, 15.0f * k * g, Color{ 0, 0, 0, 38 });
+        }
+        DrawEllipse(static_cast<int>(f.x + 4.0f), static_cast<int>(f.y + 1.0f),
+                    30.0f * k, 8.0f * k, Color{ 0, 0, 0, 90 });       // bong tiep dat dam o chan
+    }
 
     for (size_t i : order)
     {

@@ -92,6 +92,7 @@ private:
     // ----- chuyen di (run), tien, cua hang -----
     void beginRun(int startStage);                       // dung doi hinh + tui do + tien (chua vao tran)
     bool waveHasBoss(int wave);
+    void recoverPartyAfterWave();
     void enterBossBreak(int nextWave);                   // dung chan truoc wave boss: mo man Chuan bi co Shop
     void beginBattleAfterBreak();
     void settleGold();                                   // tra tien cho quai da chet (chi khi khong con Undo)
