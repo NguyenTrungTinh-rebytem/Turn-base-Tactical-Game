@@ -1,5 +1,6 @@
 // Member 4 - Huynh Quang Khai | src/graphics/BattleMap.cpp  (2.5D: phoi canh + chieu sau)
 #include "BattleMap.h"
+#include "graphics/UiCanvas.h"
 #include <algorithm>
 #include <cmath>
 
@@ -36,24 +37,24 @@ void BattleMap::setStage(StageId stage, const std::string& backgroundPath) {
     if (!backgroundPath.empty() && FileExists(backgroundPath.c_str())) {
         m_background = LoadTexture(backgroundPath.c_str());
         m_hasBackground = (m_background.id != 0);
-        if (m_hasBackground) SetTextureFilter(m_background, TEXTURE_FILTER_POINT);
+        if (m_hasBackground) SetTextureFilter(m_background, TEXTURE_FILTER_BILINEAR);
     }
 }
 
-float BattleMap::groundY() const { return GetScreenHeight() * HORIZON_RATIO; }   // y cua duong chan troi
+float BattleMap::groundY() const { return UiCanvas::height() * HORIZON_RATIO; }   // y cua duong chan troi
 
 void BattleMap::draw() const {
     if (m_hasBackground) {
-        Rectangle src = { 0, 0, (float)m_background.width, (float)m_background.height };
-        Rectangle dst = { 0, 0, (float)GetScreenWidth(), (float)GetScreenHeight() };
-        DrawTexturePro(m_background, src, dst, Vector2{ 0, 0 }, 0.0f, WHITE);
+        UiCanvas::drawCover(m_background, Rectangle{
+            0.0f, 0.0f, static_cast<float>(UiCanvas::width()),
+            static_cast<float>(UiCanvas::height()) });
     } else {
         drawProceduralBackground();
     }
 }
 
 void BattleMap::drawProceduralBackground() const {
-    const int W = GetScreenWidth(), H = GetScreenHeight();
+    const int W = UiCanvas::width(), H = UiCanvas::height();
     const float hz = groundY();
     const bool s1 = (m_stage == StageId::STAGE_1);
 
@@ -97,7 +98,7 @@ std::vector<BattleSlot> BattleMap::layoutSide(const std::vector<float>& scaleMul
     std::vector<BattleSlot> slots(scaleMuls.size());
     if (scaleMuls.empty()) return slots;
 
-    const float W = (float)GetScreenWidth(), H = (float)GetScreenHeight();
+    const float W = (float)UiCanvas::width(), H = (float)UiCanvas::height();
     const size_t n = scaleMuls.size();
 
     auto mulOf = [&](size_t i) { return std::max(0.1f, scaleMuls[i] * (isPlayer ? PLAYER_SIZE_MUL : 1.0f)); };

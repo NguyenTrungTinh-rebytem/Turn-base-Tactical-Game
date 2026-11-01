@@ -1,4 +1,16 @@
 #include "core/GameEngine.h"
+#include "graphics/UiCanvas.h"
+#include "graphics/UiText.h"
+#include "graphics/FontManager.h"
+#include "graphics/Strings.h"
+#include "graphics/UiTheme.h"
+#include "graphics/UiBlur.h"
+#include "graphics/UiCursor.h"
+#include "graphics/UiDevGallery.h"
+#include "graphics/UiIcons.h"
+#include "graphics/UiShapes.h"
+#include "graphics/UiWidgets.h"
+#include "graphics/RaylibScope.h"
 #include <string>
 #include <unordered_map>
 #include "core/AttackCommand.h"
@@ -8,9 +20,11 @@
 #include "entities/CharacterFactory.h"
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <numeric>
 #include <exception>
 #include <iostream>
+#include <stdexcept>
 #include "data/HeroPresetConfig.h"
 #include "data/CharacterRules.h"
 #include "graphics/SceneShader.h"
@@ -97,10 +111,10 @@ namespace
     const char* const POTION_NAME = "ITM_HP_MINOR";
     const char* skillTypeText(SkillType t) {
     switch (t) {
-        case SkillType::DAMAGE: return "Sat thuong";
-        case SkillType::HEAL:   return "Hoi mau";
-        case SkillType::BUFF:   return "Buff";
-        case SkillType::DEBUFF: return "Debuff";
+        case SkillType::DAMAGE: return u8"Sát thương";
+        case SkillType::HEAL:   return u8"Hồi máu";
+        case SkillType::BUFF:   return u8"Tăng cường";
+        case SkillType::DEBUFF: return u8"Giảm sức mạnh";
     }
     return "";
 }
@@ -108,16 +122,16 @@ namespace
 std::string effectText(EffectType e, int turns) {
     const char* name = "";
     switch (e) {
-        case EffectType::ATK_BOOST: name = "Tang cong";  break;
-        case EffectType::DEF_BOOST: name = "Tang thu";   break;
-        case EffectType::REGEN:     name = "Hoi mau";    break;
-        case EffectType::STUN:      name = "Choang";     break;
-        case EffectType::BURN:      name = "Chay";       break;
-        case EffectType::SLOW:      name = "Lam cham";   break;
-        case EffectType::WEAKNESS:  name = "Suy yeu";    break;
+        case EffectType::ATK_BOOST: name = u8"Tăng công";  break;
+        case EffectType::DEF_BOOST: name = u8"Tăng thủ";   break;
+        case EffectType::REGEN:     name = u8"Hồi máu";    break;
+        case EffectType::STUN:      name = u8"Choáng";     break;
+        case EffectType::BURN:      name = u8"Bỏng";       break;
+        case EffectType::SLOW:      name = u8"Chậm";       break;
+        case EffectType::WEAKNESS:  name = u8"Suy yếu";    break;
         case EffectType::NONE:      return "";
     }
-    return std::string(name) + " " + std::to_string(turns) + " luot";
+    return std::string(name) + " " + std::to_string(turns) + u8" lượt";
 }
 
 int deadlineTurnsForStage(int /*stage*/) {
@@ -136,13 +150,13 @@ int deadlineTurnsForStage(int /*stage*/) {
     {
         switch (type)
         {
-        case StatusType::ATK_BOOST: return "ATK+";
-        case StatusType::DEF_BOOST: return "DEF+";
-        case StatusType::REGEN:     return "REGEN";
-        case StatusType::STUN:      return "STUN";
-        case StatusType::BURN:      return "BURN";
-        case StatusType::SLOW:      return "SLOW";
-        case StatusType::WEAKNESS:  return "WEAK";
+        case StatusType::ATK_BOOST: return u8"CÔNG+";
+        case StatusType::DEF_BOOST: return u8"THỦ+";
+        case StatusType::REGEN:     return u8"HỒI";
+        case StatusType::STUN:      return u8"CHOÁNG";
+        case StatusType::BURN:      return u8"BỎNG";
+        case StatusType::SLOW:      return u8"CHẬM";
+        case StatusType::WEAKNESS:  return u8"YẾU";
         }
         return "?";
     }
@@ -198,21 +212,36 @@ void GameEngine::initialize()
     if (m_isInitialized)
         return;
 
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "2.5D RPG Battle Engine - Demo");
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, Strings::gameTitle);
+    SetWindowTitle(Strings::gameTitle);
+    SetWindowMinSize(960, 540);
+    if (!UiCanvas::initialize())
+        throw std::runtime_error("Unable to create the 1920x1080 UI canvas");
+    UiCursor::initialize();
+    if (!FontManager::initialize(resolvePath("assets/fonts/NotoSans-Vietnamese.ttf"))) {
+        UiCursor::shutdown();
+        UiCanvas::shutdown();
+        CloseWindow();
+        throw std::runtime_error("Unable to load the bundled Vietnamese font");
+    }
+    UiShapes::initialize(resolvePath("assets/shaders/ui_shapes.fs").c_str());
+    UiBlur::initialize(resolvePath("assets/shaders/ui_blur.fs").c_str());
+    UiIcons::initialize(resolvePath("assets/ui/icons").c_str());
     SetTargetFPS(60);
     SetExitKey(KEY_NULL);   // ESC do game tu xu ly (Undo / ve Menu), khong thoat thang
     m_audio.init();                                          // khong co loa -> game van chay, chi im lang
     m_audio.loadAll(resolvePath("assets/audio"));
-    m_sceneShader.init(SCREEN_WIDTH, SCREEN_HEIGHT);         // loi shader -> tu tat, game ve binh thuong
+    m_sceneShader.init(UiCanvas::width(), UiCanvas::height()); // loi shader -> tu tat, game ve binh thuong
 
     try {
         m_gameData.loadAll(resolvePath("data"));
         m_dataLoaded = true;
-        m_battleLog = "Data CSV nap thanh cong!";
+        m_battleLog = u8"Dữ liệu CSV đã tải thành công!";
     }
     catch (const std::exception& e) {
         m_dataLoaded = false;
-        m_battleLog = std::string("Data load notice: ") + e.what();
+        m_battleLog = std::string(u8"Lỗi tải dữ liệu: ") + e.what();
         std::cerr << m_battleLog << std::endl;
     }
     {
@@ -243,7 +272,6 @@ void GameEngine::initialize()
         m_shop.setIcons(&m_itemIcons);
     }
     m_startMenu.loadBackground(resolvePath("assets/images/bg_menu.png"));   // thieu anh -> nen thu tuc
-    m_startMenu.setStatusText(m_dataLoaded ? "Data: CSV OK" : "Data: CSV loi -> dung du lieu du phong", m_dataLoaded);
     m_heroConfig = { HERO_NAME, HERO_RACE, HERO_CLASS, HERO_ELEMENT };
     m_partyConfigs.clear();
     m_heroCreate.loadBackground(resolvePath("assets/images/bg_menu.png"));
@@ -278,7 +306,13 @@ void GameEngine::shutdown()
     m_prepMenu.unloadAll();
     m_battleMap.unloadAll();
     m_itemIcons.unloadAll();
+    UiIcons::shutdown();
+    UiBlur::shutdown();
+    UiShapes::shutdown();
     m_sceneShader.unload();
+    FontManager::shutdown();
+    UiCanvas::shutdown();
+    UiCursor::shutdown();
     m_audio.unloadAll();                 // dong thiet bi am thanh TRUOC CloseWindow
     m_combatants.clear();
     m_party.clear();
@@ -319,7 +353,7 @@ bool GameEngine::cancelLastAction()
         for (auto& c : m_combatants) syncHealth(c.get());
         m_isSelectingTarget = false;
         m_battlePhase = BattlePhase::PLAYER_TURN;
-        m_battleLog = "Da hoan tac (Undo) hanh dong vua roi! Chon lenh khac.";
+        m_battleLog = u8"Đã hoàn tác hành động vừa rồi! Hãy chọn lệnh khác.";
     }
     return result;
 }
@@ -410,7 +444,10 @@ Skill GameEngine::toBattleSkill(const SkillData& data, Element heroElement)
 
 void GameEngine::addCombatant(std::unique_ptr<Character> character, const std::string& spritePath)
 {
-    if (!character) return;
+    if (!character) {
+        std::cerr << "[BattleUI] initialization skipped a null combatant\n";
+        return;
+    }
 
     // Thieu file anh rieng -> dung sheet mac dinh de game khong bi mat hinh
     int frameW = FRAME_W, frameH = FRAME_H;
@@ -439,7 +476,15 @@ void GameEngine::addCombatant(std::unique_ptr<Character> character, const std::s
 void GameEngine::layoutViews()
 {
     const std::size_t members = m_party.size();
-    if (m_views.empty() || members == 0) return;
+    if (m_views.size() != m_combatants.size()) {
+        std::cerr << "[BattleUI] layout mismatch: combatants=" << m_combatants.size()
+                  << " views=" << m_views.size() << '\n';
+    }
+    if (m_views.empty() || members == 0) {
+        std::cerr << "[BattleUI] layout skipped: party=" << members
+                  << " views=" << m_views.size() << '\n';
+        return;
+    }
 
     std::vector<float> playerScales(members, 1.0f);
     for (std::size_t i = 0; i < members && i < m_combatants.size(); ++i)
@@ -497,27 +542,29 @@ void GameEngine::openWaveSelect()
     {
         WaveInfo w;
         w.m_number = stage;
-        w.m_title = "WAVE " + std::to_string(stage);
+        w.m_title = TextFormat(Strings::stage, stage);
 
         const std::vector<MonsterData> monsters = m_gameData.getMonstersByStage(stage);
         for (const MonsterData& m : monsters)
         {
-            w.m_enemies.push_back({ m.m_name, m.m_element });
+            w.m_enemies.push_back({ Strings::localizedName(m.m_name), m.m_element });
             if (m.m_isBoss) w.m_isBoss = true;
         }
 
         // Wave thuong chi xuat hien ngau nhien STAGE1_ENEMY_COUNT quai trong so quai co the gap (xem spawnEnemies)
         const int appear = (!w.m_isBoss) ? std::min(static_cast<int>(monsters.size()), STAGE1_ENEMY_COUNT)
                                         : static_cast<int>(monsters.size());
-        w.m_description = w.m_isBoss ? std::string("Tran chien voi Boss")
-                                     : "Xuat hien ngau nhien " + std::to_string(appear) + " quai";
+        w.m_description = w.m_isBoss ? std::string(u8"Trận chiến với trùm")
+                                     : std::string(u8"Xuất hiện ngẫu nhiên ") +
+                                           std::to_string(appear) + u8" quái";
         w.m_locked = !m_waveManager.isWaveUnlocked(stage);
         w.m_cleared = static_cast<size_t>(stage) < m_wavesCleared.size() && m_wavesCleared[static_cast<size_t>(stage)];
         waves.push_back(std::move(w));
     }
 
     m_waveSelect.setWaves(waves);
-    m_waveSelect.setHeroSummary(m_heroConfig.m_name + " - " + m_heroConfig.m_race + " " + m_heroConfig.m_class);
+    m_waveSelect.setHeroSummary(Strings::localizedName(m_heroConfig.m_name) + " - " +
+        Strings::localizedName(m_heroConfig.m_race) + " " + Strings::localizedName(m_heroConfig.m_class));
     m_waveSelect.reset(0);
     m_stateMachine.changeState(GameStateMachine::State::WAVE_SELECT);
 }
@@ -572,33 +619,33 @@ void GameEngine::openPrepMenu(int wave)
             for (const ItemPtr& item : m_party.getInventory().getItems()) {
                 if (!item || std::find(seen.begin(), seen.end(), item->getId()) != seen.end()) continue;
                 seen.push_back(item->getId());
-                info.m_items.push_back({ item->getName(), static_cast<int>(m_party.countItem(item->getId())), item->getId() });
+                info.m_items.push_back({ item->getNameVi(), static_cast<int>(m_party.countItem(item->getId())), item->getId() });
             }
             for (const ItemPtr& gear : m_equippedGear)
-                if (gear) info.m_items.push_back({ gear->getName() + " (dang deo)", 1, gear->getId() });
+                if (gear) info.m_items.push_back({ gear->getNameVi() + u8" (đang đeo)", 1, gear->getId() });
         } else {
-            info.m_items.push_back({ "Minor Health Potion", STARTER_POTIONS, "ITM_HP_MINOR" });
-            info.m_items.push_back({ "Energy Capsule", STARTER_ENERGY, "ITM_ENERGY" });
+            info.m_items.push_back({ u8"Bình hồi máu nhỏ", STARTER_POTIONS, "ITM_HP_MINOR" });
+            info.m_items.push_back({ u8"Năng lượng", STARTER_ENERGY, "ITM_ENERGY" });
         }
     }
 
     // Tab 4: Thong tin cong
-    info.m_gate.m_title = "WAVE " + std::to_string(wave);
+    info.m_gate.m_title = TextFormat(Strings::stage, wave);
     info.m_gate.m_deadlineTurns = deadlineTurnsForStage(wave);
     for (const MonsterData& m : m_gameData.getMonstersByStage(wave))
     {
         if (m.m_isBoss) {
             info.m_gate.m_hasBoss = true;
-            info.m_gate.m_bossName = m.m_name;
+            info.m_gate.m_bossName = Strings::localizedName(m.m_name);
             info.m_gate.m_bossElement = m.m_element;
             info.m_gate.m_bossHp = m.m_stats.m_hp;
         } else {
-            info.m_gate.m_enemies.push_back({ m.m_name, m.m_element });
+            info.m_gate.m_enemies.push_back({ Strings::localizedName(m.m_name), m.m_element });
         }
     }
     info.m_gate.m_description = info.m_gate.m_hasBoss
-        ? std::string("Tran chien voi Boss\nHa gac cong de tien len")
-        : std::string("Quet sach quai canh cong\nXuat hien ngau nhien");
+        ? std::string(u8"Trận chiến với trùm\nHạ gác cổng để tiến lên")
+        : std::string(u8"Quét sạch quái canh cổng\nXuất hiện ngẫu nhiên");
 
     m_prepMenu.setInfo(info);
     m_prepMenu.reset(0);
@@ -697,8 +744,8 @@ void GameEngine::openPartyMemberSelection(int slot)
     m_selectingFromPrep = true;
     m_heroCreate.reset();
     m_heroCreate.setSlotLabel(m_editingPartySlot == 0
-        ? "CHON THU LINH (1/3)"
-        : "CHON DONG DOI " + std::to_string(m_editingPartySlot + 1) + "/3");
+        ? std::string(Strings::heroLead)
+        : std::string(u8"CHỌN ĐỒNG ĐỘI ") + std::to_string(m_editingPartySlot + 1) + "/3");
     m_stateMachine.changeState(GameStateMachine::State::CREATE_HERO);
 }
 
@@ -791,6 +838,10 @@ void GameEngine::spawnEnemies(int stage)
 }
 void GameEngine::loadStage(int stage)
 {
+    std::cerr << "[BattleUI] battle initialization enter: stage=" << stage
+              << " party=" << m_party.size()
+              << " combatants-before-reset=" << m_combatants.size()
+              << " views-before-reset=" << m_views.size() << '\n';
     m_stage = stage;
     m_waveManager.addWave(stage);
     m_waveManager.startNextWave();
@@ -826,6 +877,13 @@ void GameEngine::loadStage(int stage)
 
     m_selectedAlly = m_party.getLeader();
     m_selectedTarget = (m_combatants.size() > m_party.size()) ? m_combatants[m_party.size()].get() : nullptr;
+    if (m_combatants.size() != m_views.size()) {
+        std::cerr << "[BattleUI] initialization mismatch after layout: combatants="
+                  << m_combatants.size() << " views=" << m_views.size() << '\n';
+    }
+    std::cerr << "[BattleUI] initialization complete: combatants=" << m_combatants.size()
+              << " views=" << m_views.size()
+              << " selectedTarget=" << (m_selectedTarget ? "set" : "none") << '\n';
     {
         const bool bossBg = isBossStage(m_stage);
         m_battleMap.setStage(bossBg ? StageId::STAGE_2 : StageId::STAGE_1,
@@ -835,7 +893,7 @@ void GameEngine::loadStage(int stage)
 
     m_currentCharacter = nullptr;   // update() se goi advanceTurn() de lay luot dau tien
     m_battlePhase = BattlePhase::AI_THINKING;
-    m_battleLog = "MAN " + std::to_string(stage) + " bat dau!";
+    m_battleLog = std::string(u8"MÀN ") + std::to_string(stage) + u8" bắt đầu!";
 }
 
 void GameEngine::beginRun(int startStage)
@@ -870,7 +928,8 @@ void GameEngine::startNewGame(int startStage)
     loadStage(startStage);
     advanceTurn();
 
-    m_battleLog = "Tran dau bat dau! Den luot: " + (m_currentCharacter ? m_currentCharacter->getName() : std::string("None"));
+    m_battleLog = std::string(u8"Trận đấu bắt đầu! Đến lượt: ") +
+        Strings::localizedName(m_currentCharacter ? m_currentCharacter->getName() : std::string{});
 }
 
 bool GameEngine::waveHasBoss(int wave)
@@ -901,7 +960,8 @@ void GameEngine::recoverPartyAfterWave()
         if (mpAdd > 0) h->consumeMp(-mpAdd);     // tieu hao am = hoi MP (da gioi han khong vuot toi da)
         mpTotal += mpAdd;
     }
-    m_battleLog += "  [Hoi sau wave: +" + std::to_string(hpTotal) + " HP, +" + std::to_string(mpTotal) + " MP (20%)]";
+    m_battleLog += std::string(u8"  [Hồi sau màn: +") + std::to_string(hpTotal) +
+        u8" HP, +" + std::to_string(mpTotal) + " MP (20%)]";
 }
 
 void GameEngine::enterBossBreak(int nextWave)
@@ -913,7 +973,7 @@ void GameEngine::enterBossBreak(int nextWave)
     m_isSelectingItem = false;
     m_commandStack.clear();
     openPrepMenu(nextWave);
-    m_battleLog = "Chuan bi cho wave Boss! Mo Cua Hang de mua do va trang bi.";
+    m_battleLog = u8"Chuẩn bị cho màn trùm! Mở cửa hàng để mua đồ và trang bị.";
 }
 
 void GameEngine::beginBattleAfterBreak()
@@ -923,7 +983,8 @@ void GameEngine::beginBattleAfterBreak()
     m_stateMachine.changeState(GameStateMachine::State::IN_BATTLE);
     loadStage(m_pendingWave);
     advanceTurn();
-    m_battleLog = "Tran dau bat dau! Den luot: " + (m_currentCharacter ? m_currentCharacter->getName() : std::string("None"));
+    m_battleLog = std::string(u8"Trận đấu bắt đầu! Đến lượt: ") +
+        Strings::localizedName(m_currentCharacter ? m_currentCharacter->getName() : std::string{});
 }
 
 // =====================================================================
@@ -969,7 +1030,7 @@ void GameEngine::settleGold()
     }
     if (total > 0) {
         m_gold += total;
-        m_battleLog += "  [+" + std::to_string(total) + " vang]";
+        m_battleLog += std::string(u8"  [+") + std::to_string(total) + u8" vàng]";
     }
 }
 
@@ -1010,7 +1071,7 @@ void GameEngine::refreshShop()
         if (!data) continue;
         ShopStockInfo s;
         s.m_id = data->m_id;
-        s.m_name = data->m_name;
+        s.m_name = data->m_nameVi;
         try { s.m_description = ItemFactory::createItem(*data)->getDescription(); }
         catch (const std::exception&) { s.m_description = ""; }
         s.m_category = itemCategoryIndex(data->m_category);
@@ -1026,7 +1087,7 @@ void GameEngine::refreshShop()
         seen.push_back(item->getId());
         ShopBagInfo b;
         b.m_id = item->getId();
-        b.m_name = item->getName();
+        b.m_name = item->getNameVi();
         b.m_description = item->getDescription();
         b.m_category = itemCategoryIndex(item->getCategory());
         b.m_count = static_cast<int>(m_party.countItem(item->getId()));
@@ -1038,7 +1099,7 @@ void GameEngine::refreshShop()
         m.m_name = m_party.getMember(i)->getName();
         if (i < Party::MAX_SIZE && m_equippedGear[i]) {
             m.m_gearId = m_equippedGear[i]->getId();
-            m.m_gearName = m_equippedGear[i]->getName();
+            m.m_gearName = m_equippedGear[i]->getNameVi();
         }
         info.m_members.push_back(m);
     }
@@ -1057,20 +1118,21 @@ void GameEngine::buyShopItem(int stockIndex)
     const ItemData& data = m_itemDatabase.getItem(entry.m_id);
 
     if (data.m_maxCarry > 0 && ownedCount(entry.m_id) >= data.m_maxCarry) {
-        m_shop.setMessage("Ban da mang du so luong " + data.m_name + "!", false);
+        m_shop.setMessage(u8"Bạn đã mang đủ số lượng " + data.m_nameVi + "!", false);
         return;
     }
     if (m_gold < entry.m_price) {
-        m_shop.setMessage("Khong du vang de mua " + data.m_name + "!", false);
+        m_shop.setMessage(u8"Không đủ vàng để mua " + data.m_nameVi + "!", false);
         return;
     }
     if (!m_party.addItem(ItemFactory::createItem(data))) {
-        m_shop.setMessage("Tui do da day, khong the mua them " + data.m_name + "!", false);
+        m_shop.setMessage(u8"Túi đồ đã đầy, không thể mua thêm " + data.m_nameVi + "!", false);
         return;
     }
     m_gold -= entry.m_price;
     m_audio.playSfx(SfxId::CLICK);
-    m_shop.setMessage("Da mua " + data.m_name + " (-" + std::to_string(entry.m_price) + " vang)", true);
+    m_shop.setMessage(u8"Đã mua " + data.m_nameVi + u8" (-" +
+                      std::to_string(entry.m_price) + u8" vàng)", true);
     refreshShop();
 }
 
@@ -1081,7 +1143,7 @@ void GameEngine::equipFromBag(int bagIndex, int memberIndex)
     for (const ItemPtr& item : m_party.getInventory().getItems())
         if (item && std::find(ids.begin(), ids.end(), item->getId()) == ids.end()) ids.push_back(item->getId());
     if (bagIndex < 0 || static_cast<std::size_t>(bagIndex) >= ids.size()) {
-        m_shop.setMessage("Chua chon vat pham de trang bi.", false);
+        m_shop.setMessage(u8"Chưa chọn vật phẩm để trang bị.", false);
         return;
     }
     if (memberIndex < 0 || static_cast<std::size_t>(memberIndex) >= m_party.size() ||
@@ -1092,18 +1154,20 @@ void GameEngine::equipFromBag(int bagIndex, int memberIndex)
     for (const ItemPtr& item : m_party.getInventory().getItems())
         if (item && item->getId() == id) { gear = item; break; }
     if (!gear || gear->getCategory() != ItemCategory::HELD) {
-        m_shop.setMessage("Chi Trang bi (Held Gear) moi deo duoc cho hero.", false);
+        m_shop.setMessage(u8"Chỉ trang bị mới đeo được cho tướng.", false);
         return;
     }
     const ItemPtr previous = m_equippedGear[memberIndex];
     if (!m_party.equipGear(static_cast<std::size_t>(memberIndex), gear)) {
-        m_shop.setMessage("Khong the trang bi vat pham nay.", false);
+        m_shop.setMessage(u8"Không thể trang bị vật phẩm này.", false);
         return;
     }
     m_equippedGear[memberIndex] = gear;
     m_audio.playSfx(SfxId::CLICK);
-    m_shop.setMessage(m_party.getMember(static_cast<std::size_t>(memberIndex))->getName() + " da deo " + gear->getName() +
-                      (previous ? " (cat " + previous->getName() + " vao tui)" : ""), true);
+    m_shop.setMessage(Strings::localizedName(
+                          m_party.getMember(static_cast<std::size_t>(memberIndex))->getName()) +
+                      u8" đã đeo " + gear->getNameVi() +
+                      (previous ? u8" (cất " + previous->getNameVi() + u8" vào túi)" : ""), true);
     refreshShop();
 }
 
@@ -1113,12 +1177,12 @@ void GameEngine::unequipMember(int memberIndex)
         static_cast<std::size_t>(memberIndex) >= Party::MAX_SIZE) return;
     const ItemPtr gear = m_equippedGear[memberIndex];
     if (!gear || !m_party.unequipGear(static_cast<std::size_t>(memberIndex))) {
-        m_shop.setMessage("Hero nay chua deo trang bi.", false);
+        m_shop.setMessage(u8"Tướng này chưa đeo trang bị.", false);
         return;
     }
     m_equippedGear[memberIndex].reset();
     m_audio.playSfx(SfxId::CLICK);
-    m_shop.setMessage("Da thao " + gear->getName() + " vao tui.", true);
+    m_shop.setMessage(u8"Đã tháo " + gear->getNameVi() + u8" vào túi.", true);
     refreshShop();
 }
 
@@ -1140,7 +1204,7 @@ void GameEngine::drawGoldHud(float x, float y) const
     DrawRectangleLinesEx(Rectangle{ x, y, 190.0f, 34.0f }, 2.0f, Color{ 200, 170, 80, 255 });
     DrawCircle(static_cast<int>(x + 20), static_cast<int>(y + 17), 10.0f, Color{ 255, 205, 60, 255 });
     DrawCircleLines(static_cast<int>(x + 20), static_cast<int>(y + 17), 10.0f, Color{ 120, 80, 10, 255 });
-    DrawText(TextFormat("%d vang", m_gold), static_cast<int>(x + 40), static_cast<int>(y + 7), 20, Color{ 255, 225, 120, 255 });
+    UiText::draw(TextFormat(Strings::gold, m_gold), static_cast<int>(x + 40), static_cast<int>(y + 7), 20, Color{ 255, 225, 120, 255 });
 }
 
 void GameEngine::drawPrepExtras() const
@@ -1149,14 +1213,14 @@ void GameEngine::drawPrepExtras() const
     drawGoldHud(1280.0f - 230.0f, 20.0f);
 
     const Rectangle r = shopButtonRect();
-    const bool hover = CheckCollisionPointRec(GetMousePosition(), r);
+    const bool hover = CheckCollisionPointRec(UiCanvas::mousePosition(), r);
     DrawRectangleRec(Rectangle{ r.x + 4, r.y + 5, r.width, r.height }, Color{ 0, 0, 0, 110 });
     DrawRectangleRec(r, hover ? Color{ 90, 60, 20, 235 } : Color{ 50, 40, 14, 230 });
     DrawRectangleLinesEx(r, hover ? 3.0f : 2.0f, Color{ 255, 214, 96, 255 });
-    const char* label = "CUA HANG [B]";
-    DrawText(label, static_cast<int>(r.x + (r.width - MeasureText(label, 24)) / 2.0f),
+    const char* label = u8"CỬA HÀNG [B]";
+    UiText::draw(label, static_cast<int>(r.x + (r.width - UiText::measure(label, 24)) / 2.0f),
              static_cast<int>(r.y + (r.height - 24.0f) / 2.0f), 24, hover ? Color{ 255, 240, 170, 255 } : Color{ 238, 235, 252, 255 });
-    DrawText("Dang nghi giua 2 wave: mua do, trang bi cho tuong, roi [ENTER] de vao Boss",
+    UiText::draw(u8"Đang nghỉ giữa hai màn: mua đồ, trang bị cho tướng, rồi [ENTER] để vào trùm",
              40, 702, 14, Color{ 255, 214, 96, 220 });
 }
 
@@ -1210,6 +1274,10 @@ void GameEngine::playDeathSfx(Character* character)
 
 void GameEngine::processEvents()
 {
+    if (UiDevGallery::handleInput())
+        return;
+    if (IsKeyPressed(KEY_F11)) ToggleFullscreen();
+
     // Tieng click cho cac man hinh menu (chuot trai / ENTER / SPACE)
     if (!m_stateMachine.is(GameStateMachine::State::IN_BATTLE) &&
         (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER)))
@@ -1241,7 +1309,7 @@ void GameEngine::processEvents()
     {
     m_editingPartySlot = 0;
     m_selectingFromPrep = false;
-    m_heroCreate.setSlotLabel("CHON THU LINH (1/3)");
+    m_heroCreate.setSlotLabel(Strings::heroLead);
     m_stateMachine.changeState(GameStateMachine::State::CREATE_HERO);   // ESC o man Chon Wave = ve Tao Hero
     }
     else if (m_stateMachine.is(GameStateMachine::State::PREP_MENU))
@@ -1273,7 +1341,7 @@ void GameEngine::processEvents()
         m_editingPartySlot = 0;
         m_selectingFromPrep = false;
         m_heroCreate.reset(m_heroConfig.m_name);
-        m_heroCreate.setSlotLabel("CHON THU LINH (1/3)");
+        m_heroCreate.setSlotLabel(Strings::heroLead);
         m_stateMachine.changeState(GameStateMachine::State::CREATE_HERO);
     }
     else   // chua co data CSV: vao tran luon voi hero mac dinh
@@ -1327,7 +1395,7 @@ void GameEngine::processEvents()
     case WaveSelectAction::BACK:
         m_editingPartySlot = 0;
         m_selectingFromPrep = false;
-        m_heroCreate.setSlotLabel("CHON THU LINH (1/3)");
+        m_heroCreate.setSlotLabel(Strings::heroLead);
         m_stateMachine.changeState(GameStateMachine::State::CREATE_HERO);
         break;
     case WaveSelectAction::NONE:
@@ -1341,7 +1409,7 @@ void GameEngine::processEvents()
     }
     if (m_resumeRun && m_itemsLoaded &&
         (IsKeyPressed(KEY_B) ||
-         (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), shopButtonRect())))) {
+         (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(UiCanvas::mousePosition(), shopButtonRect())))) {
         openShop();
         break;
     }
@@ -1557,7 +1625,7 @@ void GameEngine::handleBattleClick(Vector2 position)
     if (CheckCollisionPointRec(position, BattleUI::buttonBounds(BattleUIButton::ITEM))) {
         openItemMenu();
         if (availableItems().empty()) {
-            m_battleLog = "Tui do khong co vat pham dung trong tran!";
+            m_battleLog = Strings::noInventoryItems;
             m_isSelectingItem = false;
         }
         return;
@@ -1603,7 +1671,7 @@ void GameEngine::processPlayerInput()
     if (!m_currentCharacter || !isHero(m_currentCharacter)) return;
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        handleBattleClick(GetMousePosition());
+        handleBattleClick(UiCanvas::mousePosition());
         return;
     }
 
@@ -1628,7 +1696,7 @@ void GameEngine::processPlayerInput()
     if (m_isSelectingItem) {
         const auto items = availableItems();
         if (items.empty()) {
-            m_battleLog = "Tui do khong co vat pham dung trong tran!";
+            m_battleLog = Strings::noInventoryItems;
             m_isSelectingItem = false;
             return;
         }
@@ -1685,8 +1753,9 @@ void GameEngine::doBasicAttack()
     playAnimation(attacker, AnimState::ATTACK);
     syncHealth(target);
 
-    m_battleLog = attacker->getName() + " tan cong " + target->getName() + " gay " + std::to_string(dealt) + " sat thuong!"
-                + "  [ENTER] ket thuc luot, [ESC/Z] hoan tac";
+    m_battleLog = Strings::localizedName(attacker->getName()) + u8" tấn công " +
+        Strings::localizedName(target->getName()) + u8" gây " + std::to_string(dealt) +
+        u8" sát thương!  [ENTER] kết thúc lượt, [ESC/Z] hoàn tác";
     m_battlePhase = BattlePhase::PLAYER_CONFIRM;
 }
 
@@ -1698,7 +1767,8 @@ void GameEngine::doUseItem()
     Character* target = m_selectedAlly ? m_selectedAlly : hero();
     if (!item || !target) return;
     if (!item->canUse(*target)) {
-        m_battleLog = "Khong the dung " + item->getName() + " cho " + target->getName();
+        m_battleLog = u8"Không thể dùng " + item->getNameVi() + u8" cho " +
+            Strings::localizedName(target->getName());
         return;
     }
     auto amount = std::make_shared<int>(0);
@@ -1713,8 +1783,9 @@ void GameEngine::doUseItem()
         syncHealth(target);
     };
     if (!queuePlayerCommand(std::make_unique<UseItemCommand>(executeAction, undoAction))) return;
-    m_battleLog = hero()->getName() + " dung " + item->getName() + " cho " + target->getName()
-                + " (+" + std::to_string(*amount) + ") [ENTER] Xac nhan, [Z] Undo";
+    m_battleLog = Strings::localizedName(hero()->getName()) + u8" dùng " +
+        item->getNameVi() + u8" cho " + Strings::localizedName(target->getName()) +
+        u8" (+" + std::to_string(*amount) + u8") [ENTER] xác nhận, [Z] hoàn tác";
     m_isSelectingItem = false;
     m_battlePhase = BattlePhase::PLAYER_CONFIRM;
 }
@@ -1727,7 +1798,7 @@ bool GameEngine::castSkill(size_t skillIndex)
     const Skill skill = m_heroSkills[skillIndex];   // ban sao: thao tac an toan trong lambda
 
     if (h->getCurrentMp() < skill.m_mpCost) {
-        m_battleLog = "Khong du MP de dung " + skill.m_name + "!";
+        m_battleLog = u8"Không đủ MP để dùng " + Strings::localizedName(skill.m_name) + "!";
         return false;
     }
 
@@ -1772,12 +1843,17 @@ bool GameEngine::castSkill(size_t skillIndex)
         applySkillEffect(skill, target);
 
         if (offensive)
-            m_battleLog = h->getName() + " dung " + skill.m_name + " len " + target->getName()
-                        + " gay " + std::to_string(hpBefore - target->getCurrentHp()) + " sat thuong!";
+            m_battleLog = Strings::localizedName(h->getName()) + u8" dùng " +
+                Strings::localizedName(skill.m_name) + u8" lên " +
+                Strings::localizedName(target->getName()) + u8" gây " +
+                std::to_string(hpBefore - target->getCurrentHp()) + u8" sát thương!";
         else if (skill.m_type == SkillType::HEAL)
-            m_battleLog = h->getName() + " dung " + skill.m_name + " hoi " + std::to_string(target->getCurrentHp() - hpBefore) + " HP!";
+            m_battleLog = Strings::localizedName(h->getName()) + u8" dùng " +
+                Strings::localizedName(skill.m_name) + u8" hồi " +
+                std::to_string(target->getCurrentHp() - hpBefore) + " HP!";
         else
-            m_battleLog = h->getName() + " dung " + skill.m_name + "!";
+            m_battleLog = Strings::localizedName(h->getName()) + u8" dùng " +
+                Strings::localizedName(skill.m_name) + "!";
     };
 
     auto undoAction = [this, h, target, targetSnapshot, casterSnapshot, previousEffects]() {
@@ -1801,7 +1877,7 @@ void GameEngine::confirmTurn()
         actor->onTurnEnd();
         syncHealth(actor);
         if (actor->isAlive() && actor->modifiers().consumeExtraTurn()) {
-            m_battleLog = actor->getName() + " duoc them 1 luot!";
+            m_battleLog = Strings::localizedName(actor->getName()) + u8" được thêm một lượt!";
             m_battlePhase = BattlePhase::PLAYER_TURN;
             return;
         }
@@ -1829,17 +1905,17 @@ bool GameEngine::beginTurn(Character* c)
     syncHealth(c);
 
     if (!c->isAlive()) {
-        m_battleLog = c->getName() + " guc nga do hieu ung (BURN)!";
+        m_battleLog = Strings::localizedName(c->getName()) + u8" gục ngã do hiệu ứng bỏng!";
         return false;
     }
 
     if (wasStunned) {
-        m_battleLog = c->getName() + " bi choang, mat luot!";
+        m_battleLog = Strings::localizedName(c->getName()) + u8" bị choáng, mất lượt!";
         return false;
     }
 
     if (c->getCurrentHp() < hpBefore)
-        m_battleLog = c->getName() + " chiu sat thuong tu hieu ung!";
+        m_battleLog = Strings::localizedName(c->getName()) + u8" chịu sát thương từ hiệu ứng!";
     return true;
 }
 
@@ -1907,11 +1983,14 @@ void GameEngine::executeAiTurn(Character* aiChar)
 
     aiChar->onTurnEnd();
     syncHealth(aiChar);
-    m_battleLog = aiChar->getName() + " tan cong " + h->getName() + " gay " + std::to_string(dealt) + " sat thuong!";
+    m_battleLog = Strings::localizedName(aiChar->getName()) + u8" tấn công " +
+        Strings::localizedName(h->getName()) + u8" gây " + std::to_string(dealt) +
+        u8" sát thương!";
 }
 
 void GameEngine::update(float deltaTime)
 {   
+    UiWidgets::update(deltaTime);
     m_audio.update(deltaTime);
     updateMusic();
     if (IsKeyPressed(KEY_F9)) m_sceneShader.setEnabled(!m_sceneShader.isEnabled());   // bat/tat shader canh
@@ -1985,7 +2064,7 @@ void GameEngine::checkBattleCondition()
     const int clearBonus = m_shopConfig.getEconomy().m_waveClearBonus;
     if (clearBonus > 0) {
         m_gold += clearBonus;
-        m_battleLog += "  [Qua man: +" + std::to_string(clearBonus) + " vang]";
+        m_battleLog += std::string(u8"  [Qua màn: +") + std::to_string(clearBonus) + u8" vàng]";
     }
     if (m_stage < finalStage())
     {
@@ -2102,7 +2181,8 @@ void GameEngine::onHealthChanged(Character* character, int newHealth)
 void GameEngine::onCharacterDied(Character* character)
 {
     if (character) {
-        m_battleLog += "  >> " + character->getName() + " guc nga!";
+        m_battleLog += std::string(u8"  >> ") + Strings::localizedName(character->getName()) +
+            u8" gục ngã!";
         playDeathSfx(character);
     }
 }
@@ -2143,9 +2223,21 @@ BattleSlot GameEngine::slotOf(int index) const
 
 void GameEngine::render()
 {
-    BeginDrawing();
+    RaylibScope::Drawing drawing;
+    if (!drawing) return;
+    UiCanvas::FrameGuard canvasFrame;
+    if (!canvasFrame) {
+        ClearBackground(Color{ 244, 244, 244, 255 });
+        DrawRectangleRounded(Rectangle{ 28, 28, 1224, 110 }, 0.05f, 8, Color{ 15, 15, 30, 245 });
+        UiText::draw(u8"Không thể mở khung giao diện", 56, 58, 24, WHITE);
+        std::cerr << "[BattleUI] render fallback: UiCanvas frame could not start\n";
+        return;
+    }
+    UiWidgets::beginFrame();
     ClearBackground(RAYWHITE);
-       switch (m_stateMachine.getState())
+    if (UiDevGallery::visible()) {
+        UiDevGallery::draw();
+    } else switch (m_stateMachine.getState())
     {
     case GameStateMachine::State::MENU:
         m_startMenu.draw();
@@ -2162,6 +2254,15 @@ void GameEngine::render()
     if (m_shopOpen) m_shop.draw();
     break;
     case GameStateMachine::State::IN_BATTLE:
+        {
+        static std::uint64_t battleDrawFrame = 0;
+        ++battleDrawFrame;
+        std::cerr << "[BattleUI] draw frame=" << battleDrawFrame
+                  << " state=IN_BATTLE stage=" << m_stage
+                  << " combatants=" << m_combatants.size()
+                  << " views=" << m_views.size()
+                  << " selectedTarget=" << (m_selectedTarget ? "set" : "none") << '\n';
+        }
         if (m_sceneShader.isActive())
         {
             m_sceneShader.begin();            // nen + nhan vat -> RenderTexture
@@ -2181,24 +2282,39 @@ void GameEngine::render()
         break;
 
     case GameStateMachine::State::VICTORY:
-        DrawText("VICTORY!", 500, 250, 50, GREEN);
-        DrawText("Press ENTER to return to Menu", 420, 340, 22, DARKGRAY);
+        UiText::draw(Strings::victory, 500, 250, 50, GREEN);
+        UiText::draw(Strings::returnToMenu, 420, 340, 22, DARKGRAY);
         break;
 
     case GameStateMachine::State::GAME_OVER:
-        DrawText("GAME OVER", 480, 250, 50, RED);
-        DrawText("Press ENTER to return to Menu", 420, 340, 22, DARKGRAY);
+        UiText::draw(Strings::gameOver, 480, 250, 50, RED);
+        UiText::draw(Strings::returnToMenu, 420, 340, 22, DARKGRAY);
         break;
     }
 
-    EndDrawing();
+    UiWidgets::Toast();
+    UiCursor::draw();
 }
 
 void GameEngine::renderCombatants()
 {
+    const std::size_t count = std::min(m_combatants.size(), m_views.size());
+    if (m_combatants.empty() || m_views.empty()) {
+        std::cerr << "[BattleUI] combatant draw skipped: combatants=" << m_combatants.size()
+                  << " views=" << m_views.size() << '\n';
+        return;
+    }
+    if (m_combatants.size() != m_views.size()) {
+        std::cerr << "[BattleUI] drawing only matched entries: combatants="
+                  << m_combatants.size() << " views=" << m_views.size() << '\n';
+    }
     // 2.5D: ve hang xa truoc, hang gan sau (sap theo y cua chan)
-    std::vector<size_t> order(m_views.size());
-    std::iota(order.begin(), order.end(), size_t{ 0 });
+    std::vector<size_t> order;
+    order.reserve(count);
+    for (std::size_t i = 0; i < count; ++i) {
+        if (m_combatants[i] && m_views[i]) order.push_back(i);
+        else std::cerr << "[BattleUI] skipped null combatant/view at index=" << i << '\n';
+    }
     std::sort(order.begin(), order.end(), [&](size_t a, size_t b) {
         return m_views[a]->getSlot().m_feetPos.y < m_views[b]->getSlot().m_feetPos.y;
     });
@@ -2229,10 +2345,23 @@ void GameEngine::renderCombatants()
 
 void GameEngine::renderBattleUI()
 {
+    const std::size_t count = std::min(m_combatants.size(), m_views.size());
+    if (count == 0) {
+        m_ui.drawControlPanel();
+        UiText::draw(u8"ĐANG TẢI TRẬN ĐẤU", 48, 584, 20, YELLOW);
+        m_ui.drawBattleLog(m_battleLog.empty() ? u8"Chưa có đơn vị chiến đấu." : m_battleLog);
+        std::cerr << "[BattleUI] placeholder HUD: no matched combatants/views\n";
+        return;
+    }
     // ----- HP/MP + con tro muc tieu + hieu ung tung nhan vat -----
-    for (size_t i = 0; i < m_combatants.size(); ++i)
+    if (m_combatants.size() != m_views.size()) {
+        std::cerr << "[BattleUI] HUD drawing only matched entries: combatants="
+                  << m_combatants.size() << " views=" << m_views.size() << '\n';
+    }
+    for (size_t i = 0; i < count; ++i)
     {
         const Character* c = m_combatants[i].get();
+        if (!c || !m_views[i]) continue;
         if (!c->isAlive()) continue;
 
         const Vector2 head = m_views[i]->getHeadPos();
@@ -2250,8 +2379,8 @@ void GameEngine::renderBattleUI()
             for (const StatusEffect& effect : fx->second.getEffects())
             {
                 const char* label = TextFormat("%s(%d)", statusName(effect.type), effect.durationTurns);
-                DrawText(label, ex, ey, 12, ORANGE);
-                ex += MeasureText(label, 12) + 6;
+                UiText::draw(label, ex, ey, 12, ORANGE);
+                ex += UiText::measure(label, 12) + 6;
             }
         }
     }
@@ -2261,10 +2390,10 @@ void GameEngine::renderBattleUI()
     for (const GoldPopup& p : m_goldPopups) {
         const float t = std::max(0.0f, std::min(1.0f, p.m_life / GOLD_POPUP_LIFE));
         const unsigned char a = static_cast<unsigned char>(255.0f * t);
-        const char* text = TextFormat("+%d vang", p.m_amount);
-        const int w = MeasureText(text, 22);
-        DrawText(text, static_cast<int>(p.m_pos.x - w / 2.0f) + 2, static_cast<int>(p.m_pos.y) + 2, 22, Color{ 0, 0, 0, a });
-        DrawText(text, static_cast<int>(p.m_pos.x - w / 2.0f), static_cast<int>(p.m_pos.y), 22, Color{ 255, 215, 70, a });
+        const char* text = TextFormat(u8"+%d vàng", p.m_amount);
+        const int w = UiText::measure(text, 22);
+        UiText::draw(text, static_cast<int>(p.m_pos.x - w / 2.0f) + 2, static_cast<int>(p.m_pos.y) + 2, 22, Color{ 0, 0, 0, a });
+        UiText::draw(text, static_cast<int>(p.m_pos.x - w / 2.0f), static_cast<int>(p.m_pos.y), 22, Color{ 255, 215, 70, a });
     }
 
     // ----- Danh sach luot (goc phai tren) -----
@@ -2281,7 +2410,7 @@ void GameEngine::renderBattleUI()
          isHero(m_currentCharacter) && !m_isSelectingItem))
         m_ui.drawBattleControls(m_battlePhase == BattlePhase::PLAYER_CONFIRM,
                                 m_isSelectingTarget, !m_commandStack.empty());
-    m_ui.drawBattleLog("BATTLE LOG: " + m_battleLog);
+    m_ui.drawBattleLog(std::string(Strings::battleLog) + m_battleLog);
 
     // ----- Menu ky nang (popup giua man hinh, ve cuoi cung de nam tren cung) -----
     if (m_isSelectingSkill)
@@ -2289,17 +2418,21 @@ void GameEngine::renderBattleUI()
     if (m_isSelectingItem) {
         const auto items = availableItems();
         DrawRectangleRec(BattleUI::itemMenuBounds(), Color{20, 25, 40, 235});
-        DrawText("TUI DO: [1-9] Chon  [F1-F3] Dong doi  [ENTER] Dung", 355, 177, 18, WHITE);
-        if (m_selectedAlly) DrawText(TextFormat("Muc tieu: %s", m_selectedAlly->getName().c_str()), 355, 209, 18, YELLOW);
+        UiText::draw(Strings::itemPrompt, 355, 177, 18, WHITE);
+        if (m_selectedAlly) {
+            const std::string allyName = Strings::localizedName(m_selectedAlly->getName());
+            UiText::draw(TextFormat(u8"Mục tiêu: %s", allyName.c_str()), 355, 209, 18, YELLOW);
+        }
         for (std::size_t i = 0; i < items.size() && i < 9; ++i) {
             const int rowY = 246 + static_cast<int>(i) * 28;
             m_itemIcons.draw(items[i]->getId(), Rectangle{ 362.0f, static_cast<float>(rowY) - 4.0f, 26.0f, 26.0f }, WHITE);
-            DrawText(TextFormat("%d. %s  x%d", static_cast<int>(i + 1), items[i]->getName().c_str(),
+            const std::string itemName = Strings::localizedName(items[i]->getName());
+            UiText::draw(TextFormat("%d. %s  x%d", static_cast<int>(i + 1), itemName.c_str(),
                                 static_cast<int>(m_party.countItem(items[i]->getId()))),
                      396, rowY, 18,
                      static_cast<int>(i) == m_selectedItemIndex ? YELLOW : RAYWHITE);
         }
         if (m_selectedItemIndex >= 0 && static_cast<std::size_t>(m_selectedItemIndex) < items.size())
-            DrawText(items[static_cast<std::size_t>(m_selectedItemIndex)]->getDescription().c_str(), 355, 515, 16, LIGHTGRAY);
+            UiText::draw(items[static_cast<std::size_t>(m_selectedItemIndex)]->getDescription().c_str(), 355, 515, 16, LIGHTGRAY);
     }
 }

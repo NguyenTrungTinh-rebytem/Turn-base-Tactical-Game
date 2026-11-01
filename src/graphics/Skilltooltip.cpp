@@ -1,5 +1,8 @@
 // src/graphics/SkillTooltip.cpp
 #include "SkillTooltip.h"
+#include "graphics/UiCanvas.h"
+#include "graphics/UiText.h"
+#include "graphics/Strings.h"
 #include <algorithm>
 #include <vector>
 
@@ -18,11 +21,11 @@ struct TipLine {
 
 const char* elementText(Element e) {
     switch (e) {
-        case Element::KIM:  return "Kim";
-        case Element::MOC:  return "Moc";
-        case Element::THUY: return "Thuy";
-        case Element::HOA:  return "Hoa";
-        case Element::THO:  return "Tho";
+        case Element::KIM:  return Strings::elements[0];
+        case Element::MOC:  return Strings::elements[1];
+        case Element::THUY: return Strings::elements[2];
+        case Element::HOA:  return Strings::elements[3];
+        case Element::THO:  return Strings::elements[4];
     }
     return "?";
 }
@@ -40,23 +43,23 @@ Color elementColor(Element e) {
 
 const char* typeText(SkillType t) {
     switch (t) {
-        case SkillType::DAMAGE: return "Sat thuong";
-        case SkillType::HEAL:   return "Hoi mau";
-        case SkillType::BUFF:   return "Buff";
-        case SkillType::DEBUFF: return "Debuff";
+        case SkillType::DAMAGE: return u8"Sát thương";
+        case SkillType::HEAL:   return u8"Hồi máu";
+        case SkillType::BUFF:   return u8"Tăng cường";
+        case SkillType::DEBUFF: return u8"Giảm sức mạnh";
     }
     return "?";
 }
 
 const char* effectName(EffectType e) {
     switch (e) {
-        case EffectType::ATK_BOOST: return "Tang tan cong";
-        case EffectType::DEF_BOOST: return "Tang phong thu";
-        case EffectType::REGEN:     return "Hoi mau moi luot";
-        case EffectType::STUN:      return "Choang (mat luot)";
-        case EffectType::BURN:      return "Chay (mat mau moi luot)";
-        case EffectType::SLOW:      return "Lam cham";
-        case EffectType::WEAKNESS:  return "Suy yeu";
+        case EffectType::ATK_BOOST: return u8"Tăng tấn công";
+        case EffectType::DEF_BOOST: return u8"Tăng phòng thủ";
+        case EffectType::REGEN:     return u8"Hồi máu mỗi lượt";
+        case EffectType::STUN:      return u8"Choáng (mất lượt)";
+        case EffectType::BURN:      return u8"Bỏng (mất máu mỗi lượt)";
+        case EffectType::SLOW:      return u8"Làm chậm";
+        case EffectType::WEAKNESS:  return u8"Suy yếu";
         case EffectType::NONE:      return "";
     }
     return "";
@@ -88,27 +91,27 @@ std::vector<TipLine> buildLines(const SkillTipInfo& s, const Stats* caster) {
     const bool dealsDamage = !s.m_isHeal && s.m_power > 0;
 
     std::vector<TipLine> lines;
-    std::string header = s.m_typeText + " - He " + elementText(s.m_element);
-    if (dealsDamage) header += s.m_isMagic ? " (Phep)" : " (Vat ly)";
+    std::string header = s.m_typeText + u8" - Hệ " + elementText(s.m_element);
+    if (dealsDamage) header += s.m_isMagic ? u8" (Phép)" : u8" (Vật lý)";
     lines.push_back({ header, gray });
-    lines.push_back({ TextFormat("Ton MP: %d", s.m_mpCost), blue });
+    lines.push_back({ TextFormat(u8"Tốn MP: %d", s.m_mpCost), blue });
 
     if (dealsDamage) {
-        lines.push_back({ TextFormat("Sat thuong: %d%% %s", s.m_power,
-                                     s.m_isMagic ? "Phep cong (MA)" : "Tan cong (A)"), white });
+        lines.push_back({ TextFormat(u8"Sát thương: %d%% %s", s.m_power,
+                                     s.m_isMagic ? u8"Phép công (MA)" : u8"Tấn công (A)"), white });
         if (caster) {
             const int atk = s.m_isMagic ? caster->m_ma : caster->m_a;
-            lines.push_back({ TextFormat("Uoc tinh: ~%d (chua tinh khac he)", atk * s.m_power / 100), gold });
+            lines.push_back({ TextFormat(u8"Ước tính: ~%d (chưa tính khắc hệ)", atk * s.m_power / 100), gold });
         }
     } else if (s.m_isHeal) {
-        lines.push_back({ TextFormat("Hoi phuc: %d HP", s.m_power), green });
+        lines.push_back({ TextFormat(u8"Hồi phục: %d HP", s.m_power), green });
     }
 
-    if (!s.m_effectText.empty()) lines.push_back({ "Hieu ung: " + s.m_effectText, orange });
+    if (!s.m_effectText.empty()) lines.push_back({ u8"Hiệu ứng: " + s.m_effectText, orange });
 
     if (dealsDamage) {
-        lines.push_back({ "Manh vs: " + elementList(s.m_element, true), green });
-        lines.push_back({ "Yeu vs: " + elementList(s.m_element, false), red });
+        lines.push_back({ u8"Mạnh trước: " + elementList(s.m_element, true), green });
+        lines.push_back({ u8"Yếu trước: " + elementList(s.m_element, false), red });
     }
     return lines;
 }
@@ -116,7 +119,7 @@ std::vector<TipLine> buildLines(const SkillTipInfo& s, const Stats* caster) {
 
 SkillTipInfo SkillTooltip::fromSkill(const Skill& skill) {
     SkillTipInfo t;
-    t.m_name = skill.m_name;
+    t.m_name = Strings::localizedName(skill.m_name);
     t.m_element = skill.m_element;
     t.m_typeText = typeText(skill.m_type);
     t.m_power = skill.m_power;
@@ -124,7 +127,8 @@ SkillTipInfo SkillTooltip::fromSkill(const Skill& skill) {
     t.m_isHeal = (skill.m_type == SkillType::HEAL);
     t.m_isMagic = skill.m_isMagic;
     if (skill.m_effect != EffectType::NONE && skill.m_effectTurns > 0)
-        t.m_effectText = std::string(effectName(skill.m_effect)) + " (" + std::to_string(skill.m_effectTurns) + " luot)";
+        t.m_effectText = std::string(effectName(skill.m_effect)) + " (" +
+                         std::to_string(skill.m_effectTurns) + u8" lượt)";
     return t;
 }
 
@@ -136,13 +140,13 @@ void SkillTooltip::draw(const SkillTipInfo& info, Vector2 mousePos, const Stats*
     const std::vector<TipLine> lines = buildLines(info, caster);
     const Color accent = elementColor(info.m_element);
 
-    int w = std::max(MIN_W, MeasureText(info.m_name.c_str(), TITLE_SIZE) + 2 * PAD);
-    for (const TipLine& l : lines) w = std::max(w, MeasureText(l.m_text.c_str(), TEXT_SIZE) + 2 * PAD);
+    int w = std::max(MIN_W, UiText::measure(info.m_name.c_str(), TITLE_SIZE) + 2 * PAD);
+    for (const TipLine& l : lines) w = std::max(w, UiText::measure(l.m_text.c_str(), TEXT_SIZE) + 2 * PAD);
     const int titleH = TITLE_SIZE + 8;
     const int h = PAD * 2 + titleH + static_cast<int>(lines.size()) * LINE_H;
 
     // Dat canh con tro; tran man hinh thi lat sang trai / day len.
-    const int sw = GetScreenWidth(), sh = GetScreenHeight();
+    const int sw = UiCanvas::width(), sh = UiCanvas::height();
     int x = static_cast<int>(mousePos.x) + 18;
     int y = static_cast<int>(mousePos.y) + 20;
     if (x + w > sw - MARGIN) x = static_cast<int>(mousePos.x) - w - 18;
@@ -155,12 +159,12 @@ void SkillTooltip::draw(const SkillTipInfo& info, Vector2 mousePos, const Stats*
     DrawRectangleLinesEx(Rectangle{ static_cast<float>(x), static_cast<float>(y),
                                     static_cast<float>(w), static_cast<float>(h) }, 2.0f, accent);
 
-    DrawText(info.m_name.c_str(), x + PAD, y + PAD, TITLE_SIZE, accent);
+    UiText::draw(info.m_name.c_str(), x + PAD, y + PAD, TITLE_SIZE, accent);
     DrawLine(x + PAD, y + PAD + titleH - 4, x + w - PAD, y + PAD + titleH - 4, Fade(accent, 0.5f));
 
     int ty = y + PAD + titleH;
     for (const TipLine& l : lines) {
-        DrawText(l.m_text.c_str(), x + PAD, ty, TEXT_SIZE, l.m_color);
+        UiText::draw(l.m_text.c_str(), x + PAD, ty, TEXT_SIZE, l.m_color);
         ty += LINE_H;
     }
 }

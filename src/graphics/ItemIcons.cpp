@@ -1,5 +1,6 @@
 // src/graphics/ItemIcons.cpp
 #include "graphics/ItemIcons.h"
+#include "graphics/UiText.h"
 #include <algorithm>
 
 ItemIcons::~ItemIcons() { unloadAll(); }
@@ -54,6 +55,6 @@ void ItemIcons::draw(const std::string& itemId, Rectangle dest, Color tint) cons
     const size_t us = itemId.find('_');
     const char letter[2] = { us != std::string::npos && us + 1 < itemId.size() ? itemId[us + 1] : (itemId.empty() ? '?' : itemId[0]), 0 };
     const int fs = static_cast<int>(dest.height * 0.5f);
-    DrawText(letter, static_cast<int>(dest.x + (dest.width - MeasureText(letter, fs)) / 2.0f),
+    UiText::draw(letter, static_cast<int>(dest.x + (dest.width - UiText::measure(letter, fs)) / 2.0f),
              static_cast<int>(dest.y + (dest.height - fs) / 2.0f), fs, WHITE);
 }

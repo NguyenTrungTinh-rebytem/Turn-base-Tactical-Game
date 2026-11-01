@@ -1,5 +1,8 @@
 // src/graphics/ShopScreen.cpp
 #include "graphics/ShopScreen.h"
+#include "graphics/UiCanvas.h"
+#include "graphics/UiText.h"
+#include "graphics/Strings.h"
 #include <algorithm>
 
 namespace {
@@ -17,19 +20,19 @@ constexpr Color COL_GOLD     { 255, 205, 60, 255 };
 const char* categoryText(int c)
 {
     switch (c) {
-        case 0:  return "Tieu hao (dung o ngoai tran va trong tran)";
-        case 1:  return "Tang suc manh (dung trong tran, ton 1 luot)";
-        default: return "Trang bi (deo san truoc tran)";
+        case 0:  return u8"Tiêu hao (dùng ngoài và trong trận)";
+        case 1:  return u8"Tăng sức mạnh (dùng trong trận, tốn 1 lượt)";
+        default: return u8"Trang bị (đeo trước trận)";
     }
 }
 
 void drawCentered(const char* text, float cx, float y, int size, Color c)
 {
-    DrawText(text, static_cast<int>(cx - MeasureText(text, size) / 2.0f), static_cast<int>(y), size, c);
+    UiText::draw(text, static_cast<int>(cx - UiText::measure(text, size) / 2.0f), static_cast<int>(y), size, c);
 }
 void drawRight(const char* text, float right, float y, int size, Color c)
 {
-    DrawText(text, static_cast<int>(right - MeasureText(text, size)), static_cast<int>(y), size, c);
+    UiText::draw(text, static_cast<int>(right - UiText::measure(text, size)), static_cast<int>(y), size, c);
 }
 
 // Tu dong xuong dong theo do rong (px). Tra ve so dong da ve.
@@ -39,7 +42,7 @@ int drawWrapped(const std::string& text, float x, float y, float maxW, int size,
     int lines = 0;
     auto flush = [&]() {
         if (line.empty()) return;
-        DrawText(line.c_str(), static_cast<int>(x), static_cast<int>(y) + lines * lineH, size, c);
+        UiText::draw(line.c_str(), static_cast<int>(x), static_cast<int>(y) + lines * lineH, size, c);
         ++lines;
         line.clear();
     };
@@ -47,7 +50,7 @@ int drawWrapped(const std::string& text, float x, float y, float maxW, int size,
         if (i == text.size() || text[i] == ' ') {
             if (!word.empty()) {
                 const std::string trial = line.empty() ? word : line + " " + word;
-                if (!line.empty() && MeasureText(trial.c_str(), size) > maxW) { flush(); line = word; }
+                if (!line.empty() && UiText::measure(trial.c_str(), size) > maxW) { flush(); line = word; }
                 else line = trial;
                 word.clear();
             }
@@ -119,7 +122,7 @@ void ShopScreen::ensureVisible()
 // ============ Bo cuc (1280x720) ============
 Rectangle ShopScreen::panelRect() const
 {
-    const float W = static_cast<float>(GetScreenWidth());
+    const float W = static_cast<float>(UiCanvas::width());
     return { (W - 1100.0f) / 2.0f, 30.0f, 1100.0f, 660.0f };
 }
 Rectangle ShopScreen::tabRect(int i) const
@@ -166,7 +169,7 @@ Rectangle ShopScreen::closeRect() const
 // ============ Input ============
 ShopAction ShopScreen::handleInput()
 {
-    const Vector2 mouse = GetMousePosition();
+    const Vector2 mouse = UiCanvas::mousePosition();
     clampSelection();
 
     if (IsKeyPressed(KEY_ONE) && m_tab != TAB_SHOP) { m_tab = TAB_SHOP; }
@@ -230,7 +233,7 @@ ShopAction ShopScreen::handleInput()
 // ============ Ve ============
 void ShopScreen::draw() const
 {
-    const int W = GetScreenWidth(), H = GetScreenHeight();
+    const int W = UiCanvas::width(), H = UiCanvas::height();
     DrawRectangle(0, 0, W, H, Color{ 0, 0, 0, 190 });
 
     const Rectangle p = panelRect();
@@ -238,14 +241,14 @@ void ShopScreen::draw() const
     DrawRectangleRec(p, COL_PANEL);
     DrawRectangleLinesEx(p, 2.0f, COL_EDGE);
 
-    DrawText("CUA HANG & TRANG BI", static_cast<int>(p.x + 24), static_cast<int>(p.y + 16), 34, COL_TITLE);
-    const char* gold = TextFormat("VANG: %d", m_info.m_gold);
-    DrawCircle(static_cast<int>(p.x + p.width - 40 - MeasureText(gold, 30) - 18), static_cast<int>(p.y + 33), 11.0f, COL_GOLD);
-    DrawCircleLines(static_cast<int>(p.x + p.width - 40 - MeasureText(gold, 30) - 18), static_cast<int>(p.y + 33), 11.0f, Color{ 120, 80, 10, 255 });
+    UiText::draw(Strings::shopTitle, static_cast<int>(p.x + 24), static_cast<int>(p.y + 16), 34, COL_TITLE);
+    const char* gold = TextFormat(u8"VÀNG: %d", m_info.m_gold);
+    DrawCircle(static_cast<int>(p.x + p.width - 40 - UiText::measure(gold, 30) - 18), static_cast<int>(p.y + 33), 11.0f, COL_GOLD);
+    DrawCircleLines(static_cast<int>(p.x + p.width - 40 - UiText::measure(gold, 30) - 18), static_cast<int>(p.y + 33), 11.0f, Color{ 120, 80, 10, 255 });
     drawRight(gold, p.x + p.width - 28.0f, p.y + 18.0f, 30, COL_GOLD);
 
-    const char* tabNames[TAB_COUNT] = { "1. CUA HANG", "2. KHO DO / TRANG BI" };
-    const Vector2 mouse = GetMousePosition();
+    const char* tabNames[TAB_COUNT] = { u8"1. CỬA HÀNG", u8"2. TÚI ĐỒ / TRANG BỊ" };
+    const Vector2 mouse = UiCanvas::mousePosition();
     for (int t = 0; t < TAB_COUNT; ++t) {
         const Rectangle r = tabRect(t);
         const bool active = (t == m_tab), hover = CheckCollisionPointRec(mouse, r);
@@ -259,13 +262,13 @@ void ShopScreen::draw() const
 
     // thong bao
     if (m_messageTime > 0.0f && !m_message.empty())
-        DrawText(m_message.c_str(), static_cast<int>(p.x + 24), static_cast<int>(p.y + p.height - 48), 20, m_messageOk ? COL_OK : COL_ERR);
+        UiText::draw(m_message.c_str(), static_cast<int>(p.x + 24), static_cast<int>(p.y + p.height - 48), 20, m_messageOk ? COL_OK : COL_ERR);
     const char* help = (m_tab == TAB_SHOP)
-        ? "[UP/DOWN] Chon   [ENTER] Mua   [TAB] Doi tab   [ESC/B] Dong"
-        : "[UP/DOWN] Chon do   [F1-F3 / click hero] Trang bi   [Z/X/C] Thao   [ESC/B] Dong";
-    DrawText(help, static_cast<int>(p.x + 24), static_cast<int>(p.y + p.height - 24), 15, COL_DIM);
+        ? u8"[LÊN/XUỐNG] Chọn   [ENTER] Mua   [TAB] Đổi thẻ   [ESC/B] Đóng"
+        : u8"[LÊN/XUỐNG] Chọn đồ   [F1-F3 / nhấp tướng] Trang bị   [Z/X/C] Tháo   [ESC/B] Đóng";
+    UiText::draw(help, static_cast<int>(p.x + 24), static_cast<int>(p.y + p.height - 24), 15, COL_DIM);
 
-    drawButton(closeRect(), "DONG", true, CheckCollisionPointRec(mouse, closeRect()), COL_EDGE_SEL);
+    drawButton(closeRect(), u8"ĐÓNG", true, CheckCollisionPointRec(mouse, closeRect()), COL_EDGE_SEL);
 }
 
 void ShopScreen::drawList() const
@@ -273,11 +276,11 @@ void ShopScreen::drawList() const
     const Rectangle l = listRect();
     const int count = listCount();
     if (count == 0) {
-        drawCentered(m_tab == TAB_SHOP ? "Cua hang trong" : "Tui do trong - hay mua vat pham o tab Cua hang",
+        drawCentered(m_tab == TAB_SHOP ? u8"Cửa hàng đang trống" : u8"Túi đồ trống - hãy mua vật phẩm ở cửa hàng",
                      l.x + l.width / 2.0f, l.y + 120.0f, 20, COL_DIM);
         return;
     }
-    const Vector2 mouse = GetMousePosition();
+    const Vector2 mouse = UiCanvas::mousePosition();
     for (int r = 0; r < VISIBLE_ROWS; ++r) {
         const int idx = m_scroll[m_tab] + r;
         if (idx >= count) break;
@@ -292,19 +295,19 @@ void ShopScreen::drawList() const
             const bool soldOut = s.m_limit > 0 && s.m_owned >= s.m_limit;
             const bool afford = m_info.m_gold >= s.m_price;
             if (m_icons) m_icons->draw(s.m_id, Rectangle{ row.x + 8, row.y + 4, 52, 52 }, soldOut ? Color{ 120, 120, 120, 255 } : WHITE);
-            DrawText(s.m_name.c_str(), static_cast<int>(row.x + 74), static_cast<int>(row.y + 8), 22, soldOut ? COL_DIM : COL_TEXT);
-            DrawText(categoryText(s.m_category), static_cast<int>(row.x + 74), static_cast<int>(row.y + 36), 14, COL_LABEL);
-            if (soldOut) drawRight("DA DU", row.x + row.width - 14.0f, row.y + 10.0f, 22, COL_DIM);
+            UiText::draw(s.m_name.c_str(), static_cast<int>(row.x + 74), static_cast<int>(row.y + 8), 22, soldOut ? COL_DIM : COL_TEXT);
+            UiText::draw(categoryText(s.m_category), static_cast<int>(row.x + 74), static_cast<int>(row.y + 36), 14, COL_LABEL);
+            if (soldOut) drawRight(u8"ĐÃ ĐỦ", row.x + row.width - 14.0f, row.y + 10.0f, 22, COL_DIM);
             else {
-                drawRight(TextFormat("%d G", s.m_price), row.x + row.width - 14.0f, row.y + 10.0f, 24, afford ? COL_GOLD : COL_ERR);
+                drawRight(TextFormat(u8"%d vàng", s.m_price), row.x + row.width - 14.0f, row.y + 10.0f, 24, afford ? COL_GOLD : COL_ERR);
             }
-            drawRight(s.m_limit > 0 ? TextFormat("Co %d/%d", s.m_owned, s.m_limit) : TextFormat("Co %d", s.m_owned),
+            drawRight(s.m_limit > 0 ? TextFormat(u8"Có %d/%d", s.m_owned, s.m_limit) : TextFormat(u8"Có %d", s.m_owned),
                       row.x + row.width - 14.0f, row.y + 38.0f, 15, COL_LABEL);
         } else {
             const ShopBagInfo& b = m_info.m_bag[static_cast<size_t>(idx)];
             if (m_icons) m_icons->draw(b.m_id, Rectangle{ row.x + 8, row.y + 4, 52, 52 }, WHITE);
-            DrawText(b.m_name.c_str(), static_cast<int>(row.x + 74), static_cast<int>(row.y + 8), 22, COL_TEXT);
-            DrawText(categoryText(b.m_category), static_cast<int>(row.x + 74), static_cast<int>(row.y + 36), 14, COL_LABEL);
+            UiText::draw(b.m_name.c_str(), static_cast<int>(row.x + 74), static_cast<int>(row.y + 8), 22, COL_TEXT);
+            UiText::draw(categoryText(b.m_category), static_cast<int>(row.x + 74), static_cast<int>(row.y + 36), 14, COL_LABEL);
             drawRight(TextFormat("x%d", b.m_count), row.x + row.width - 14.0f, row.y + 16.0f, 26, COL_OK);
         }
     }
@@ -324,15 +327,15 @@ void ShopScreen::drawShopDetail() const
     drawCentered(s.m_name.c_str(), d.x + d.width / 2.0f, d.y + 124.0f, 24, COL_TITLE);
     drawCentered(categoryText(s.m_category), d.x + d.width / 2.0f, d.y + 154.0f, 13, COL_LABEL);
     drawWrapped(s.m_description, d.x + 20.0f, d.y + 184.0f, d.width - 40.0f, 18, COL_TEXT, 24);
-    drawRight(TextFormat("Gia: %d G", s.m_price), d.x + d.width - 20.0f, d.y + d.height - 106.0f, 22,
+    drawRight(TextFormat(u8"Giá: %d vàng", s.m_price), d.x + d.width - 20.0f, d.y + d.height - 106.0f, 22,
               m_info.m_gold >= s.m_price ? COL_GOLD : COL_ERR);
-    DrawText(s.m_limit > 0 ? TextFormat("So huu: %d/%d", s.m_owned, s.m_limit) : TextFormat("So huu: %d", s.m_owned),
+    UiText::draw(s.m_limit > 0 ? TextFormat(u8"Sở hữu: %d/%d", s.m_owned, s.m_limit) : TextFormat(u8"Sở hữu: %d", s.m_owned),
              static_cast<int>(d.x + 20), static_cast<int>(d.y + d.height - 104), 18, COL_LABEL);
 
     const bool soldOut = s.m_limit > 0 && s.m_owned >= s.m_limit;
     const bool afford = m_info.m_gold >= s.m_price;
-    const char* label = soldOut ? "DA DU SO LUONG" : (afford ? "MUA  (ENTER)" : "KHONG DU VANG");
-    drawButton(buyButtonRect(), label, !soldOut && afford, CheckCollisionPointRec(GetMousePosition(), buyButtonRect()), COL_EDGE_SEL);
+    const char* label = soldOut ? u8"ĐÃ ĐỦ SỐ LƯỢNG" : (afford ? u8"MUA  (ENTER)" : u8"KHÔNG ĐỦ VÀNG");
+    drawButton(buyButtonRect(), label, !soldOut && afford, CheckCollisionPointRec(UiCanvas::mousePosition(), buyButtonRect()), COL_EDGE_SEL);
 }
 
 void ShopScreen::drawBagDetail() const
@@ -345,30 +348,31 @@ void ShopScreen::drawBagDetail() const
     const ShopBagInfo* sel = hasBag ? &m_info.m_bag[static_cast<size_t>(m_bagSel)] : nullptr;
     if (sel) {
         if (m_icons) m_icons->draw(sel->m_id, Rectangle{ d.x + 14.0f, d.y + 12.0f, 64, 64 }, WHITE);
-        DrawText(sel->m_name.c_str(), static_cast<int>(d.x + 90), static_cast<int>(d.y + 14), 22, COL_TITLE);
+        UiText::draw(sel->m_name.c_str(), static_cast<int>(d.x + 90), static_cast<int>(d.y + 14), 22, COL_TITLE);
         drawWrapped(sel->m_description, d.x + 90.0f, d.y + 44.0f, d.width - 104.0f, 15, COL_TEXT, 19);
     } else {
-        DrawText("Chua chon vat pham", static_cast<int>(d.x + 20), static_cast<int>(d.y + 30), 20, COL_DIM);
+        UiText::draw(Strings::noSelectedItem, static_cast<int>(d.x + 20), static_cast<int>(d.y + 30), 20, COL_DIM);
     }
 
-    DrawText("DOI HINH", static_cast<int>(d.x + 14), static_cast<int>(d.y + 166), 16, COL_TITLE);
+    UiText::draw(Strings::formation, static_cast<int>(d.x + 14), static_cast<int>(d.y + 166), 16, COL_TITLE);
     const bool canEquip = sel && sel->m_category == 2;
-    const Vector2 mouse = GetMousePosition();
+    const Vector2 mouse = UiCanvas::mousePosition();
     for (size_t i = 0; i < m_info.m_members.size() && i < 3; ++i) {
         const ShopMemberInfo& m = m_info.m_members[i];
         const Rectangle r = memberRect(static_cast<int>(i));
         const bool hover = CheckCollisionPointRec(mouse, r);
         DrawRectangleRec(r, hover && canEquip ? Color{ 52, 44, 92, 250 } : Color{ 28, 24, 58, 235 });
         DrawRectangleLinesEx(r, hover && canEquip ? 3.0f : 2.0f, hover && canEquip ? COL_EDGE_SEL : COL_EDGE);
-        DrawText(TextFormat("%d. %s", static_cast<int>(i) + 1, m.m_name.c_str()), static_cast<int>(r.x + 12), static_cast<int>(r.y + 8), 20, COL_TEXT);
+        const std::string memberName = Strings::localizedName(m.m_name);
+        UiText::draw(TextFormat("%d. %s", static_cast<int>(i) + 1, memberName.c_str()), static_cast<int>(r.x + 12), static_cast<int>(r.y + 8), 20, COL_TEXT);
         if (m.m_gearId.empty()) {
-            DrawText("(chua deo trang bi)", static_cast<int>(r.x + 12), static_cast<int>(r.y + 40), 16, COL_DIM);
+            UiText::draw(u8"(chưa đeo trang bị)", static_cast<int>(r.x + 12), static_cast<int>(r.y + 40), 16, COL_DIM);
         } else {
             if (m_icons) m_icons->draw(m.m_gearId, Rectangle{ r.x + 12, r.y + 34, 36, 36 }, WHITE);
-            DrawText(m.m_gearName.c_str(), static_cast<int>(r.x + 56), static_cast<int>(r.y + 44), 16, COL_OK);
-            drawButton(unequipRect(static_cast<int>(i)), "THAO", true, CheckCollisionPointRec(mouse, unequipRect(static_cast<int>(i))), COL_EDGE);
+            UiText::draw(m.m_gearName.c_str(), static_cast<int>(r.x + 56), static_cast<int>(r.y + 44), 16, COL_OK);
+            drawButton(unequipRect(static_cast<int>(i)), "THÁO", true, CheckCollisionPointRec(mouse, unequipRect(static_cast<int>(i))), COL_EDGE);
         }
     }
-    DrawText(canEquip ? "Chon hero de deo trang bi dang chon" : "Chon 1 trang bi o danh sach de deo cho hero",
+    UiText::draw(canEquip ? u8"Chọn tướng để đeo trang bị đang chọn" : u8"Chọn trang bị trong danh sách để đeo cho tướng",
              static_cast<int>(d.x + 14), static_cast<int>(d.y + d.height - 26), 14, canEquip ? COL_OK : COL_DIM);
 }

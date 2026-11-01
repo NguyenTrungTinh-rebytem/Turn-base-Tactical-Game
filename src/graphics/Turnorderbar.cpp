@@ -1,5 +1,8 @@
 // src/graphics/TurnOrderBar.cpp
 #include "TurnOrderBar.h"
+#include "graphics/UiCanvas.h"
+#include "graphics/UiText.h"
+#include "graphics/Strings.h"
 #include "entities/Character.h"
 #include <algorithm>
 #include <cmath>
@@ -48,7 +51,7 @@ void TurnOrderBar::draw(const std::vector<Character*>& upcoming, const Character
     const float dt = std::min(GetFrameTime(), 0.05f);   // tranh nhay vot khi lag
     m_time += dt;
 
-    const float x0 = GetScreenWidth() - BOX_W - MARGIN;
+    const float x0 = UiCanvas::width() - BOX_W - MARGIN;
     const float y0 = MARGIN + 22.0f;
     const float step = BOX_H + GAP;
 
@@ -99,7 +102,7 @@ void TurnOrderBar::draw(const std::vector<Character*>& upcoming, const Character
                  m_rows.end());
 
     // ---- Ve ----
-    DrawText("TURN ORDER", static_cast<int>(x0), static_cast<int>(MARGIN), 16, GOLD);
+    UiText::draw(Strings::turnOrder, static_cast<int>(x0), static_cast<int>(MARGIN), 16, GOLD);
 
     const float pulse = 0.5f + 0.5f * std::sin(m_time * 6.0f);
     for (const Row& r : m_rows) {
@@ -114,10 +117,11 @@ void TurnOrderBar::draw(const std::vector<Character*>& upcoming, const Character
                                  1.0f, withAlpha(GOLD, (0.15f + 0.30f * pulse) * act * r.m_alpha));   // quang nhap nhay
         DrawRectangleLinesEx(box, 1.0f + 1.5f * act, withAlpha(lerpColor(GRAY, GOLD, act), r.m_alpha));
 
-        DrawText(TextFormat("%d. %s", r.m_rank, r.m_name.c_str()),
+        const std::string name = Strings::localizedName(r.m_name);
+        UiText::draw(TextFormat("%d. %s", r.m_rank, name.c_str()),
                  static_cast<int>(box.x) + 8, static_cast<int>(box.y) + 8, 14, withAlpha(RAYWHITE, r.m_alpha));
         const char* spd = TextFormat("SPD %d", r.m_spd);
-        DrawText(spd, static_cast<int>(box.x + BOX_W - MeasureText(spd, 12) - 8), static_cast<int>(box.y) + 9, 12,
+        UiText::draw(spd, static_cast<int>(box.x + BOX_W - UiText::measure(spd, 12) - 8), static_cast<int>(box.y) + 9, 12,
                  withAlpha(SKYBLUE, r.m_alpha));
     }
 }

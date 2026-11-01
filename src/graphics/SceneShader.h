@@ -5,6 +5,9 @@
 // Chi ap dung cho nen + nhan vat; UI/HP bar/chu ve SAU nen van sac net.
 // Khong tao duoc shader (may cu / loi GLSL) -> isActive() = false, game ve binh thuong.
 #include "raylib.h"
+#include "RaylibScope.h"
+#include "UiCanvas.h"
+#include <memory>
 #include <vector>
 
 enum class SceneMood { NORMAL = 0, BOSS };
@@ -40,6 +43,10 @@ private:
 
     struct Ember { float x, y, vx, vy, size, phase, life; };
     std::vector<Ember> m_embers;
+    std::unique_ptr<UiCanvas::SuspensionGuard> m_canvasSuspension;
+    std::unique_ptr<RaylibScope::TextureMode> m_targetScope;
+    std::unique_ptr<RaylibScope::CameraMode> m_cameraScope;
+    bool m_captureValid = false;
     void updateEmbers(float dt, SceneMood mood);
     void drawEmbers(SceneMood mood, float t);
 };

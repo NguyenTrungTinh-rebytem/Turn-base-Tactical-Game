@@ -1,5 +1,8 @@
 // Member 4 - Huynh Quang Khai | src/graphics/WaveSelectScreen.cpp
 #include "WaveSelectScreen.h"
+#include "graphics/UiCanvas.h"
+#include "graphics/UiText.h"
+#include "graphics/Strings.h"
 #include <algorithm>
 #include <cmath>
 
@@ -35,17 +38,17 @@ Color elementColor(Element e) {
 }
 const char* elementName(Element e) {
     switch (e) {
-        case Element::KIM:  return "Kim";
-        case Element::MOC:  return "Moc";
-        case Element::THUY: return "Thuy";
-        case Element::HOA:  return "Hoa";
-        case Element::THO:  return "Tho";
+        case Element::KIM:  return Strings::elements[0];
+        case Element::MOC:  return Strings::elements[1];
+        case Element::THUY: return Strings::elements[2];
+        case Element::HOA:  return Strings::elements[3];
+        case Element::THO:  return Strings::elements[4];
     }
     return "?";
 }
 
 void drawCenteredText(const char* text, float cx, float y, int size, Color c) {
-    DrawText(text, static_cast<int>(cx - MeasureText(text, size) / 2.0f), static_cast<int>(y), size, c);
+    UiText::draw(text, static_cast<int>(cx - UiText::measure(text, size) / 2.0f), static_cast<int>(y), size, c);
 }
 
 std::vector<std::string> splitLines(const std::string& s) {
@@ -108,7 +111,7 @@ bool WaveSelectScreen::selectedLocked() const {
 
 // ============ Bo cuc ============
 Rectangle WaveSelectScreen::cardRect(size_t index) const {
-    const float W = static_cast<float>(GetScreenWidth());
+    const float W = static_cast<float>(UiCanvas::width());
     const float n = static_cast<float>(std::max<size_t>(1, m_waves.size()));
     float w = CARD_W;
     if (n * w + (n - 1.0f) * CARD_GAP > W - 2.0f * SIDE_MARGIN)      // nhieu wave -> the hep lai
@@ -119,7 +122,7 @@ Rectangle WaveSelectScreen::cardRect(size_t index) const {
 
 Rectangle WaveSelectScreen::buttonRect(int index) const {
     const float total = BTN_COUNT * BTN_W + (BTN_COUNT - 1) * BTN_GAP;
-    const float startX = (static_cast<float>(GetScreenWidth()) - total) / 2.0f;
+    const float startX = (static_cast<float>(UiCanvas::width()) - total) / 2.0f;
     return { startX + index * (BTN_W + BTN_GAP), BTN_Y, BTN_W, BTN_H };
 }
 
@@ -133,7 +136,7 @@ void WaveSelectScreen::select(int delta) {
 WaveSelectAction WaveSelectScreen::tryStart() {
     if (m_waves.empty()) return WaveSelectAction::NONE;
     if (selectedLocked()) {
-        m_message = "Wave nay chua mo khoa! Hay hoan thanh wave truoc do.";
+        m_message = u8"Màn này chưa mở khóa! Hãy hoàn thành màn trước đó.";
         m_messageTimer = 2.0f;
         return WaveSelectAction::NONE;
     }
@@ -155,8 +158,8 @@ WaveSelectAction WaveSelectScreen::handleInput() {
     }
 
     // ---- Chuot ----
-    const Vector2 mouse = GetMousePosition();
-    const Vector2 moved = GetMouseDelta();
+    const Vector2 mouse = UiCanvas::mousePosition();
+    const Vector2 moved = UiCanvas::mouseDelta();
     const bool mouseMoved = (moved.x != 0.0f || moved.y != 0.0f);
 
     m_hoverButton = -1;
@@ -194,13 +197,13 @@ void WaveSelectScreen::update(float deltaTime) {
 // ============ Ve ============
 void WaveSelectScreen::draw() const {
     drawBackground();
-    const float cx = GetScreenWidth() / 2.0f;
-    drawCenteredText("CHON WAVE", cx, 30.0f, 44, COL_TITLE);
+    const float cx = UiCanvas::width() / 2.0f;
+    drawCenteredText(Strings::selectWave, cx, 30.0f, 44, COL_TITLE);
     if (!m_heroSummary.empty())
-        drawCenteredText(TextFormat("Anh hung: %s", m_heroSummary.c_str()), cx, 86.0f, 18, COL_LABEL);
+        drawCenteredText(TextFormat(u8"Anh hùng: %s", m_heroSummary.c_str()), cx, 86.0f, 18, COL_LABEL);
 
     if (m_waves.empty()) {
-        drawCenteredText("Khong co du lieu wave (kiem tra thu muc data/)", cx, 320.0f, 22, COL_ERR);
+        drawCenteredText(Strings::waveDataMissing, cx, 320.0f, 22, COL_ERR);
     } else {
         for (size_t i = 0; i < m_waves.size(); ++i)
             if (i != m_selected) drawCard(i);
@@ -209,14 +212,14 @@ void WaveSelectScreen::draw() const {
 
     drawButtons();
     if (m_messageTimer > 0.0f) drawCenteredText(m_message.c_str(), cx, 612.0f, 20, COL_ERR);
-    drawCenteredText("[LEFT/RIGHT] Chon wave   [ENTER] Bat dau   [ESC] Quay lai", cx, 702.0f, 16, Color{ 200, 195, 225, 220 });
+    drawCenteredText(Strings::waveChooseHelp, cx, 702.0f, 16, Color{ 200, 195, 225, 220 });
 }
 
 void WaveSelectScreen::drawBackground() const {
-    const int W = GetScreenWidth(), H = GetScreenHeight();
+    const int W = UiCanvas::width(), H = UiCanvas::height();
     if (m_hasBackground) {
-        DrawTexturePro(m_background, Rectangle{ 0, 0, static_cast<float>(m_background.width), static_cast<float>(m_background.height) },
-                       Rectangle{ 0, 0, static_cast<float>(W), static_cast<float>(H) }, Vector2{ 0, 0 }, 0.0f, WHITE);
+        UiCanvas::drawCover(m_background, Rectangle{ 0.0f, 0.0f,
+            static_cast<float>(W), static_cast<float>(H) });
     } else {
         DrawRectangleGradientV(0, 0, W, H, Color{ 10, 8, 36, 255 }, Color{ 60, 30, 70, 255 });
     }
@@ -239,7 +242,7 @@ void WaveSelectScreen::drawCard(size_t index) const {
         const Rectangle tag = { r.x + r.width / 2.0f - 34.0f, r.y + HEADER_H - 11.0f, 68.0f, 22.0f };
         DrawRectangleRec(tag, Color{ 200, 50, 60, 255 });
         DrawRectangleLinesEx(tag, 1.0f, Color{ 255, 150, 150, 255 });
-        drawCenteredText("BOSS", tag.x + tag.width / 2.0f, tag.y + 3.0f, 16, WHITE);
+        drawCenteredText(u8"TRÙM", tag.x + tag.width / 2.0f, tag.y + 3.0f, 16, WHITE);
     }
 
     // ---- Mo ta ----
@@ -251,23 +254,24 @@ void WaveSelectScreen::drawCard(size_t index) const {
 
     // ---- Danh sach quai ----
     y = r.y + 150.0f;
-    DrawText("QUAI CO THE GAP", static_cast<int>(r.x + 20), static_cast<int>(y), 15, COL_TITLE);
+    UiText::draw(Strings::availableEnemies, static_cast<int>(r.x + 20), static_cast<int>(y), 15, COL_TITLE);
     y += 28.0f;
     for (size_t i = 0; i < w.m_enemies.size() && i < MAX_ENEMY_LINES; ++i) {
         const WaveEnemy& e = w.m_enemies[i];
         DrawCircle(static_cast<int>(r.x + 30), static_cast<int>(y + 10), 6.0f, elementColor(e.m_element));
-        DrawText(e.m_name.c_str(), static_cast<int>(r.x + 46), static_cast<int>(y), 18, COL_TEXT);
+        const std::string name = Strings::localizedName(e.m_name);
+        UiText::draw(name.c_str(), static_cast<int>(r.x + 46), static_cast<int>(y), 18, COL_TEXT);
         const char* el = elementName(e.m_element);
-        DrawText(el, static_cast<int>(r.x + r.width - 20 - MeasureText(el, 14)), static_cast<int>(y + 3), 14, elementColor(e.m_element));
+        UiText::draw(el, static_cast<int>(r.x + r.width - 20 - UiText::measure(el, 14)), static_cast<int>(y + 3), 14, elementColor(e.m_element));
         y += 28.0f;
     }
     if (w.m_enemies.size() > MAX_ENEMY_LINES)
-        DrawText(TextFormat("+%d quai khac", static_cast<int>(w.m_enemies.size() - MAX_ENEMY_LINES)),
+        UiText::draw(TextFormat(u8"+%d quái khác", static_cast<int>(w.m_enemies.size() - MAX_ENEMY_LINES)),
                  static_cast<int>(r.x + 46), static_cast<int>(y), 14, COL_DIM);
 
     // ---- Trang thai ----
     if (w.m_cleared && !w.m_locked)
-        drawCenteredText("DA HOAN THANH", r.x + r.width / 2.0f, r.y + r.height - 38.0f, 18, COL_OK);
+        drawCenteredText(Strings::waveCleared, r.x + r.width / 2.0f, r.y + r.height - 38.0f, 18, COL_OK);
 
     // ---- Vien (vang khi duoc chon) ----
     DrawRectangleLinesEx(r, selected ? 4.0f : 2.0f, selected ? COL_EDGE_SEL : COL_EDGE);
@@ -280,7 +284,7 @@ void WaveSelectScreen::drawCard(size_t index) const {
         DrawRectangleRec(Rectangle{ cx - 24, cy - 8, 48, 36 }, Color{ 200, 170, 80, 255 });              // than khoa
         DrawRectangle(static_cast<int>(cx - 4), static_cast<int>(cy + 4), 8, 12, Color{ 60, 44, 20, 255 });
         const std::string hint = w.m_lockHint.empty()
-            ? std::string(TextFormat("Hoan thanh Wave %d\nde mo khoa", std::max(1, w.m_number - 1)))
+            ? std::string(TextFormat(u8"Hoàn thành màn %d\nđể mở khóa", std::max(1, w.m_number - 1)))
             : w.m_lockHint;
         float hy = cy + 44.0f;
         for (const std::string& line : splitLines(hint)) {
@@ -292,7 +296,7 @@ void WaveSelectScreen::drawCard(size_t index) const {
 }
 
 void WaveSelectScreen::drawButtons() const {
-    const char* labels[BTN_COUNT] = { "QUAY LAI", "BAT DAU" };
+    const char* labels[BTN_COUNT] = { Strings::back, Strings::start };
     for (int i = 0; i < BTN_COUNT; ++i) {
         const Rectangle r = buttonRect(i);
         const bool hover = (m_hoverButton == i);

@@ -1,5 +1,8 @@
 // Member 4 - Huynh Quang Khai | src/graphics/StartMenu.cpp
 #include "StartMenu.h"
+#include "graphics/UiCanvas.h"
+#include "graphics/UiText.h"
+#include "graphics/Strings.h"
 #include <algorithm>
 #include <cmath>
 
@@ -37,14 +40,14 @@ float hash01(int n) {
 }
 
 void drawCenteredText(const char* text, float centerX, float y, int size, Color color) {
-    const int w = MeasureText(text, size);
-    DrawText(text, static_cast<int>(centerX - w / 2.0f), static_cast<int>(y), size, color);
+    const int w = UiText::measure(text, size);
+    UiText::draw(text, static_cast<int>(centerX - w / 2.0f), static_cast<int>(y), size, color);
 }
 } // namespace
 
 StartMenu::StartMenu() {
-    m_buttons.push_back({ "BAT DAU", MenuAction::START_GAME, 0.0f });
-    m_buttons.push_back({ "THOAT",   MenuAction::EXIT,       0.0f });
+    m_buttons.push_back({ Strings::menuStart, MenuAction::START_GAME, 0.0f });
+    m_buttons.push_back({ Strings::menuExit,   MenuAction::EXIT,       0.0f });
 }
 
 StartMenu::~StartMenu() { unloadAll(); }
@@ -66,14 +69,9 @@ void StartMenu::unloadAll() {
     m_background = Texture2D{};
 }
 
-void StartMenu::setStatusText(const std::string& text, bool isOk) {
-    m_statusText = text;
-    m_statusOk = isOk;
-}
-
 Rectangle StartMenu::buttonRect(size_t index) const {
-    const float W = static_cast<float>(GetScreenWidth());
-    const float H = static_cast<float>(GetScreenHeight());
+    const float W = static_cast<float>(UiCanvas::width());
+    const float H = static_cast<float>(UiCanvas::height());
     return { W * m_menuCenterX - BUTTON_W / 2.0f,
              H * BUTTONS_Y_RATIO + static_cast<float>(index) * (BUTTON_H + BUTTON_GAP),
              BUTTON_W, BUTTON_H };
@@ -98,8 +96,8 @@ MenuAction StartMenu::handleInput() {
         return m_buttons[static_cast<size_t>(m_selected)].m_action;
 
     // ---- Chuot: di chuyen thi chon nut dang tro, bam trai thi kich hoat ----
-    const Vector2 mouse = GetMousePosition();
-    const Vector2 moved = GetMouseDelta();
+    const Vector2 mouse = UiCanvas::mousePosition();
+    const Vector2 moved = UiCanvas::mouseDelta();
     for (int i = 0; i < count; ++i) {
         if (!CheckCollisionPointRec(mouse, buttonRect(static_cast<size_t>(i)))) continue;
         if (moved.x != 0.0f || moved.y != 0.0f) m_selected = i;
@@ -121,16 +119,15 @@ void StartMenu::draw() const {
     // Fade-in tu mau den khi vao menu
     const float fade = 1.0f - clamp01(m_time / FADE_IN_SECONDS);
     if (fade > 0.0f)
-        DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(),
+        DrawRectangle(0, 0, UiCanvas::width(), UiCanvas::height(),
                       Color{ 0, 0, 0, static_cast<unsigned char>(255 * fade) });
 }
 
 void StartMenu::drawBackground() const {
-    const int W = GetScreenWidth(), H = GetScreenHeight();
+    const int W = UiCanvas::width(), H = UiCanvas::height();
     if (m_hasBackground) {
-        Rectangle src = { 0, 0, static_cast<float>(m_background.width), static_cast<float>(m_background.height) };
-        Rectangle dst = { 0, 0, static_cast<float>(W), static_cast<float>(H) };
-        DrawTexturePro(m_background, src, dst, Vector2{ 0, 0 }, 0.0f, WHITE);
+        UiCanvas::drawCover(m_background, Rectangle{
+            0.0f, 0.0f, static_cast<float>(W), static_cast<float>(H) });
     } else {
         drawProceduralBackground();
     }
@@ -151,7 +148,7 @@ void StartMenu::drawBackground() const {
 
 // Nen thu tuc khi chua co anh: bau troi dem + trang + sao nhap nhay + nui
 void StartMenu::drawProceduralBackground() const {
-    const int W = GetScreenWidth(), H = GetScreenHeight();
+    const int W = UiCanvas::width(), H = UiCanvas::height();
     const int horizon = static_cast<int>(H * 0.68f);
 
     DrawRectangleGradientV(0, 0, W, horizon, Color{ 10, 8, 36, 255 }, Color{ 214, 104, 96, 255 });
@@ -170,17 +167,17 @@ void StartMenu::drawProceduralBackground() const {
 }
 
 void StartMenu::drawTitle() const {
-    const float W = static_cast<float>(GetScreenWidth());
-    const float H = static_cast<float>(GetScreenHeight());
+    const float W = static_cast<float>(UiCanvas::width());
+    const float H = static_cast<float>(UiCanvas::height());
     const float cx = W * m_menuCenterX;
     const float bob = std::sin(m_time * 1.8f) * 4.0f;
     const float y = H * TITLE_Y_RATIO + bob;
 
     // Bong + chu vang
-    drawCenteredText("THE FIRST STEP", cx + 4.0f, y + 4.0f, 76, COL_TITLE_SHADOW);
-    drawCenteredText("THE FIRST STEP", cx, y, 76, COL_TITLE);
+    drawCenteredText(Strings::gameTitle, cx + 4.0f, y + 4.0f, 76, COL_TITLE_SHADOW);
+    drawCenteredText(Strings::gameTitle, cx, y, 76, COL_TITLE);
 
-    drawCenteredText("2.5D PIXEL TURN-BASED RPG", cx, y + 92.0f, 24, COL_SUBTITLE);
+    drawCenteredText(u8"RPG chiến thuật theo lượt 2.5D", cx, y + 92.0f, 24, COL_SUBTITLE);
 
     // Duong ke trang tri
     const float lineW = 300.0f, lineY = y + 128.0f;
@@ -216,12 +213,9 @@ void StartMenu::drawButtons() const {
 }
 
 void StartMenu::drawFooter() const {
-    const float W = static_cast<float>(GetScreenWidth());
-    const float H = static_cast<float>(GetScreenHeight());
+    const float W = static_cast<float>(UiCanvas::width());
+    const float H = static_cast<float>(UiCanvas::height());
 
-    drawCenteredText("[UP/DOWN] Chon   [ENTER] Xac nhan   [ESC] Thoat", W / 2.0f, H - 34.0f, 18, Color{ 200, 195, 225, 220 });
-    if (!m_statusText.empty())
-        DrawText(m_statusText.c_str(), 20, static_cast<int>(H) - 30, 16, m_statusOk ? COL_OK : COL_ERR);
-    const char* credit = "DT10 - Turn-based RPG Battle Engine";
-    DrawText(credit, static_cast<int>(W) - MeasureText(credit, 14) - 20, static_cast<int>(H) - 28, 14, Color{ 160, 155, 190, 200 });
+    drawCenteredText(u8"[LÊN/XUỐNG] Chọn   [ENTER] Xác nhận   [ESC] Thoát",
+                     W / 2.0f, H - 34.0f, 18, Color{ 200, 195, 225, 220 });
 }

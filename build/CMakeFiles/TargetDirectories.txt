@@ -1,6 +1,7 @@
-D:/Turn-base-Tactical-Game/build/CMakeFiles/game.dir
-D:/Turn-base-Tactical-Game/build/CMakeFiles/test_entities.dir
-D:/Turn-base-Tactical-Game/build/CMakeFiles/test_core_integration.dir
-D:/Turn-base-Tactical-Game/build/CMakeFiles/test.dir
-D:/Turn-base-Tactical-Game/build/CMakeFiles/edit_cache.dir
-D:/Turn-base-Tactical-Game/build/CMakeFiles/rebuild_cache.dir
+D:/KIET/devC/DSA/Turn-base-Tactical-Game/build/CMakeFiles/game.dir
+D:/KIET/devC/DSA/Turn-base-Tactical-Game/build/CMakeFiles/test_entities.dir
+D:/KIET/devC/DSA/Turn-base-Tactical-Game/build/CMakeFiles/test_core_integration.dir
+D:/KIET/devC/DSA/Turn-base-Tactical-Game/build/CMakeFiles/test_boss_mouse.dir
+D:/KIET/devC/DSA/Turn-base-Tactical-Game/build/CMakeFiles/test.dir
+D:/KIET/devC/DSA/Turn-base-Tactical-Game/build/CMakeFiles/edit_cache.dir
+D:/KIET/devC/DSA/Turn-base-Tactical-Game/build/CMakeFiles/rebuild_cache.dir

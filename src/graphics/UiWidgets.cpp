@@ -1,0 +1,261 @@
+#include "UiWidgets.h"
+#include "UiBlur.h"
+#include "UiCanvas.h"
+#include "UiIcons.h"
+#include "UiInput.h"
+#include "UiShapes.h"
+#include "UiText.h"
+#include "UiTheme.h"
+#include "RaylibScope.h"
+#include <algorithm>
+#include <cmath>
+#include <optional>
+#include <utility>
+
+namespace {
+constexpr Color outline{ 146, 164, 190, 255 };
+constexpr Color label{ 225, 233, 245, 255 };
+constexpr Color muted{ 194, 205, 222, 255 };
+constexpr Color textOnAccent{ 17, 24, 39, 255 };
+constexpr Color accentHover{ 255, 222, 145, 255 };
+constexpr float borderWidth = 1.0f;
+bool tooltipClaimed = false;
+std::string toastMessage;
+float toastRemaining = 0.0f;
+std::optional<RaylibScope::ScissorMode> scrollAreaScissor;
+
+bool hovered(Rectangle bounds) {
+    return CheckCollisionPointRec(UiInput::mousePosition(), bounds);
+}
+
+void drawLabel(Rectangle bounds, const std::string& text, int size, Color color,
+               float centerXOffset = 0.0f) {
+    const int width = UiText::measure(text, size);
+    UiText::draw(text, static_cast<int>(bounds.x + (bounds.width - width) * 0.5f + centerXOffset),
+                 static_cast<int>(bounds.y + (bounds.height - size) * 0.5f), size, color);
+}
+
+Rectangle inset(Rectangle bounds, float amount) {
+    return { bounds.x + amount, bounds.y + amount,
+             std::max(0.0f, bounds.width - 2.0f * amount),
+             std::max(0.0f, bounds.height - 2.0f * amount) };
+}
+
+float linearChannel(unsigned char channel) {
+    const float value = static_cast<float>(channel) / 255.0f;
+    return value <= 0.04045f ? value / 12.92f : std::pow((value + 0.055f) / 1.055f, 2.4f);
+}
+
+unsigned char srgbChannel(float value) {
+    value = std::clamp(value, 0.0f, 1.0f);
+    const float encoded = value <= 0.0031308f ? value * 12.92f
+        : 1.055f * std::pow(value, 1.0f / 2.4f) - 0.055f;
+    return static_cast<unsigned char>(std::lround(encoded * 255.0f));
+}
+
+std::pair<Color, Color> accessiblePillColors(Color fill) {
+    float channels[] = { linearChannel(fill.r), linearChannel(fill.g), linearChannel(fill.b) };
+    float luminance = 0.2126f * channels[0] + 0.7152f * channels[1] + 0.0722f * channels[2];
+    Color foreground = UiTheme::ink;
+    if (luminance < 0.08f || luminance >= 0.32f) {
+        foreground = luminance < 0.08f ? WHITE : UiTheme::ink;
+    } else if (luminance - 0.08f <= 0.32f - luminance) {
+        const float factor = 0.08f / luminance;
+        for (float& channel : channels) channel *= factor;
+        foreground = WHITE;
+    } else {
+        const float factor = (0.32f - luminance) / (1.0f - luminance);
+        for (float& channel : channels) channel += (1.0f - channel) * factor;
+    }
+    fill = Color{ srgbChannel(channels[0]), srgbChannel(channels[1]),
+                  srgbChannel(channels[2]), 255 };
+    return { fill, foreground };
+}
+}
+
+void UiWidgets::beginFrame() {
+    scrollAreaScissor.reset();
+    tooltipClaimed = false;
+}
+
+bool UiWidgets::Button(Rectangle bounds, const std::string& text, bool enabled) {
+    const bool over = hovered(bounds);
+    const bool held = enabled && over && UiInput::down();
+    const bool clicked = enabled && over && UiInput::pressed();
+    const Color fill = !enabled ? Color{ 38, 48, 65, 255 }
+        : over ? accentHover : UiTheme::accent;
+    UiShapes::roundedRect(bounds, UiTheme::radiusSmall, fill,
+                          !enabled ? muted : (held ? UiTheme::ink : outline),
+                          held ? 2.0f : borderWidth);
+    drawLabel(bounds, text, 16, enabled ? textOnAccent : label);
+    return clicked;
+}
+
+bool UiWidgets::IconButton(Rectangle bounds, const std::string& iconKey, bool enabled) {
+    const bool over = hovered(bounds);
+    const bool held = enabled && over && UiInput::down();
+    const bool clicked = enabled && over && UiInput::pressed();
+    const Color fill = !enabled ? Color{ 38, 48, 65, 255 }
+        : over ? Color{ 37, 55, 80, 255 } : UiTheme::panelRaised;
+    UiShapes::roundedRect(bounds, UiTheme::radiusSmall, fill,
+                          !enabled ? muted : (held ? UiTheme::accent : outline),
+                          held ? 2.0f : borderWidth);
+    const float iconSize = std::min(bounds.width, bounds.height) * 0.62f;
+    UiIcons::draw(iconKey, Rectangle{ bounds.x + (bounds.width - iconSize) * 0.5f,
+                                      bounds.y + (bounds.height - iconSize) * 0.5f,
+                                      iconSize, iconSize });
+    return clicked;
+}
+
+bool UiWidgets::TabBar(Rectangle bounds, const std::vector<std::string>& labels, int& selected) {
+    if (labels.empty()) return false;
+    selected = std::clamp(selected, 0, static_cast<int>(labels.size()) - 1);
+    const float tabWidth = bounds.width / static_cast<float>(labels.size());
+    bool changed = false;
+    for (std::size_t index = 0; index < labels.size(); ++index) {
+        const Rectangle tab{ bounds.x + static_cast<float>(index) * tabWidth,
+                             bounds.y, tabWidth, bounds.height };
+        const bool over = hovered(tab);
+        if (over && UiInput::pressed()) {
+            selected = static_cast<int>(index);
+            changed = true;
+        }
+        const bool active = static_cast<int>(index) == selected;
+        UiShapes::roundedRect(tab, UiTheme::radiusSmall,
+            active ? UiTheme::accent : (over ? Color{ 37, 55, 80, 255 } : UiTheme::panelRaised),
+            outline, borderWidth);
+        drawLabel(tab, labels[index], 15, active ? textOnAccent : UiTheme::text);
+    }
+    return changed;
+}
+
+bool UiWidgets::ListRow(Rectangle bounds, const std::string& title,
+                        const std::string& detail, bool selected, bool enabled) {
+    const bool over = hovered(bounds);
+    const bool held = enabled && over && UiInput::down();
+    UiShapes::roundedRect(bounds, UiTheme::radiusSmall,
+        selected ? Color{ 44, 64, 91, 255 } : (over ? Color{ 31, 48, 72, 255 } : UiTheme::panel),
+        held || selected ? UiTheme::accent : outline, held || selected ? 2.0f : borderWidth);
+    const float textX = bounds.x + 14.0f;
+    const Color tint = enabled ? UiTheme::text : muted;
+    UiText::draw(title, static_cast<int>(textX), static_cast<int>(bounds.y + 7.0f), 16, tint);
+    if (!detail.empty())
+        UiText::draw(detail, static_cast<int>(textX), static_cast<int>(bounds.y + 29.0f), 13,
+                     selected ? label : muted);
+    return enabled && over && UiInput::pressed();
+}
+
+bool UiWidgets::ItemTile(Rectangle bounds, const std::string& iconKey, const std::string& title,
+                         const std::string& quantity, bool enabled) {
+    const bool over = hovered(bounds);
+    const bool held = enabled && over && UiInput::down();
+    UiShapes::roundedRect(bounds, UiTheme::radiusMedium,
+        over ? Color{ 31, 48, 72, 255 } : UiTheme::panel,
+        held || over ? UiTheme::accent : outline, held ? 2.0f : borderWidth);
+    const float iconSize = std::min(bounds.height - 34.0f, bounds.width - 20.0f);
+    UiIcons::draw(iconKey, Rectangle{ bounds.x + (bounds.width - iconSize) * 0.5f,
+                                      bounds.y + 8.0f, iconSize, iconSize },
+                  enabled ? WHITE : muted);
+    UiText::draw(title, static_cast<int>(bounds.x + 10.0f),
+                 static_cast<int>(bounds.y + bounds.height - 23.0f), 13, enabled ? UiTheme::text : muted);
+    if (!quantity.empty())
+        UiShapes::roundedRect(Rectangle{ bounds.x + bounds.width - 34.0f, bounds.y + 5.0f, 28.0f, 22.0f },
+                              UiTheme::radiusSmall, UiTheme::accent);
+    if (!quantity.empty())
+        drawLabel(Rectangle{ bounds.x + bounds.width - 34.0f, bounds.y + 5.0f, 28.0f, 22.0f },
+                  quantity, 12, textOnAccent);
+    return enabled && over && UiInput::pressed();
+}
+
+void UiWidgets::BeginScrollArea(Rectangle bounds, float contentHeight, float& scrollOffset) {
+    const bool over = hovered(bounds);
+    if (over) scrollOffset -= UiInput::wheel() * 32.0f;
+    scrollOffset = std::clamp(scrollOffset, 0.0f, std::max(0.0f, contentHeight - bounds.height));
+    UiShapes::roundedRect(bounds, UiTheme::radiusSmall, UiTheme::panel, outline, borderWidth);
+    const float scale = UiCanvas::scale();
+    scrollAreaScissor.emplace(static_cast<int>(bounds.x * scale), static_cast<int>(bounds.y * scale),
+                              static_cast<int>(bounds.width * scale), static_cast<int>(bounds.height * scale));
+}
+
+void UiWidgets::EndScrollArea() { scrollAreaScissor.reset(); }
+
+bool UiWidgets::Dialog(Rectangle bounds, const std::string& title, const std::string& body,
+                       const std::string& actionLabel) {
+    UiBlur::draw(bounds, UiTheme::radiusMedium, Color{ 16, 25, 42, 230 });
+    UiShapes::roundedRect(bounds, UiTheme::radiusMedium, BLANK, UiTheme::accent, 2.0f);
+    UiText::draw(title, static_cast<int>(bounds.x + 22.0f), static_cast<int>(bounds.y + 18.0f),
+                 22, UiTheme::accent);
+    UiText::draw(body, static_cast<int>(bounds.x + 22.0f), static_cast<int>(bounds.y + 58.0f),
+                 16, UiTheme::text);
+    const Rectangle action{ bounds.x + bounds.width - 174.0f,
+                            bounds.y + bounds.height - 58.0f, 152.0f, 40.0f };
+    return Button(action, actionLabel);
+}
+
+void UiWidgets::Tooltip(Rectangle anchor, const std::string& text) {
+    if (tooltipClaimed || !hovered(anchor)) return;
+    tooltipClaimed = true;
+    const Vector2 mouse = UiInput::mousePosition();
+    const float width = std::min(340.0f, static_cast<float>(UiText::measure(text, 14) + 24));
+    Rectangle bounds{ mouse.x + 14.0f, mouse.y + 18.0f, width, 36.0f };
+    if (bounds.x + bounds.width > UiCanvas::width() - 8.0f) bounds.x = mouse.x - width - 14.0f;
+    if (bounds.y + bounds.height > UiCanvas::height() - 8.0f) bounds.y = mouse.y - bounds.height - 12.0f;
+    UiShapes::roundedRect(bounds, UiTheme::radiusSmall, Color{ 16, 25, 42, 255 }, outline, borderWidth);
+    UiText::draw(text, static_cast<int>(bounds.x + 12.0f), static_cast<int>(bounds.y + 10.0f),
+                 14, UiTheme::text);
+}
+
+void UiWidgets::Pill(Rectangle bounds, const std::string& text, Color fill) {
+    const auto colors = accessiblePillColors(fill);
+    UiShapes::roundedRect(bounds, bounds.height * 0.5f, colors.first);
+    drawLabel(bounds, text, 13, colors.second);
+}
+
+void UiWidgets::Gauge(Rectangle bounds, float value, const std::string& text, Color fill) {
+    value = std::clamp(value, 0.0f, 1.0f);
+    UiShapes::roundedRect(bounds, bounds.height * 0.5f, Color{ 35, 47, 64, 255 },
+                          outline, borderWidth);
+    if (value > 0.0f) {
+        Rectangle active = inset(bounds, 2.0f);
+        active.width = std::max(0.0f, active.width) * value;
+        UiShapes::roundedRect(active, active.height * 0.5f, fill);
+    }
+    const int labelWidth = UiText::measure(text, 13) + 16;
+    const Rectangle badge{ bounds.x + (bounds.width - labelWidth) * 0.5f,
+                           bounds.y + (bounds.height - 22.0f) * 0.5f,
+                           static_cast<float>(labelWidth), 22.0f };
+    UiShapes::roundedRect(badge, UiTheme::radiusSmall, UiTheme::ink);
+    drawLabel(badge, text, 13, UiTheme::text);
+}
+
+bool UiWidgets::QuantityStepper(Rectangle bounds, int& value, int minimum, int maximum) {
+    if (minimum > maximum) std::swap(minimum, maximum);
+    value = std::clamp(value, minimum, maximum);
+    const float buttonWidth = std::min(bounds.height, bounds.width * 0.3f);
+    const Rectangle decrement{ bounds.x, bounds.y, buttonWidth, bounds.height };
+    const Rectangle increment{ bounds.x + bounds.width - buttonWidth, bounds.y, buttonWidth, bounds.height };
+    bool changed = false;
+    if (Button(decrement, u8"−", value > minimum)) { --value; changed = true; }
+    if (Button(increment, "+", value < maximum)) { ++value; changed = true; }
+    UiShapes::roundedRect(Rectangle{ decrement.x + decrement.width + 3.0f, bounds.y,
+                                     bounds.width - 2.0f * buttonWidth - 6.0f, bounds.height },
+                          UiTheme::radiusSmall, UiTheme::panel, outline, borderWidth);
+    drawLabel(bounds, std::to_string(value), 16, UiTheme::text);
+    return changed;
+}
+
+void UiWidgets::showToast(const std::string& message, float duration) {
+    toastMessage = message;
+    toastRemaining = std::max(0.1f, duration);
+}
+
+void UiWidgets::update(float deltaTime) {
+    toastRemaining = std::max(0.0f, toastRemaining - std::max(0.0f, deltaTime));
+}
+
+void UiWidgets::Toast() {
+    if (toastRemaining <= 0.0f || toastMessage.empty()) return;
+    Rectangle bounds{ (UiCanvas::width() - 440.0f) * 0.5f, 24.0f, 440.0f, 46.0f };
+    UiShapes::roundedRect(bounds, UiTheme::radiusMedium, UiTheme::panelRaised, outline, borderWidth);
+    drawLabel(bounds, toastMessage, 16, UiTheme::text);
+}

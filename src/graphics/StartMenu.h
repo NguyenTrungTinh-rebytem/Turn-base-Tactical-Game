@@ -23,9 +23,6 @@ public:
     // Giai phong texture. Core goi trong shutdown(), TRUOC CloseWindow(). Goi nhieu lan van an toan.
     void unloadAll();
 
-    // Dong trang thai nho o goc duoi trai, vd "Data: CSV OK" (isOk=false -> mau do)
-    void setStatusText(const std::string& text, bool isOk);
-
     // Vi tri ngang cua cum (tieu de + nut), ti le chieu rong man hinh: 0.5 = giua, 0.68 = lech phai
     // (anh nen hien tai co nhan vat ben trai nen de menu lech phai cho khoi che)
     void setMenuCenterX(float ratio) { m_menuCenterX = ratio; }
@@ -54,6 +51,4 @@ private:
     float       m_menuCenterX = 0.68f;
     Texture2D   m_background{};
     bool        m_hasBackground = false;
-    std::string m_statusText;
-    bool        m_statusOk = true;
 };
