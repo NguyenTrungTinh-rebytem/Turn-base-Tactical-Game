@@ -13,6 +13,7 @@
 #include <iostream>
 #include "data/HeroPresetConfig.h"
 #include "data/CharacterRules.h"
+#include "graphics/SceneShader.h"
 #include <cctype>
 
 namespace
@@ -197,6 +198,7 @@ void GameEngine::initialize()
     SetExitKey(KEY_NULL);   // ESC do game tu xu ly (Undo / ve Menu), khong thoat thang
     m_audio.init();                                          // khong co loa -> game van chay, chi im lang
     m_audio.loadAll(resolvePath("assets/audio"));
+    m_sceneShader.init(SCREEN_WIDTH, SCREEN_HEIGHT);         // loi shader -> tu tat, game ve binh thuong
 
     try {
         m_gameData.loadAll(resolvePath("data"));
@@ -245,9 +247,12 @@ void GameEngine::initialize()
     m_heroCreate.loadPreviewSprite(resolvePath(SPRITE_SHEET_PATH), FRAME_W, FRAME_H);
     setupHeroCreateScreen();
     m_combatSubject.addObserver(this);
-    m_battleMap.setStage(m_stage == 1 ? StageId::STAGE_1 : StageId::STAGE_2,
-    resolvePath(m_stage == 1 ? "assets/images/bg_wave1.png"
-                           : "assets/images/bg_wave2.png"));
+    {
+        const bool bossBg = isBossStage(m_stage);
+        m_battleMap.setStage(bossBg ? StageId::STAGE_2 : StageId::STAGE_1,
+                             resolvePath(bossBg ? "assets/images/bg_wave2.png"
+                                                : "assets/images/bg_wave1.png"));
+    }
     m_waveManager.reset();
     m_waveManager.unlockWave(1);
     m_stateMachine.changeState(GameStateMachine::State::MENU);
@@ -268,6 +273,7 @@ void GameEngine::shutdown()
     m_prepMenu.unloadAll();
     m_battleMap.unloadAll();
     m_itemIcons.unloadAll();
+    m_sceneShader.unload();
     m_audio.unloadAll();                 // dong thiet bi am thanh TRUOC CloseWindow
     m_combatants.clear();
     m_party.clear();
@@ -333,9 +339,28 @@ std::string GameEngine::resolvePath(const std::string& relativePath) const
     return relativePath;
 }
 
-int GameEngine::finalStage() const
+int GameEngine::finalStage()
 {
-    return m_dataLoaded ? 2 : 1;
+    if (!m_dataLoaded) return 1;
+    if (m_finalStageCache > 0) return m_finalStageCache;
+    // Wave cuoi = wave lon nhat co quai trong data/monsters.csv (3 wave: 2 thuong + Boss)
+    int last = 1;
+    for (int s = 1; s <= 10; ++s)
+    {
+        try
+        {
+            if (m_gameData.getMonstersByStage(s).empty()) break;
+            last = s;
+        }
+        catch (const std::exception&) { break; }
+    }
+    m_finalStageCache = last;
+    return last;
+}
+
+bool GameEngine::isBossStage(int stage)
+{
+    return m_dataLoaded && waveHasBoss(stage);
 }
 
 Skill GameEngine::toBattleSkill(const SkillData& data, Element heroElement)
@@ -475,8 +500,8 @@ void GameEngine::openWaveSelect()
             if (m.m_isBoss) w.m_isBoss = true;
         }
 
-        // Wave 1 chi xuat hien ngau nhien STAGE1_ENEMY_COUNT quai trong so quai co the gap (xem spawnEnemies)
-        const int appear = (stage == 1) ? std::min(static_cast<int>(monsters.size()), STAGE1_ENEMY_COUNT)
+        // Wave thuong chi xuat hien ngau nhien STAGE1_ENEMY_COUNT quai trong so quai co the gap (xem spawnEnemies)
+        const int appear = (!w.m_isBoss) ? std::min(static_cast<int>(monsters.size()), STAGE1_ENEMY_COUNT)
                                         : static_cast<int>(monsters.size());
         w.m_description = w.m_isBoss ? std::string("Tran chien voi Boss")
                                      : "Xuat hien ngau nhien " + std::to_string(appear) + " quai";
@@ -734,7 +759,9 @@ void GameEngine::spawnEnemies(int stage)
     if (m_dataLoaded)
     {
         std::vector<MonsterData> monsters = m_gameData.getMonstersByStage(stage);
-        if (stage == 1)
+        const bool hasBoss = std::any_of(monsters.begin(), monsters.end(),
+                                         [](const MonsterData& md) { return md.m_isBoss; });
+        if (!hasBoss)
         {
             std::shuffle(monsters.begin(), monsters.end(), m_rng);
             if (monsters.size() > static_cast<size_t>(STAGE1_ENEMY_COUNT))
@@ -794,9 +821,12 @@ void GameEngine::loadStage(int stage)
 
     m_selectedAlly = m_party.getLeader();
     m_selectedTarget = (m_combatants.size() > m_party.size()) ? m_combatants[m_party.size()].get() : nullptr;
-    m_battleMap.setStage(m_stage == 1 ? StageId::STAGE_1 : StageId::STAGE_2,
-    resolvePath(m_stage == 1 ? "assets/images/bg_wave1.png"
-                           : "assets/images/bg_wave2.png"));
+    {
+        const bool bossBg = isBossStage(m_stage);
+        m_battleMap.setStage(bossBg ? StageId::STAGE_2 : StageId::STAGE_1,
+                             resolvePath(bossBg ? "assets/images/bg_wave2.png"
+                                                : "assets/images/bg_wave1.png"));
+    }
 
     m_currentCharacter = nullptr;   // update() se goi advanceTurn() de lay luot dau tien
     m_battlePhase = BattlePhase::AI_THINKING;
@@ -1695,6 +1725,7 @@ void GameEngine::update(float deltaTime)
 {   
     m_audio.update(deltaTime);
     updateMusic();
+    if (IsKeyPressed(KEY_F9)) m_sceneShader.setEnabled(!m_sceneShader.isEnabled());   // bat/tat shader canh
     if (m_shopOpen) m_shop.update(deltaTime);
     if (m_stateMachine.is(GameStateMachine::State::MENU))
     m_startMenu.update(deltaTime);
@@ -1941,9 +1972,21 @@ void GameEngine::render()
     if (m_shopOpen) m_shop.draw();
     break;
     case GameStateMachine::State::IN_BATTLE:
-        m_battleMap.draw();
-        renderCombatants();
-        renderBattleUI();
+        if (m_sceneShader.isActive())
+        {
+            m_sceneShader.begin();            // nen + nhan vat -> RenderTexture
+            m_battleMap.draw();
+            renderCombatants();
+            m_sceneShader.end();
+            m_sceneShader.draw(isBossStage(m_stage) ? SceneMood::BOSS : SceneMood::NORMAL,
+                               static_cast<float>(GetTime()));
+        }
+        else
+        {
+            m_battleMap.draw();
+            renderCombatants();
+        }
+        renderBattleUI();                     // UI ve sau shader -> van sac net
         m_ui.drawFloatingTexts();
         break;
 

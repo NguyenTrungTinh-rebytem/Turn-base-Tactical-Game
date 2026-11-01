@@ -29,6 +29,7 @@
 #include "audio/AudioManager.h"
 #include "data/ShopConfig.h"
 #include "graphics/ItemIcons.h"
+#include "graphics/SceneShader.h"
 #include "graphics/ShopScreen.h"
 #include "raylib.h"
 #include <memory>
@@ -76,7 +77,9 @@ private:
     void addCombatant(std::unique_ptr<Character> character, const std::string& spritePath = "");
     void layoutViews();
     std::vector<Character*> upcomingOrder() const;   // thu tu luot de hien thi (Turn Order)
-    int  finalStage() const;
+    int  finalStage();
+    bool isBossStage(int stage);
+    int  m_finalStageCache = 0;
     void setupHeroCreateScreen();
     void openWaveSelect();  
     void leavePrepMenu();
@@ -205,6 +208,7 @@ HeroConfig m_heroConfig;
     struct GoldPopup { Vector2 m_pos{}; int m_amount = 0; float m_life = 1.4f; };
     AudioManager m_audio;
     ItemIcons m_itemIcons;
+    SceneShader m_sceneShader;
     ShopConfig m_shopConfig;
     ShopScreen m_shop;
     int m_gold = 0;
