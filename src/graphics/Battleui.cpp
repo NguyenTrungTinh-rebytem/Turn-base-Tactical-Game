@@ -177,20 +177,22 @@ void BattleUI::drawCommandHelp(const std::string& helpText) const {
     const char* text = helpText.empty()
         ? "[A] Tan Cong | [S] Ky Nang | [I] Vat pham | [TAB] Doi Muc Tieu | [ESC] Menu"
         : helpText.c_str();
-    DrawText(text, PANEL_X + 20, HELP_Y, 18, LIGHTGRAY);
+    DrawText(text, PANEL_X + 480, HELP_Y, 18, LIGHTGRAY);
 }
 
 void BattleUI::drawBattleControls(bool waitingConfirm, bool selectingTarget, bool canUndo) const {
     if (waitingConfirm) {
         drawButton(buttonBounds(BattleUIButton::END_TURN), "KET THUC LUOT");
         drawButton(buttonBounds(BattleUIButton::UNDO), "HOAN TAC", canUndo);
+        drawCommandHelp("[ENTER] Ket thuc luot | [ESC/Z] Hoan tac");
     } else if (selectingTarget) {
         drawButton(buttonBounds(BattleUIButton::CANCEL_TARGET), "HUY CHON MUC TIEU");
-        DrawText("Click vao muc tieu song", 260, HELP_Y, 18, LIGHTGRAY);
+        drawCommandHelp("Click vao muc tieu song | [ESC] Huy");
     } else {
         drawButton(buttonBounds(BattleUIButton::ATTACK), "TAN CONG");
         drawButton(buttonBounds(BattleUIButton::SKILL), "KY NANG");
         drawButton(buttonBounds(BattleUIButton::ITEM), "VAT PHAM");
+        drawCommandHelp();
     }
 }
 
