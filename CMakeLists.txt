@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(TurnBaseTacticalGame CXX)
 
-option(UI_DEV_TOOLS "Enable the temporary UI component gallery (F10)" OFF)
+option(UI_DEV_TOOLS "Enable UI development diagnostics" OFF)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -34,9 +34,9 @@ find_package(raylib 4.0 REQUIRED)
 # 4. Tạo file thực thi
 add_executable(game ${SOURCES})
 target_link_libraries(game PRIVATE raylib)
-target_compile_definitions(game PRIVATE UI_DEV_TOOLS=$<BOOL:${UI_DEV_TOOLS}>)
-
-
+if(UI_DEV_TOOLS)
+    target_compile_definitions(game PRIVATE UI_DEV_TOOLS=1)
+endif()
 # 5. Copy data/ và assets/ cạnh game.exe sau mỗi lần build
 #    (game cũng tự tìm ở thư mục chạy hiện tại và ../ so với exe)
 add_custom_command(TARGET game POST_BUILD
@@ -67,6 +67,12 @@ add_executable(test_core_integration EXCLUDE_FROM_ALL
     src/data/SkillElementConfig.cpp
 )
 add_test(NAME test_core_integration COMMAND test_core_integration ${CMAKE_CURRENT_SOURCE_DIR}/data)
+
+# UI localization adapters are pure C++ and do not require a Raylib window.
+add_executable(test_ui_localization EXCLUDE_FROM_ALL
+    tests/test_ui_localization.cpp
+)
+add_test(NAME test_ui_localization COMMAND test_ui_localization)
 
 # Mouse targeting and turn progression through a boss-sized combatant (no window).
 set(BATTLE_TEST_SOURCES ${SOURCES})
