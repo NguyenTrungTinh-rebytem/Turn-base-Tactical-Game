@@ -21,6 +21,7 @@ const std::vector<std::string>& iconKeys() {
         "skill:C_ENCHANT_1", "skill:C_ENCHANT_2", "skill:C_PALADIN_1", "skill:C_PALADIN_2",
         "action:attack", "action:skill", "action:item", "action:confirm", "action:undo",
         "action:end_turn", "action:close", "action:shop", "action:target",
+        "action:gear", "action:coin", "action:lock", "action:crown",
         "element:kim", "element:moc", "element:thuy", "element:hoa", "element:tho"
     };
     return keys;

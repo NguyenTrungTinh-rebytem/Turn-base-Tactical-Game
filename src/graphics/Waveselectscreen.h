@@ -18,6 +18,7 @@ struct WaveInfo {
     std::string m_description;           // toi da 2 dong, ngan cach bang '\n'
     std::string m_lockHint;              // dong huong dan khi bi khoa, vd "Hoan thanh WAVE 1.2\nde mo khoa" (rong = tu sinh)
     bool        m_isBoss = false;
+    int         m_bossHp = 0;
     bool        m_locked = false;
     bool        m_cleared = false;
     std::vector<WaveEnemy> m_enemies;    // quai co the gap
@@ -52,6 +53,7 @@ private:
     enum Btn { BTN_BACK = 0, BTN_START, BTN_COUNT };
 
     Rectangle cardRect(size_t index) const;
+    Rectangle navigationRect(bool next) const;
     Rectangle buttonRect(int index) const;
     bool selectedLocked() const;
     WaveSelectAction tryStart();
@@ -59,6 +61,8 @@ private:
 
     void drawBackground() const;
     void drawCard(size_t index) const;
+    void drawFollowingWavePlaceholder() const;
+    void drawNavigation() const;
     void drawButtons() const;
 
     std::vector<WaveInfo> m_waves;

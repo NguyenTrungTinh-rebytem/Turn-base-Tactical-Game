@@ -1,18 +1,22 @@
 // src/graphics/SkillTooltip.cpp
 #include "SkillTooltip.h"
 #include "graphics/UiCanvas.h"
+#include "graphics/UiElementSigil.h"
+#include "graphics/UiShapes.h"
 #include "graphics/UiText.h"
 #include "graphics/Strings.h"
+#include "graphics/UiTheme.h"
 #include <algorithm>
 #include <vector>
 
 namespace {
 constexpr int PAD = 10;
 constexpr int TITLE_SIZE = 18;
-constexpr int TEXT_SIZE = 14;
-constexpr int LINE_H = 20;
-constexpr int MIN_W = 250;
-constexpr int MARGIN = 8;
+constexpr int TEXT_SIZE = 16;
+constexpr int LINE_H = 24;
+constexpr int MIN_W = 300;
+constexpr int MAX_W = 520;
+constexpr int MARGIN = 16;
 
 struct TipLine {
     std::string m_text;
@@ -32,34 +36,34 @@ const char* elementText(Element e) {
 
 Color elementColor(Element e) {
     switch (e) {
-        case Element::KIM:  return Color{ 235, 220, 140, 255 };
-        case Element::MOC:  return Color{ 120, 220, 120, 255 };
-        case Element::THUY: return Color{ 100, 170, 255, 255 };
-        case Element::HOA:  return Color{ 255, 120, 90, 255 };
-        case Element::THO:  return Color{ 210, 160, 100, 255 };
+        case Element::KIM:  return UiTheme::kim;
+        case Element::MOC:  return UiTheme::moc;
+        case Element::THUY: return UiTheme::thuy;
+        case Element::HOA:  return UiTheme::hoa;
+        case Element::THO:  return UiTheme::tho;
     }
     return WHITE;
 }
 
 const char* typeText(SkillType t) {
     switch (t) {
-        case SkillType::DAMAGE: return u8"Sát thương";
-        case SkillType::HEAL:   return u8"Hồi máu";
-        case SkillType::BUFF:   return u8"Tăng cường";
-        case SkillType::DEBUFF: return u8"Giảm sức mạnh";
+        case SkillType::DAMAGE: return Strings::skillTypeDamage;
+        case SkillType::HEAL:   return Strings::skillTypeHeal;
+        case SkillType::BUFF:   return Strings::skillTypeBuff;
+        case SkillType::DEBUFF: return Strings::skillTypeDebuff;
     }
     return "?";
 }
 
 const char* effectName(EffectType e) {
     switch (e) {
-        case EffectType::ATK_BOOST: return u8"Tăng tấn công";
-        case EffectType::DEF_BOOST: return u8"Tăng phòng thủ";
-        case EffectType::REGEN:     return u8"Hồi máu mỗi lượt";
-        case EffectType::STUN:      return u8"Choáng (mất lượt)";
-        case EffectType::BURN:      return u8"Bỏng (mất máu mỗi lượt)";
-        case EffectType::SLOW:      return u8"Làm chậm";
-        case EffectType::WEAKNESS:  return u8"Suy yếu";
+        case EffectType::ATK_BOOST: return Strings::effectAttackBoost;
+        case EffectType::DEF_BOOST: return Strings::effectDefenseBoost;
+        case EffectType::REGEN:     return Strings::effectRegeneration;
+        case EffectType::STUN:      return Strings::effectStun;
+        case EffectType::BURN:      return Strings::effectBurn;
+        case EffectType::SLOW:      return Strings::effectSlow;
+        case EffectType::WEAKNESS:  return Strings::effectWeakness;
         case EffectType::NONE:      return "";
     }
     return "";
@@ -80,38 +84,38 @@ std::string elementList(Element atk, bool strong) {
 }
 
 std::vector<TipLine> buildLines(const SkillTipInfo& s, const Stats* caster) {
-    const Color white{ 235, 235, 245, 255 };
-    const Color gray{ 170, 170, 190, 255 };
-    const Color gold{ 255, 215, 90, 255 };
-    const Color blue{ 120, 190, 255, 255 };
-    const Color green{ 120, 230, 140, 255 };
-    const Color orange{ 255, 170, 90, 255 };
-    const Color red{ 255, 130, 130, 255 };
+    const Color white = UiTheme::text;
+    const Color gray = UiTheme::ash;
+    const Color gold = UiTheme::currency;
+    const Color blue = UiTheme::mpTop;
+    const Color green = UiTheme::heal;
+    const Color orange = UiTheme::ember;
+    const Color red = UiTheme::danger;
 
     const bool dealsDamage = !s.m_isHeal && s.m_power > 0;
 
     std::vector<TipLine> lines;
-    std::string header = s.m_typeText + u8" - Hệ " + elementText(s.m_element);
-    if (dealsDamage) header += s.m_isMagic ? u8" (Phép)" : u8" (Vật lý)";
+    std::string header = s.m_typeText + Strings::skillHeader + elementText(s.m_element);
+    if (dealsDamage) header += s.m_isMagic ? Strings::magicDamageType : Strings::physicalDamageType;
     lines.push_back({ header, gray });
-    lines.push_back({ TextFormat(u8"Tốn MP: %d", s.m_mpCost), blue });
+    lines.push_back({ TextFormat(Strings::skillCostTemplate, s.m_mpCost), blue });
 
     if (dealsDamage) {
-        lines.push_back({ TextFormat(u8"Sát thương: %d%% %s", s.m_power,
-                                     s.m_isMagic ? u8"Phép công (MA)" : u8"Tấn công (A)"), white });
+        lines.push_back({ TextFormat(Strings::skillDamageTemplate, s.m_power,
+                                     s.m_isMagic ? Strings::magicAttack : Strings::physicalAttack), white });
         if (caster) {
             const int atk = s.m_isMagic ? caster->m_ma : caster->m_a;
-            lines.push_back({ TextFormat(u8"Ước tính: ~%d (chưa tính khắc hệ)", atk * s.m_power / 100), gold });
+            lines.push_back({ TextFormat(Strings::estimatedDamageTemplate, atk * s.m_power / 100), gold });
         }
     } else if (s.m_isHeal) {
-        lines.push_back({ TextFormat(u8"Hồi phục: %d HP", s.m_power), green });
+        lines.push_back({ TextFormat(Strings::healingTemplate, s.m_power), green });
     }
 
-    if (!s.m_effectText.empty()) lines.push_back({ u8"Hiệu ứng: " + s.m_effectText, orange });
+    if (!s.m_effectText.empty()) lines.push_back({ std::string(Strings::effectPrefix) + s.m_effectText, orange });
 
     if (dealsDamage) {
-        lines.push_back({ u8"Mạnh trước: " + elementList(s.m_element, true), green });
-        lines.push_back({ u8"Yếu trước: " + elementList(s.m_element, false), red });
+        lines.push_back({ std::string(Strings::strongAgainstPrefix) + elementList(s.m_element, true), green });
+        lines.push_back({ std::string(Strings::weakAgainstPrefix) + elementList(s.m_element, false), red });
     }
     return lines;
 }
@@ -128,43 +132,72 @@ SkillTipInfo SkillTooltip::fromSkill(const Skill& skill) {
     t.m_isMagic = skill.m_isMagic;
     if (skill.m_effect != EffectType::NONE && skill.m_effectTurns > 0)
         t.m_effectText = std::string(effectName(skill.m_effect)) + " (" +
-                         std::to_string(skill.m_effectTurns) + u8" lượt)";
+                         std::to_string(skill.m_effectTurns) + Strings::turnsSuffix;
     return t;
 }
 
-void SkillTooltip::draw(const Skill& skill, Vector2 mousePos, const Stats* caster) {
-    draw(fromSkill(skill), mousePos, caster);
+void SkillTooltip::draw(const Skill& skill, Vector2 mousePos, const Stats* caster, Rectangle trigger) {
+    draw(fromSkill(skill), mousePos, caster, trigger);
 }
 
-void SkillTooltip::draw(const SkillTipInfo& info, Vector2 mousePos, const Stats* caster) {
+void SkillTooltip::draw(const SkillTipInfo& info, Vector2 mousePos, const Stats* caster,
+                        Rectangle trigger) {
     const std::vector<TipLine> lines = buildLines(info, caster);
     const Color accent = elementColor(info.m_element);
 
-    int w = std::max(MIN_W, UiText::measure(info.m_name.c_str(), TITLE_SIZE) + 2 * PAD);
-    for (const TipLine& l : lines) w = std::max(w, UiText::measure(l.m_text.c_str(), TEXT_SIZE) + 2 * PAD);
+    int w = std::max(MIN_W, UiText::measure(info.m_name.c_str(), TITLE_SIZE) + 3 * PAD + 20);
+    for (const TipLine& l : lines)
+        w = std::max(w, std::min(MAX_W, UiText::measure(l.m_text.c_str(), TEXT_SIZE) + 2 * PAD));
+    w = std::min(MAX_W, w);
     const int titleH = TITLE_SIZE + 8;
     const int h = PAD * 2 + titleH + static_cast<int>(lines.size()) * LINE_H;
 
-    // Dat canh con tro; tran man hinh thi lat sang trai / day len.
     const int sw = UiCanvas::width(), sh = UiCanvas::height();
-    int x = static_cast<int>(mousePos.x) + 18;
-    int y = static_cast<int>(mousePos.y) + 20;
-    if (x + w > sw - MARGIN) x = static_cast<int>(mousePos.x) - w - 18;
-    if (y + h > sh - MARGIN) y = sh - h - MARGIN;
-    x = std::max(MARGIN, x);
-    y = std::max(MARGIN, y);
+    if (trigger.width <= 0.0f || trigger.height <= 0.0f)
+        trigger = Rectangle{ mousePos.x, mousePos.y, 1.0f, 1.0f };
+    const Rectangle candidates[] = {
+        { trigger.x + trigger.width + 12.0f, trigger.y, static_cast<float>(w), static_cast<float>(h) },
+        { trigger.x - w - 12.0f, trigger.y, static_cast<float>(w), static_cast<float>(h) },
+        { trigger.x, trigger.y + trigger.height + 12.0f, static_cast<float>(w), static_cast<float>(h) },
+        { trigger.x, trigger.y - h - 12.0f, static_cast<float>(w), static_cast<float>(h) }
+    };
+    Rectangle bounds{};
+    bool placed = false;
+    for (const Rectangle& candidate : candidates) {
+        Rectangle clamped = candidate;
+        clamped.x = std::clamp(clamped.x, static_cast<float>(MARGIN),
+                               static_cast<float>(sw - MARGIN) - clamped.width);
+        clamped.y = std::clamp(clamped.y, static_cast<float>(MARGIN),
+                               static_cast<float>(sh - MARGIN) - clamped.height);
+        if (CheckCollisionRecs(clamped, trigger)) continue;
+        bounds = clamped;
+        placed = true;
+        break;
+    }
+    if (!placed) return;
+    const int x = static_cast<int>(bounds.x);
+    const int y = static_cast<int>(bounds.y);
 
-    DrawRectangle(x + 3, y + 3, w, h, Color{ 0, 0, 0, 90 });
-    DrawRectangle(x, y, w, h, Color{ 20, 18, 34, 245 });
-    DrawRectangleLinesEx(Rectangle{ static_cast<float>(x), static_cast<float>(y),
-                                    static_cast<float>(w), static_cast<float>(h) }, 2.0f, accent);
+    UiShapeEffects effects;
+    effects.gradientBottom = UiTheme::panelBottom;
+    effects.shadowBlur = UiTheme::floatingShadowSize;
+    UiShapes::roundedRect(bounds, UiTheme::radiusTooltip,
+                          Color{ UiTheme::panel.r, UiTheme::panel.g, UiTheme::panel.b, 240 },
+                          accent, 1.0f, effects);
 
-    UiText::draw(info.m_name.c_str(), x + PAD, y + PAD, TITLE_SIZE, accent);
-    DrawLine(x + PAD, y + PAD + titleH - 4, x + w - PAD, y + PAD + titleH - 4, Fade(accent, 0.5f));
+    UiElementSigil::draw(info.m_element,
+                         Rectangle{ static_cast<float>(x + PAD), static_cast<float>(y + PAD),
+                                    22.0f, 22.0f });
+    UiText::drawEllipsis(info.m_name, x + PAD + 28, y + PAD, w - 3 * PAD - 28,
+                         TITLE_SIZE, accent, UiFontRole::HUD);
+    UiShapes::roundedRect(Rectangle{ static_cast<float>(x + PAD),
+                                     static_cast<float>(y + PAD + titleH - 4),
+                                     static_cast<float>(w - 2 * PAD), 2.0f },
+                          UiTheme::radiusBar, Fade(accent, 0.5f));
 
     int ty = y + PAD + titleH;
     for (const TipLine& l : lines) {
-        UiText::draw(l.m_text.c_str(), x + PAD, ty, TEXT_SIZE, l.m_color);
+        UiText::drawEllipsis(l.m_text, x + PAD, ty, w - 2 * PAD, TEXT_SIZE, l.m_color, UiFontRole::BODY);
         ty += LINE_H;
     }
 }

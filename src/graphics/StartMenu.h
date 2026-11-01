@@ -39,14 +39,17 @@ private:
     };
 
     Rectangle buttonRect(size_t index) const;
+    Rectangle exitDialogRect() const;
+    Rectangle exitDialogButtonRect(bool confirm) const;
     void drawBackground() const;
     void drawProceduralBackground() const;
     void drawTitle() const;
     void drawButtons() const;
-    void drawFooter() const;
+    void drawExitDialog() const;
 
     std::vector<Button> m_buttons;
     int         m_selected = 0;
+    bool        m_exitDialogOpen = false;
     float       m_time = 0.0f;
     float       m_menuCenterX = 0.68f;
     Texture2D   m_background{};

@@ -64,6 +64,7 @@ void UiCanvas::end() {
     if (!initialized || !canvasTarget) return;
     canvasCamera.reset();
     canvasTarget.reset();
+    ClearBackground(Color{ 8, 10, 20, 255 });
     DrawTexturePro(canvas.texture,
         Rectangle{ 0.0f, 0.0f, static_cast<float>(canvas.texture.width),
                    -static_cast<float>(canvas.texture.height) },

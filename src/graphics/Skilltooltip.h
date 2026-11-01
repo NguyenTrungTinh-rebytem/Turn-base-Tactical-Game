@@ -22,7 +22,9 @@ class SkillTooltip {
 public:
     // Goi CUOI CUNG trong ham ve (sau moi thu khac) de tooltip nam tren cung.
     // caster != nullptr -> hien them sat thuong uoc tinh dua tren chi so nguoi dung skill.
-    static void draw(const SkillTipInfo& info, Vector2 mousePos, const Stats* caster = nullptr);
-    static void draw(const Skill& skill, Vector2 mousePos, const Stats* caster = nullptr);  // dung trong tran
+    static void draw(const SkillTipInfo& info, Vector2 mousePos, const Stats* caster = nullptr,
+                     Rectangle trigger = {});
+    static void draw(const Skill& skill, Vector2 mousePos, const Stats* caster = nullptr,
+                     Rectangle trigger = {});  // dung trong tran
     static SkillTipInfo fromSkill(const Skill& skill);
 };

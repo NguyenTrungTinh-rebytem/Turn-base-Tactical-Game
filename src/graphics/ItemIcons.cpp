@@ -1,5 +1,6 @@
 // src/graphics/ItemIcons.cpp
 #include "graphics/ItemIcons.h"
+#include "graphics/UiIcons.h"
 #include "graphics/UiText.h"
 #include <algorithm>
 
@@ -44,6 +45,12 @@ void ItemIcons::draw(const std::string& itemId, Rectangle dest, Color tint) cons
                        Vector2{ 0, 0 }, 0.0f, tint);
         return;
     }
+    const std::string generatedKey = "item:" + itemId;
+    if (UiIcons::contains(generatedKey)) {
+        UiIcons::draw(generatedKey, dest, tint);
+        return;
+    }
+
     // o thay the: mau theo nhom + chu cai dau cua phan sau "ITM_"
     Color c = Color{ 200, 80, 90, 255 };
     if (it != m_icons.end()) {

@@ -1,8 +1,13 @@
 // src/graphics/PrepMenuScreen.cpp
 #include "PrepMenuScreen.h"
 #include "graphics/UiCanvas.h"
+#include "graphics/UiInput.h"
+#include "graphics/UiElementSigil.h"
+#include "graphics/UiShapes.h"
 #include "graphics/UiText.h"
+#include "graphics/UiTheme.h"
 #include "graphics/Strings.h"
+#include "graphics/UiIcons.h"
 #include "SkillTooltip.h"
 #include "graphics/ItemIcons.h"
 #include <algorithm>
@@ -10,31 +15,31 @@
 
 namespace {
 // ---- Bo cuc (thiet ke cho 1280x720) ----
-constexpr float TAB_W = 250.0f, TAB_H = 46.0f, TAB_GAP = 12.0f, TAB_Y = 92.0f;
+constexpr float TAB_W = 250.0f, TAB_H = 48.0f, TAB_GAP = 12.0f, TAB_Y = 90.0f;
 constexpr float PANEL_Y = 138.0f, PANEL_H = 482.0f, PANEL_W = 1036.0f;
 constexpr float BTN_W = 220.0f, BTN_H = 52.0f, BTN_GAP = 30.0f, BTN_Y = 640.0f;
 constexpr size_t MAX_SKILL_ROWS = 6;
 constexpr int    ITEM_SLOTS = 8;
 
 // ---- Mau (dong bo voi WaveSelectScreen) ----
-constexpr Color COL_TITLE    { 255, 214, 96, 255 };
-constexpr Color COL_PANEL    { 16, 13, 36, 225 };
-constexpr Color COL_EDGE     { 140, 120, 180, 255 };
-constexpr Color COL_EDGE_SEL { 255, 214, 96, 255 };
-constexpr Color COL_LABEL    { 190, 185, 220, 255 };
-constexpr Color COL_TEXT     { 238, 235, 252, 255 };
-constexpr Color COL_DIM      { 130, 126, 160, 255 };
-constexpr Color COL_ERR      { 255, 110, 110, 255 };
-constexpr Color COL_OK       { 120, 230, 140, 255 };
-constexpr Color COL_BOSS     { 200, 50, 60, 255 };
+constexpr Color COL_TITLE    = UiTheme::accent;
+constexpr Color COL_PANEL    = UiTheme::panel;
+constexpr Color COL_EDGE     = UiTheme::border;
+constexpr Color COL_EDGE_SEL = UiTheme::ember;
+constexpr Color COL_LABEL    = UiTheme::ash;
+constexpr Color COL_TEXT     = UiTheme::text;
+constexpr Color COL_DIM      = UiTheme::ash;
+constexpr Color COL_ERR      = UiTheme::danger;
+constexpr Color COL_OK       = UiTheme::verdigris;
+constexpr Color COL_BOSS     = UiTheme::danger;
 
 Color elementColor(Element e) {
     switch (e) {
-        case Element::KIM:  return Color{ 215, 215, 230, 255 };
-        case Element::MOC:  return Color{ 100, 210, 100, 255 };
-        case Element::THUY: return Color{ 90, 160, 255, 255 };
-        case Element::HOA:  return Color{ 255, 110, 80, 255 };
-        case Element::THO:  return Color{ 205, 160, 90, 255 };
+        case Element::KIM:  return UiTheme::kim;
+        case Element::MOC:  return UiTheme::moc;
+        case Element::THUY: return UiTheme::thuy;
+        case Element::HOA:  return UiTheme::hoa;
+        case Element::THO:  return UiTheme::tho;
     }
     return WHITE;
 }
@@ -57,16 +62,23 @@ SkillTipInfo toTipInfo(const PrepSkillInfo& s) {
     t.m_mpCost = s.m_mpCost;
     t.m_effectText = s.m_effectText;
     t.m_isMagic = s.m_isMagic;
-    t.m_isHeal = (s.m_typeText.find(u8"Hồi") != std::string::npos);
+    t.m_isHeal = (s.m_typeText.find(Strings::skillTypeHeal) != std::string::npos);
     return t;
 }
 const char* tabLabel(int i) {
-    static const char* labels[] = { "ĐỘI HÌNH", "KỸ NĂNG", "TÚI ĐỒ", "THÔNG TIN CỔNG" };
+    static const char* labels[] = { Strings::formation, Strings::skillMenuTitle,
+                                    Strings::itemMenuTitle, "THÔNG TIN CỔNG" };
     return labels[i];
 }
+const char* tabIcon(int i) {
+    static const char* icons[] = { "action:crown", "action:skill", "action:item", "action:target" };
+    return icons[i];
+}
 
-void drawCenteredText(const char* text, float cx, float y, int size, Color c) {
-    UiText::draw(text, static_cast<int>(cx - UiText::measure(text, size) / 2.0f), static_cast<int>(y), size, c);
+void drawCenteredText(const char* text, float cx, float y, int size, Color c,
+                      float letterSpacing = 0.0f, UiFontRole role = UiFontRole::AUTO) {
+    UiText::draw(text, static_cast<int>(cx - UiText::measure(text, size, role, letterSpacing) / 2.0f),
+                 static_cast<int>(y), size, c, role, letterSpacing);
 }
 void drawRightText(const char* text, float right, float y, int size, Color c) {
     UiText::draw(text, static_cast<int>(right - UiText::measure(text, size)), static_cast<int>(y), size, c);
@@ -152,6 +164,10 @@ void PrepMenuScreen::selectTab(int delta) {
 }
 
 PrepMenuAction PrepMenuScreen::handleInput() {
+    if (UiInput::rightClicked()) {
+        UiInput::consumeClick(MOUSE_BUTTON_RIGHT);
+        return PrepMenuAction::BACK;
+    }
     // ---- Ban phim ----
     if (IsKeyPressed(KEY_LEFT)  || IsKeyPressed(KEY_A) || IsKeyPressed(KEY_Q)) selectTab(-1);
     if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D) || IsKeyPressed(KEY_E) || IsKeyPressed(KEY_TAB)) selectTab(+1);
@@ -167,23 +183,40 @@ PrepMenuAction PrepMenuScreen::handleInput() {
     if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER)) return PrepMenuAction::START;
 
     // ---- Chuot ----
-    const Vector2 mouse = UiCanvas::mousePosition();
+    const Vector2 mouse = UiInput::mousePosition();
     m_hoverTab = -1;
     for (int i = 0; i < TAB_COUNT; ++i)
-        if (CheckCollisionPointRec(mouse, tabRect(i))) m_hoverTab = i;
+        if (CheckCollisionPointRec(mouse, tabRect(i))) {
+            m_hoverTab = i;
+            UiInput::setCursorType(UiInput::CursorType::POINTER);
+        }
     m_hoverButton = -1;
     for (int i = 0; i < BTN_COUNT; ++i)
-        if (CheckCollisionPointRec(mouse, buttonRect(i))) m_hoverButton = i;
+        if (CheckCollisionPointRec(mouse, buttonRect(i))) {
+            m_hoverButton = i;
+            UiInput::setCursorType(UiInput::CursorType::POINTER);
+        }
 
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    if (UiInput::pressed(MOUSE_BUTTON_LEFT)) {
         if (m_tab == TAB_PARTY) {
             for (int i = 0; i < 3; ++i)
-                if (CheckCollisionPointRec(mouse, partyCardRect(contentRect(), i)))
+                if (CheckCollisionPointRec(mouse, partyCardRect(contentRect(), i))) {
+                    UiInput::consumeClick();
                     return static_cast<PrepMenuAction>(static_cast<int>(PrepMenuAction::EDIT_MEMBER_1) + i);
+                }
         }
-        if (m_hoverTab >= 0) m_tab = m_hoverTab;
-        if (m_hoverButton == BTN_BACK)  return PrepMenuAction::BACK;
-        if (m_hoverButton == BTN_START) return PrepMenuAction::START;
+        if (m_hoverTab >= 0) {
+            UiInput::consumeClick();
+            m_tab = m_hoverTab;
+        }
+        if (m_hoverButton == BTN_BACK) {
+            UiInput::consumeClick();
+            return PrepMenuAction::BACK;
+        }
+        if (m_hoverButton == BTN_START) {
+            UiInput::consumeClick();
+            return PrepMenuAction::START;
+        }
     }
     return PrepMenuAction::NONE;
 }
@@ -195,19 +228,20 @@ void PrepMenuScreen::draw() const {
     m_hoverSkill = -1;
     drawBackground();
     const float cx = UiCanvas::width() / 2.0f;
-    drawCenteredText(u8"CHUẨN BỊ TRẬN ĐẤU", cx, 26.0f, 40, COL_TITLE);
+    drawCenteredText(Strings::preparationTitle, cx, 26.0f, 40, COL_TITLE);
     if (!m_info.m_gate.m_title.empty()) {
         const std::string heroName = Strings::localizedName(m_info.m_hero.m_name);
-        drawCenteredText(TextFormat(u8"%s  -  Anh hùng: %s", m_info.m_gate.m_title.c_str(), heroName.c_str()),
+        drawCenteredText(TextFormat(Strings::preparationHero, m_info.m_gate.m_title.c_str(), heroName.c_str()),
                          cx, 66.0f, 16, COL_LABEL);
     }
 
     drawTabs();
 
     const Rectangle area = contentRect();
-    DrawRectangleRec(Rectangle{ area.x + 5, area.y + 6, area.width, area.height }, Color{ 0, 0, 0, 120 });
-    DrawRectangleRec(area, COL_PANEL);
-    DrawRectangleLinesEx(area, 2.0f, COL_EDGE);
+    UiShapeEffects panelEffects;
+    panelEffects.gradientBottom = UiTheme::panelBottom;
+    panelEffects.shadowBlur = 8.0f;
+    UiShapes::roundedRect(area, UiTheme::radiusLarge, COL_PANEL, COL_EDGE, 1.0f, panelEffects);
 
     switch (m_tab) {
         case TAB_PARTY:  drawPartyTab(area);  break;
@@ -218,16 +252,20 @@ void PrepMenuScreen::draw() const {
     }
 
     drawButtons();
-    drawCenteredText(m_tab == TAB_PARTY
-                         ? u8"[NHẤP / F1-F3] Chọn đồng đội   [T] Thêm/đổi tướng   [ENTER] Vào trận"
-                         : u8"[Q/E / TRÁI/PHẢI] Đổi thẻ   [1-4] Chọn thẻ   [ENTER] Vào trận   [ESC] Quay lại",
-                     cx, 702.0f, 16, Color{ 200, 195, 225, 220 });
+}
 
-    // Tooltip ky nang: ve CUOI CUNG de nam tren moi thu
+void PrepMenuScreen::drawTooltip() const {
     if (m_tab == TAB_SKILLS && m_hoverSkill >= 0 &&
         static_cast<size_t>(m_hoverSkill) < m_info.m_skills.size()) {
+        const Rectangle area = contentRect();
+        const Rectangle skillAnchor{
+            area.x + 24.0f,
+            area.y + 56.0f + static_cast<float>(m_hoverSkill) * 74.0f,
+            area.width - 48.0f,
+            64.0f
+        };
         SkillTooltip::draw(toTipInfo(m_info.m_skills[static_cast<size_t>(m_hoverSkill)]),
-                           UiCanvas::mousePosition(), &m_info.m_hero.m_stats);
+                           UiCanvas::mousePosition(), &m_info.m_hero.m_stats, skillAnchor);
     }
 }
 
@@ -237,9 +275,9 @@ void PrepMenuScreen::drawBackground() const {
         UiCanvas::drawCover(m_background, Rectangle{ 0.0f, 0.0f,
             static_cast<float>(W), static_cast<float>(H) });
     } else {
-        DrawRectangleGradientV(0, 0, W, H, Color{ 10, 8, 36, 255 }, Color{ 60, 30, 70, 255 });
+        DrawRectangleGradientV(0, 0, W, H, UiTheme::obsidian, UiTheme::panelBottom);
     }
-    DrawRectangle(0, 0, W, H, Color{ 0, 0, 0, 160 });
+    DrawRectangle(0, 0, W, H, Color{ 12, 10, 18, 135 });
 }
 
 void PrepMenuScreen::drawTabs() const {
@@ -247,9 +285,19 @@ void PrepMenuScreen::drawTabs() const {
         const Rectangle r = tabRect(i);
         const bool active = (i == m_tab);
         const bool hover = (i == m_hoverTab);
-        DrawRectangleRec(r, active ? Color{ 60, 46, 18, 240 } : (hover ? Color{ 40, 34, 70, 235 } : Color{ 24, 20, 50, 225 }));
-        DrawRectangleLinesEx(r, active ? 3.0f : 2.0f, active ? COL_EDGE_SEL : COL_EDGE);
-        drawCenteredText(TextFormat("%d. %s", i + 1, tabLabel(i)), r.x + r.width / 2.0f, r.y + (r.height - 20.0f) / 2.0f, 20,
+        UiShapeEffects effects;
+        effects.flatBottom = true;
+        effects.gradientBottom = active ? UiTheme::primaryBottom : UiTheme::panelBottom;
+        UiShapes::roundedRect(r, UiTheme::radiusSmall,
+            active ? UiTheme::primaryTop : UiTheme::panel,
+            active || hover ? UiTheme::accent : COL_EDGE, 1.0f, effects);
+        if (active)
+            UiShapes::roundedRect(Rectangle{ r.x + 8.0f, r.y + r.height - 2.0f,
+                                             r.width - 16.0f, 2.0f },
+                                  UiTheme::radiusBar, UiTheme::ember);
+        UiIcons::draw(tabIcon(i), Rectangle{ r.x + 18.0f, r.y + 12.0f, 24.0f, 24.0f });
+        drawCenteredText(tabLabel(i), r.x + r.width / 2.0f + 12.0f,
+                         r.y + (r.height - 20.0f) / 2.0f, 20,
                          active ? COL_TITLE : (hover ? COL_TEXT : COL_LABEL));
     }
 }
@@ -264,43 +312,51 @@ void PrepMenuScreen::drawPartyTab(const Rectangle& area) const {
         const bool hovered = CheckCollisionPointRec(UiCanvas::mousePosition(), r);
         const float cx = r.x + r.width / 2.0f;
         if (h) {
-            DrawRectangleRec(r, Color{ 28, 24, 58, 235 });
-            DrawRectangleRec(Rectangle{ r.x, r.y, r.width, 54.0f }, Color{ 40, 62, 128, 255 });
+            UiShapeEffects cardEffects;
+            cardEffects.gradientBottom = UiTheme::panelBottom;
+            UiShapes::roundedRect(r, UiTheme::radiusCard, UiTheme::panel,
+                                  hovered ? COL_EDGE_SEL : COL_EDGE, 1.0f, cardEffects);
+            UiShapeEffects headerEffects;
+            headerEffects.flatBottom = true;
+            headerEffects.gradientBottom = UiTheme::panelBottom;
+            UiShapes::roundedRect(Rectangle{ r.x, r.y, r.width, 54.0f },
+                                  UiTheme::radiusCard, UiTheme::panelBottom,
+                                  BLANK, 0.0f, headerEffects);
             const std::string heroName = Strings::localizedName(h->m_name);
             const std::string race = Strings::localizedName(h->m_race);
             const std::string heroClass = Strings::localizedName(h->m_class);
             drawCenteredText(heroName.c_str(), cx, r.y + 14.0f, 24, COL_TEXT);
             drawCenteredText(TextFormat("%s %s", race.c_str(), heroClass.c_str()), cx, r.y + 68.0f, 17, COL_LABEL);
-            DrawCircle(static_cast<int>(cx - 30), static_cast<int>(r.y + 106), 7.0f, elementColor(h->m_element));
-            UiText::draw(TextFormat(Strings::elementPrefix, elementName(h->m_element)), static_cast<int>(cx - 16), static_cast<int>(r.y + 97), 18, elementColor(h->m_element));
+            UiElementSigil::draw(h->m_element, Rectangle{ cx - 40.0f, r.y + 96.0f, 24.0f, 24.0f });
+            UiText::draw(TextFormat(Strings::elementPrefix, elementName(h->m_element)), static_cast<int>(cx - 10), static_cast<int>(r.y + 97), 18, elementColor(h->m_element));
             float y = r.y + 140.0f;
             const float x = r.x + 22.0f, w = r.width - 44.0f;
-            drawStatRow("HP", h->m_stats.m_hp, x, y, w); y += 30.0f;
-            drawStatRow("MP", h->m_stats.m_mp, x, y, w); y += 30.0f;
-            drawStatRow("ATK", h->m_stats.m_a, x, y, w); y += 30.0f;
-            drawStatRow("MATK", h->m_stats.m_ma, x, y, w); y += 30.0f;
-            drawStatRow("DEF", h->m_stats.m_d, x, y, w); y += 30.0f;
-            drawStatRow("MDEF", h->m_stats.m_md, x, y, w); y += 30.0f;
-            drawStatRow("SPD", h->m_stats.m_spd, x, y, w);
-            drawCenteredText(i == 0 ? u8"ĐỘI TRƯỞNG - NHẤP ĐỂ ĐỔI" : u8"ĐỒNG ĐỘI - NHẤP ĐỂ ĐỔI",
-                             cx, r.y + r.height - 29.0f, 14, COL_OK);
+            drawStatRow(Strings::statHp, h->m_stats.m_hp, x, y, w); y += 30.0f;
+            drawStatRow(Strings::statMp, h->m_stats.m_mp, x, y, w); y += 30.0f;
+            drawStatRow(Strings::statAttack, h->m_stats.m_a, x, y, w); y += 30.0f;
+            drawStatRow(Strings::statMagic, h->m_stats.m_ma, x, y, w); y += 30.0f;
+            drawStatRow(Strings::statDefense, h->m_stats.m_d, x, y, w); y += 30.0f;
+            drawStatRow(Strings::statMagicDefense, h->m_stats.m_md, x, y, w); y += 30.0f;
+            drawStatRow(Strings::statSpeed, h->m_stats.m_spd, x, y, w);
+            drawCenteredText(i == 0 ? Strings::partyLeaderChange : Strings::partyMemberChange,
+                             cx, r.y + r.height - 29.0f, 16, COL_OK);
         } else {
-            DrawRectangleRec(r, Color{20,18,40,200});
+            UiShapes::roundedRect(r, UiTheme::radiusCard, UiTheme::panel);
             const float cy = r.y + r.height / 2.0f;
             DrawRectangle(static_cast<int>(cx - 3), static_cast<int>(cy - 28), 6, 56, COL_DIM);
             DrawRectangle(static_cast<int>(cx - 28), static_cast<int>(cy - 3), 56, 6, COL_DIM);
-            drawCenteredText(TextFormat(u8"ĐỒNG ĐỘI %d", i + 1), cx, cy + 46.0f, 20, COL_LABEL);
-            drawCenteredText(u8"NHẤP ĐỂ CHỌN", cx, cy + 74.0f, 16, COL_OK);
+            drawCenteredText(TextFormat(Strings::partyMember, i + 1), cx, cy + 46.0f, 20, COL_LABEL);
         }
-        DrawRectangleLinesEx(r, hovered ? 3.0f : 2.0f, hovered ? COL_EDGE_SEL : (h ? COL_EDGE_SEL : COL_DIM));
+        if (!h)
+            UiShapes::roundedRect(r, UiTheme::radiusCard, BLANK, COL_DIM, 1.0f);
     }
 }
 
 // ---------------- Tab 2: KY NANG ----------------
 void PrepMenuScreen::drawSkillsTab(const Rectangle& area) const {
     UiText::draw(Strings::heroSkills, static_cast<int>(area.x + 28), static_cast<int>(area.y + 20), 20, COL_TITLE);
-    drawRightText("MP", area.x + area.width - 250.0f, area.y + 24.0f, 14, COL_DIM);
-    drawRightText(u8"SÁT THƯƠNG", area.x + area.width - 120.0f, area.y + 24.0f, 14, COL_DIM);
+    drawRightText(Strings::statMp, area.x + area.width - 250.0f, area.y + 24.0f, 16, COL_DIM);
+    drawRightText(Strings::damageLabel, area.x + area.width - 120.0f, area.y + 24.0f, 16, COL_DIM);
 
     if (m_info.m_skills.empty()) {
         drawCenteredText(Strings::noSkill, area.x + area.width / 2.0f, area.y + area.height / 2.0f, 22, COL_DIM);
@@ -314,18 +370,20 @@ void PrepMenuScreen::drawSkillsTab(const Rectangle& area) const {
         const Rectangle r = { area.x + 24.0f, y, area.width - 48.0f, rowH };
         const bool rowHover = CheckCollisionPointRec(UiCanvas::mousePosition(), r);
         if (rowHover) m_hoverSkill = static_cast<int>(i);
-        DrawRectangleRec(r, rowHover ? Color{ 40, 34, 80, 245 } : Color{ 28, 24, 58, 235 });
-        DrawRectangleLinesEx(r, 2.0f, rowHover ? COL_EDGE_SEL : COL_EDGE);
-        DrawRectangle(static_cast<int>(r.x), static_cast<int>(r.y), 6, static_cast<int>(r.height), elementColor(s.m_element));
+        UiShapeEffects rowEffects;
+        rowEffects.gradientBottom = UiTheme::panelBottom;
+        UiShapes::roundedRect(r, UiTheme::radiusSmall, UiTheme::panel,
+                              rowHover ? COL_EDGE_SEL : COL_EDGE, 1.0f, rowEffects);
+        UiElementSigil::draw(s.m_element, Rectangle{ r.x + 6.0f, r.y + 14.0f, 30.0f, 30.0f });
 
         const std::string skillName = Strings::localizedName(s.m_name);
-        UiText::draw(skillName.c_str(), static_cast<int>(r.x + 24), static_cast<int>(r.y + 10), 22, COL_TEXT);
+        UiText::draw(skillName.c_str(), static_cast<int>(r.x + 44), static_cast<int>(r.y + 10), 22, COL_TEXT);
         std::string sub = s.m_typeText;
         if (!s.m_effectText.empty()) sub += "  |  " + s.m_effectText;
-        UiText::draw(sub.c_str(), static_cast<int>(r.x + 24), static_cast<int>(r.y + 38), 16, COL_LABEL);
+        UiText::draw(sub.c_str(), static_cast<int>(r.x + 44), static_cast<int>(r.y + 38), 16, COL_LABEL);
 
         UiText::draw(elementName(s.m_element), static_cast<int>(r.x + r.width - 410), static_cast<int>(r.y + 20), 18, elementColor(s.m_element));
-        drawRightText(TextFormat("%d", s.m_mpCost), r.x + r.width - 226.0f, r.y + 20.0f, 20, Color{ 110, 170, 255, 255 });
+        drawRightText(TextFormat("%d", s.m_mpCost), r.x + r.width - 226.0f, r.y + 20.0f, 20, UiTheme::mpTop);
         drawRightText(s.m_power > 0 ? TextFormat("%d%%", s.m_power) : "-", r.x + r.width - 24.0f, r.y + 20.0f, 20, COL_TEXT);
         y += rowH + rowGap;
     }
@@ -344,21 +402,25 @@ void PrepMenuScreen::drawItemsTab(const Rectangle& area) const {
         const int col = i % cols, row = i / cols;
         const Rectangle r = { area.x + pad + col * (slotW + gap), area.y + top + row * (slotH + gap), slotW, slotH };
         const bool filled = static_cast<size_t>(i) < m_info.m_items.size();
-        DrawRectangleRec(r, filled ? Color{ 28, 24, 58, 235 } : Color{ 20, 18, 40, 170 });
-        DrawRectangleLinesEx(r, 2.0f, filled ? COL_EDGE : Color{ 70, 66, 96, 255 });
+        UiShapeEffects slotEffects;
+        slotEffects.gradientBottom = UiTheme::panelBottom;
+        UiShapes::roundedRect(r, UiTheme::radiusCard,
+            filled ? UiTheme::panel : UiTheme::obsidian,
+            filled ? COL_EDGE : UiTheme::disabled, 1.0f, slotEffects);
         if (filled) {
             const PrepItemInfo& it = m_info.m_items[static_cast<size_t>(i)];
             const float cx = r.x + r.width / 2.0f;
             if (m_icons && !it.m_id.empty()) {
                 m_icons->draw(it.m_id, Rectangle{ cx - 32.0f, r.y + 14.0f, 64.0f, 64.0f }, WHITE);
             } else {
-                DrawCircle(static_cast<int>(cx), static_cast<int>(r.y + 52), 24.0f, Color{ 220, 80, 100, 255 });   // bieu tuong tam
+                UiShapes::roundedRect(Rectangle{ cx - 24.0f, r.y + 28.0f, 48.0f, 48.0f },
+                                      UiTheme::radiusCard, UiTheme::danger);
                 DrawRectangle(static_cast<int>(cx - 7), static_cast<int>(r.y + 22), 14, 12, Color{ 200, 190, 220, 255 });
             }
             drawCenteredText(it.m_name.c_str(), cx, r.y + 92.0f, 20, COL_TEXT);
             drawCenteredText(TextFormat("x%d", it.m_count), cx, r.y + 118.0f, 18, COL_OK);
         } else {
-            drawCenteredText("Trống", r.x + r.width / 2.0f, r.y + r.height / 2.0f - 9.0f, 18, Color{ 70, 66, 96, 255 });
+            drawCenteredText(Strings::emptySlot, r.x + r.width / 2.0f, r.y + r.height / 2.0f - 9.0f, 18, COL_DIM);
         }
     }
 }
@@ -371,7 +433,7 @@ void PrepMenuScreen::drawGateTab(const Rectangle& area) const {
     const float rightX = area.x + pad + leftW + 36.0f, rightW = area.x + area.width - pad - rightX;
 
     // ---- Cot trai: cong + thoi han ----
-    UiText::draw(g.m_title.empty() ? u8"CỔNG" : g.m_title.c_str(), static_cast<int>(leftX), static_cast<int>(area.y + 22), 34, COL_TITLE);
+    UiText::draw(g.m_title.empty() ? Strings::gateLabel : g.m_title.c_str(), static_cast<int>(leftX), static_cast<int>(area.y + 22), 34, COL_TITLE);
     float y = area.y + 72.0f;
     for (const std::string& line : splitLines(g.m_description)) {
         UiText::draw(line.c_str(), static_cast<int>(leftX), static_cast<int>(y), 18, COL_LABEL);
@@ -381,12 +443,12 @@ void PrepMenuScreen::drawGateTab(const Rectangle& area) const {
     // Thoi han (dong ho cong)
     const Rectangle clockBox = { leftX, area.y + 170.0f, leftW, 120.0f };
     const bool hasDeadline = g.m_deadlineTurns >= 0;
-    DrawRectangleRec(clockBox, Color{ 28, 24, 58, 235 });
-    DrawRectangleLinesEx(clockBox, 2.0f, hasDeadline ? COL_EDGE_SEL : COL_EDGE);
+    UiShapes::roundedRect(clockBox, UiTheme::radiusCard, UiTheme::panel,
+                          hasDeadline ? COL_EDGE_SEL : COL_EDGE, 1.0f);
     UiText::draw(Strings::turnLimit, static_cast<int>(clockBox.x + 20), static_cast<int>(clockBox.y + 16), 16, COL_DIM);
     if (hasDeadline) {
         UiText::draw(TextFormat("%d", g.m_deadlineTurns), static_cast<int>(clockBox.x + 20), static_cast<int>(clockBox.y + 44), 56, COL_TITLE);
-        UiText::draw(u8"lượt để hạ gác cổng", static_cast<int>(clockBox.x + 100 + (g.m_deadlineTurns >= 100 ? 36 : 0)),
+        UiText::draw(Strings::turnsToDefeatGate, static_cast<int>(clockBox.x + 100 + (g.m_deadlineTurns >= 100 ? 36 : 0)),
                  static_cast<int>(clockBox.y + 66), 18, COL_TEXT);
     } else {
         UiText::draw(Strings::unlimited, static_cast<int>(clockBox.x + 20), static_cast<int>(clockBox.y + 52), 30, COL_OK);
@@ -394,32 +456,31 @@ void PrepMenuScreen::drawGateTab(const Rectangle& area) const {
 
     // Goi y khac he
     const Rectangle hintBox = { leftX, area.y + 310.0f, leftW, 150.0f };
-    DrawRectangleRec(hintBox, Color{ 28, 24, 58, 235 });
-    DrawRectangleLinesEx(hintBox, 2.0f, COL_EDGE);
-    UiText::draw(u8"VÒNG KHẮC HỆ", static_cast<int>(hintBox.x + 20), static_cast<int>(hintBox.y + 14), 16, COL_DIM);
+    UiShapes::roundedRect(hintBox, UiTheme::radiusCard, UiTheme::panel, COL_EDGE, 1.0f);
+    UiText::draw(Strings::elementCycleTitle, static_cast<int>(hintBox.x + 20), static_cast<int>(hintBox.y + 14), 16, COL_DIM);
     const Element ring[] = { Element::KIM, Element::MOC, Element::THO, Element::THUY, Element::HOA };
     float hx = hintBox.x + 20.0f;
     for (int i = 0; i < 5; ++i) {
-        DrawCircle(static_cast<int>(hx + 8), static_cast<int>(hintBox.y + 58), 8.0f, elementColor(ring[i]));
-        UiText::draw(elementName(ring[i]), static_cast<int>(hx + 20), static_cast<int>(hintBox.y + 49), 16, elementColor(ring[i]));
+        UiElementSigil::draw(ring[i], Rectangle{ hx, hintBox.y + 48.0f, 20.0f, 20.0f });
+        UiText::draw(elementName(ring[i]), static_cast<int>(hx + 24), static_cast<int>(hintBox.y + 49), 16, elementColor(ring[i]));
         hx += 78.0f;
     }
-    UiText::draw(u8"Khắc hệ: x1,5 sát thương", static_cast<int>(hintBox.x + 20), static_cast<int>(hintBox.y + 84), 16, COL_OK);
-    UiText::draw(u8"Bị khắc hệ: x0,5 sát thương", static_cast<int>(hintBox.x + 20), static_cast<int>(hintBox.y + 108), 16, COL_ERR);
-    UiText::draw(u8"(Kim > Mộc > Thổ > Thủy > Hỏa > Kim)", static_cast<int>(hintBox.x + 20), static_cast<int>(hintBox.y + 128), 14, COL_DIM);
+    UiText::draw(Strings::elementAdvantage, static_cast<int>(hintBox.x + 20), static_cast<int>(hintBox.y + 84), 16, COL_OK);
+    UiText::draw(Strings::elementDisadvantage, static_cast<int>(hintBox.x + 20), static_cast<int>(hintBox.y + 108), 16, COL_ERR);
+    UiText::draw(Strings::elementCycle, static_cast<int>(hintBox.x + 20), static_cast<int>(hintBox.y + 128), 16, COL_DIM);
 
     // ---- Cot phai: boss + quai ----
     float ry = area.y + 22.0f;
     if (g.m_hasBoss) {
         const Rectangle boss = { rightX, ry, rightW, 130.0f };
-        DrawRectangleRec(boss, Color{ 60, 20, 30, 235 });
-        DrawRectangleLinesEx(boss, 3.0f, COL_BOSS);
-        DrawRectangleRec(Rectangle{ boss.x + 18, boss.y + 14, 68, 22 }, COL_BOSS);
-        drawCenteredText(u8"TRÙM", boss.x + 18 + 34, boss.y + 17, 16, WHITE);
+        UiShapes::roundedRect(boss, UiTheme::radiusCard, UiTheme::dangerBottom, COL_BOSS, 1.0f);
+        UiShapes::roundedRect(Rectangle{ boss.x + 18, boss.y + 14, 68, 22 },
+                              UiTheme::radiusChip, COL_BOSS);
+        drawCenteredText(Strings::boss, boss.x + 18 + 34, boss.y + 17, 16, WHITE);
         UiText::draw(g.m_bossName.c_str(), static_cast<int>(boss.x + 100), static_cast<int>(boss.y + 12), 28, COL_TEXT);
-        DrawCircle(static_cast<int>(boss.x + 30), static_cast<int>(boss.y + 76), 8.0f, elementColor(g.m_bossElement));
-        UiText::draw(TextFormat(Strings::elementPrefix, elementName(g.m_bossElement)), static_cast<int>(boss.x + 46), static_cast<int>(boss.y + 66), 18, elementColor(g.m_bossElement));
-        UiText::draw(TextFormat("HP %d", g.m_bossHp), static_cast<int>(boss.x + 46), static_cast<int>(boss.y + 94), 18, COL_TEXT);
+        UiElementSigil::draw(g.m_bossElement, Rectangle{ boss.x + 18, boss.y + 66, 24, 24 });
+        UiText::draw(TextFormat(Strings::elementPrefix, elementName(g.m_bossElement)), static_cast<int>(boss.x + 50), static_cast<int>(boss.y + 66), 18, elementColor(g.m_bossElement));
+        UiText::draw(TextFormat(Strings::healthTemplate, g.m_bossHp), static_cast<int>(boss.x + 46), static_cast<int>(boss.y + 94), 18, COL_TEXT);
         ry += 130.0f + 20.0f;
     }
 
@@ -438,19 +499,28 @@ void PrepMenuScreen::drawGateTab(const Rectangle& area) const {
     if (g.m_enemies.empty())
         UiText::draw(Strings::noData, static_cast<int>(rightX), static_cast<int>(ry), 18, COL_DIM);
     else if (shown < g.m_enemies.size())
-        UiText::draw(TextFormat(u8"+%d quái khác", static_cast<int>(g.m_enemies.size() - shown)), static_cast<int>(rightX + 28), static_cast<int>(ry), 14, COL_DIM);
+        UiText::draw(TextFormat(Strings::additionalEnemiesTemplate, static_cast<int>(g.m_enemies.size() - shown)), static_cast<int>(rightX + 28), static_cast<int>(ry), 16, COL_DIM);
 }
 
 void PrepMenuScreen::drawButtons() const {
-    const char* labels[BTN_COUNT] = { Strings::back, u8"VÀO TRẬN" };
+    const char* labels[BTN_COUNT] = { Strings::back, Strings::enterBattle };
     for (int i = 0; i < BTN_COUNT; ++i) {
         const Rectangle r = buttonRect(i);
         const bool hover = (m_hoverButton == i);
         const bool primary = (i == BTN_START);
-        DrawRectangleRec(Rectangle{ r.x + 4, r.y + 5, r.width, r.height }, Color{ 0, 0, 0, 110 });
-        DrawRectangleRec(r, hover ? Color{ 90, 60, 20, 235 } : (primary ? Color{ 50, 40, 14, 230 } : COL_PANEL));
-        DrawRectangleLinesEx(r, hover ? 3.0f : 2.0f, (hover || primary) ? COL_EDGE_SEL : COL_EDGE);
-        drawCenteredText(labels[i], r.x + r.width / 2.0f, r.y + (r.height - 24.0f) / 2.0f, 24,
-                         hover ? Color{ 255, 240, 170, 255 } : COL_TEXT);
+        Rectangle body = r;
+        if (hover && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) body.y += 2.0f;
+        UiShapeEffects effects;
+        effects.gradientBottom = primary ? UiTheme::primaryBottom : UiTheme::panelBottom;
+        effects.shadowBlur = 6.0f;
+        effects.glow = UiTheme::ember;
+        effects.glowRadius = hover ? 5.0f : 0.0f;
+        effects.glowStrength = hover ? 0.4f : 0.0f;
+        UiShapes::roundedRect(body, UiTheme::radiusSmall,
+            primary ? UiTheme::primaryTop : UiTheme::panel,
+            hover || primary ? COL_EDGE_SEL : COL_EDGE, 1.0f, effects);
+        drawCenteredText(labels[i], body.x + body.width / 2.0f,
+                         body.y + (body.height - 24.0f) / 2.0f, 24,
+                         primary ? UiTheme::primaryText : COL_TEXT, 24.0f * 0.04f, UiFontRole::HUD);
     }
 }

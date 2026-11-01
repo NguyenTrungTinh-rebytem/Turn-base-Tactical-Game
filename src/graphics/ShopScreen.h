@@ -91,6 +91,8 @@ private:
     int m_bagSel = 0;
     int m_scroll[TAB_COUNT] = { 0, 0 };
     int m_actionMember = 0;
+    bool m_draggingScrollbar = false;
+    float m_scrollbarGrabOffset = 0.0f;
     float m_time = 0.0f;
     std::string m_message;
     bool  m_messageOk = true;

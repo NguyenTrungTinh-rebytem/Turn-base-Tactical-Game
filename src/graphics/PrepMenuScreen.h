@@ -80,6 +80,7 @@ public:
     void update(float deltaTime);
     PrepMenuAction handleInput();
     void draw() const;
+    void drawTooltip() const;
 
 private:
     enum Tab { TAB_PARTY = 0, TAB_SKILLS, TAB_ITEMS, TAB_GATE, TAB_COUNT };

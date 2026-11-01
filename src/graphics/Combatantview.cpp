@@ -1,6 +1,8 @@
 // Member 4 - Huynh Quang Khai | src/graphics/CombatantView.cpp
 #include "CombatantView.h"
 #include "entities/Character.h"
+#include "graphics/UiShapes.h"
+#include "graphics/UiTheme.h"
 #include <algorithm>
 #include <cmath>
 
@@ -56,6 +58,19 @@ void CombatantView::draw(const BattleMap& map, Color baseTint) const {
     map.drawShadow(m_slot, static_cast<float>(m_frameWidth), m_alpha);
     const Rectangle bounds = getDrawBounds();
     m_sprite->drawFrame(Vector2{ bounds.x, bounds.y }, m_slot.m_flipX, m_slot.m_scale, tint);
+}
+
+void CombatantView::drawPortrait(Rectangle bounds, Color tint) const {
+    if (!m_sprite || !m_sprite->isLoaded()) return;
+    const Texture2D& texture = m_sprite->getTexture();
+    const int frameWidth = m_sprite->getFrameWidth();
+    const int frameHeight = m_sprite->getFrameHeight();
+    const Rectangle source{
+        static_cast<float>(m_sprite->getCurrentFrame() * frameWidth),
+        static_cast<float>(m_sprite->getCurrentRow() * frameHeight),
+        static_cast<float>(frameWidth), static_cast<float>(frameHeight)
+    };
+    UiShapes::roundedTexture(bounds, source, texture, UiTheme::radiusSmall, tint, BLANK, 0.0f);
 }
 
 void CombatantView::unloadAll() { m_sprite->unload(); }
