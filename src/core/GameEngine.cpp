@@ -6,7 +6,7 @@
 #include "graphics/UiTheme.h"
 #include "graphics/UiBlur.h"
 #include "graphics/UiCursor.h"
-#include "graphics/UiDevGallery.h"
+#include "graphics/UiInput.h"
 #include "graphics/UiIcons.h"
 #include "graphics/UiShapes.h"
 #include "graphics/UiWidgets.h"
@@ -19,6 +19,7 @@
 #include "core/CharacterSnapshot.h"
 #include "entities/CharacterFactory.h"
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstdint>
 #include <numeric>
@@ -75,6 +76,7 @@ namespace
         return 0;
     }
     constexpr float GOLD_POPUP_LIFE = 1.4f;
+    constexpr Rectangle RETURN_MENU_BUTTON{ 490.0f, 350.0f, 300.0f, 58.0f };
 
     // Sprite sheet rieng cho tung quai (theo id trong monsters.csv). Id la -> dung SPRITE_SHEET_PATH.
     std::string monsterSpritePath(const std::string& monsterId)
@@ -186,6 +188,93 @@ int deadlineTurnsForStage(int /*stage*/) {
         }
         return "?";
     }
+
+    bool fitCombatantInsideBattlefield(CombatantView& view, const std::string& name)
+    {
+        constexpr float hudGap = 8.0f;
+        const std::array<Rectangle, 11> hudRects{
+            UiTheme::battleTurnStrip,
+            UiTheme::battleRoundChip,
+            UiTheme::battlePartyCards[0],
+            UiTheme::battlePartyCards[1],
+            UiTheme::battlePartyCards[2],
+            UiTheme::battleCommandListMax,
+            UiTheme::battleCommandCluster,
+            UiTheme::battleLogPanel,
+            UiTheme::battleLogButton,
+            UiTheme::battleLogTicker,
+            UiTheme::battleEnemyTurnChip
+        };
+        const float width = static_cast<float>(UiCanvas::width());
+        const float height = static_cast<float>(UiCanvas::height());
+        const BattleSlot originalSlot = view.getSlot();
+        BattleSlot slot = originalSlot;
+
+        for (int attempt = 0; attempt < 8; ++attempt)
+        {
+            view.setSlot(slot);
+            const Rectangle bounds = view.getDrawBounds();
+            std::vector<float> xs{ bounds.x };
+            std::vector<float> ys{ bounds.y };
+            for (const Rectangle& hud : hudRects)
+            {
+                xs.push_back(hud.x - bounds.width - hudGap);
+                xs.push_back(hud.x + hud.width + hudGap);
+                ys.push_back(hud.y - bounds.height - hudGap);
+                ys.push_back(hud.y + hud.height + hudGap);
+            }
+
+            bool found = false;
+            float bestX = bounds.x;
+            float bestY = bounds.y;
+            float bestDistance = std::numeric_limits<float>::max();
+            for (const float x : xs)
+            {
+                if (x < UiTheme::battlefieldMargin ||
+                    x + bounds.width > width - UiTheme::battlefieldMargin) continue;
+                for (const float y : ys)
+                {
+                    if (y < UiTheme::battlefieldMargin ||
+                        y + bounds.height > height - UiTheme::battlefieldMargin) continue;
+                    const Rectangle candidate{ x, y, bounds.width, bounds.height };
+                    const bool intersectsHud = std::any_of(hudRects.begin(), hudRects.end(),
+                        [&candidate](Rectangle hud) { return CheckCollisionRecs(candidate, hud); });
+                    if (intersectsHud) continue;
+                    const float dx = x - bounds.x;
+                    const float dy = y - bounds.y;
+                    const float distance = dx * dx + dy * dy;
+                    if (distance < bestDistance)
+                    {
+                        found = true;
+                        bestDistance = distance;
+                        bestX = x;
+                        bestY = y;
+                    }
+                }
+            }
+
+            if (found)
+            {
+                slot.m_feetPos.x = bestX + bounds.width * 0.5f;
+                slot.m_feetPos.y = bestY + bounds.height;
+                view.setSlot(slot);
+                const bool changed = std::fabs(bestX - bounds.x) > 0.5f ||
+                    std::fabs(bestY - bounds.y) > 0.5f ||
+                    std::fabs(slot.m_scale - originalSlot.m_scale) > 0.001f;
+                if (changed)
+                    std::cerr << "[BattleUI] corrected battlefield layout for "
+                              << name << " (position/scale adjusted to safe region)\n";
+                return changed;
+            }
+
+            slot.m_scale *= 0.9f;
+        }
+
+        view.setSlot(originalSlot);
+        std::cerr << "[BattleUI] unable to fit combatant inside battlefield safe region: "
+                  << name << '\n';
+        return false;
+    }
 }
 
 // =====================================================================
@@ -199,6 +288,8 @@ void GameEngine::run()
     while (m_isRunning && !WindowShouldClose())
     {
         const float deltaTime = GetFrameTime();
+        UiInput::beginFrame();
+        UiCursor::update(deltaTime);
         processEvents();
         update(deltaTime);
         render();
@@ -213,13 +304,13 @@ void GameEngine::initialize()
         return;
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, Strings::gameTitle);
-    SetWindowTitle(Strings::gameTitle);
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, Strings::windowTitle);
+    SetWindowTitle(Strings::windowTitle);
     SetWindowMinSize(960, 540);
     if (!UiCanvas::initialize())
         throw std::runtime_error("Unable to create the 1920x1080 UI canvas");
     UiCursor::initialize();
-    if (!FontManager::initialize(resolvePath("assets/fonts/NotoSans-Vietnamese.ttf"))) {
+    if (!FontManager::instance().initialize(resolvePath("assets/fonts"))) {
         UiCursor::shutdown();
         UiCanvas::shutdown();
         CloseWindow();
@@ -237,7 +328,7 @@ void GameEngine::initialize()
     try {
         m_gameData.loadAll(resolvePath("data"));
         m_dataLoaded = true;
-        m_battleLog = u8"Dữ liệu CSV đã tải thành công!";
+        m_battleLog.clear();
     }
     catch (const std::exception& e) {
         m_dataLoaded = false;
@@ -310,7 +401,7 @@ void GameEngine::shutdown()
     UiBlur::shutdown();
     UiShapes::shutdown();
     m_sceneShader.unload();
-    FontManager::shutdown();
+    FontManager::instance().shutdown();
     UiCanvas::shutdown();
     UiCursor::shutdown();
     m_audio.unloadAll();                 // dong thiet bi am thanh TRUOC CloseWindow
@@ -493,8 +584,11 @@ void GameEngine::layoutViews()
         if (it != m_scaleMul.end()) playerScales[i] = it->second;
     }
     const auto playerSlots = m_battleMap.layoutPlayers(playerScales);
-    for (std::size_t i = 0; i < members && i < m_views.size(); ++i)
+    for (std::size_t i = 0; i < members && i < m_views.size() &&
+         i < m_combatants.size(); ++i) {
         m_views[i]->setSlot(playerSlots[i]);
+        fitCombatantInsideBattlefield(*m_views[i], m_combatants[i]->getName());
+    }
 
     std::vector<float> enemyScales;
     for (std::size_t i = members; i < m_combatants.size(); ++i)
@@ -510,6 +604,8 @@ void GameEngine::layoutViews()
             slot.m_feetPos.y += BOSS_OFFSET_Y;
         }
         m_views[i + members]->setSlot(slot);
+        fitCombatantInsideBattlefield(*m_views[i + members],
+                                      m_combatants[i + members]->getName());
     }
 }
 std::vector<Character*> GameEngine::upcomingOrder() const
@@ -548,7 +644,10 @@ void GameEngine::openWaveSelect()
         for (const MonsterData& m : monsters)
         {
             w.m_enemies.push_back({ Strings::localizedName(m.m_name), m.m_element });
-            if (m.m_isBoss) w.m_isBoss = true;
+            if (m.m_isBoss) {
+                w.m_isBoss = true;
+                w.m_bossHp = m.m_stats.m_hp;
+            }
         }
 
         // Wave thuong chi xuat hien ngau nhien STAGE1_ENEMY_COUNT quai trong so quai co the gap (xem spawnEnemies)
@@ -843,10 +942,15 @@ void GameEngine::loadStage(int stage)
               << " combatants-before-reset=" << m_combatants.size()
               << " views-before-reset=" << m_views.size() << '\n';
     m_stage = stage;
+    m_turnCount = 0;
+    m_battleLogOpen = false;
+    m_battleLog.clear();
+    m_ui.clearBattleLog();
     m_waveManager.addWave(stage);
     m_waveManager.startNextWave();
 
     // Giu lai moi thanh vien Party, bo quai cu
+    m_turnOrderBar.reset();
     for (std::size_t i = m_party.size(); i < m_combatants.size(); ++i)
         m_baseSpeed.erase(m_combatants[i].get());
     m_combatants.resize(m_party.size());
@@ -1217,11 +1321,9 @@ void GameEngine::drawPrepExtras() const
     DrawRectangleRec(Rectangle{ r.x + 4, r.y + 5, r.width, r.height }, Color{ 0, 0, 0, 110 });
     DrawRectangleRec(r, hover ? Color{ 90, 60, 20, 235 } : Color{ 50, 40, 14, 230 });
     DrawRectangleLinesEx(r, hover ? 3.0f : 2.0f, Color{ 255, 214, 96, 255 });
-    const char* label = u8"CỬA HÀNG [B]";
+    const char* label = u8"CỬA HÀNG";
     UiText::draw(label, static_cast<int>(r.x + (r.width - UiText::measure(label, 24)) / 2.0f),
              static_cast<int>(r.y + (r.height - 24.0f) / 2.0f), 24, hover ? Color{ 255, 240, 170, 255 } : Color{ 238, 235, 252, 255 });
-    UiText::draw(u8"Đang nghỉ giữa hai màn: mua đồ, trang bị cho tướng, rồi [ENTER] để vào trùm",
-             40, 702, 14, Color{ 255, 214, 96, 220 });
 }
 
 // =====================================================================
@@ -1274,13 +1376,39 @@ void GameEngine::playDeathSfx(Character* character)
 
 void GameEngine::processEvents()
 {
-    if (UiDevGallery::handleInput())
-        return;
     if (IsKeyPressed(KEY_F11)) ToggleFullscreen();
+
+    if (m_stateMachine.is(GameStateMachine::State::IN_BATTLE) &&
+        UiInput::pressed(MOUSE_BUTTON_LEFT)) {
+        const Vector2 position = UiInput::mousePosition();
+        if (CheckCollisionPointRec(position, BattleUI::battleLogButtonBounds())) {
+            m_battleLogOpen = !m_battleLogOpen;
+            if (m_battleLogOpen) m_ui.markBattleLogRead();
+            UiInput::consumeClick();
+            return;
+        }
+        if (m_battleLogOpen && CheckCollisionPointRec(position, BattleUI::battleLogPanelBounds())) {
+            const Rectangle panel = BattleUI::battleLogPanelBounds();
+            const Rectangle close{ panel.x + panel.width - 27.0f, panel.y + 4.0f, 22.0f, 22.0f };
+            if (CheckCollisionPointRec(position, close)) m_battleLogOpen = false;
+            UiInput::consumeClick();
+            return;
+        }
+    }
+
+    if (UiInput::rightClicked()) {
+        if (m_stateMachine.is(GameStateMachine::State::IN_BATTLE) &&
+            (m_isSelectingSkill || m_isSelectingItem || m_isSelectingTarget)) {
+            m_isSelectingSkill = false;
+            m_isSelectingItem = false;
+            m_isSelectingTarget = false;
+            UiInput::consumeClick(MOUSE_BUTTON_RIGHT);
+        }
+    }
 
     // Tieng click cho cac man hinh menu (chuot trai / ENTER / SPACE)
     if (!m_stateMachine.is(GameStateMachine::State::IN_BATTLE) &&
-        (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER)))
+        (UiInput::pressed(MOUSE_BUTTON_LEFT) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER)))
         m_audio.playSfx(SfxId::CLICK);
 
     if (IsKeyPressed(KEY_ESCAPE))
@@ -1409,7 +1537,8 @@ void GameEngine::processEvents()
     }
     if (m_resumeRun && m_itemsLoaded &&
         (IsKeyPressed(KEY_B) ||
-         (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(UiCanvas::mousePosition(), shopButtonRect())))) {
+         (UiInput::pressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(UiInput::mousePosition(), shopButtonRect())))) {
+        UiInput::consumeClick();
         openShop();
         break;
     }
@@ -1455,8 +1584,12 @@ void GameEngine::processEvents()
 
     case GameStateMachine::State::VICTORY:
     case GameStateMachine::State::GAME_OVER:
-        if (IsKeyPressed(KEY_ENTER))
+        if (IsKeyPressed(KEY_ENTER) ||
+            (UiInput::pressed(MOUSE_BUTTON_LEFT) &&
+             CheckCollisionPointRec(UiInput::mousePosition(), RETURN_MENU_BUTTON))) {
+            UiInput::consumeClick();
             m_stateMachine.changeState(GameStateMachine::State::MENU);
+        }
         break;
     }
 }
@@ -1549,13 +1682,33 @@ void GameEngine::handleBattleClick(Vector2 position)
 
     if (m_isSelectingItem) {
         const auto items = availableItems();
+        if (CheckCollisionPointRec(position, BattleUI::itemCancelBounds())) {
+            m_isSelectingItem = false;
+            return;
+        }
+        if (CheckCollisionPointRec(position, BattleUI::buttonBounds(BattleUIButton::ITEM))) {
+            m_isSelectingItem = false;
+            return;
+        }
+        for (std::size_t i = 0; i < m_party.size() && i < 3; ++i) {
+            if (!CheckCollisionPointRec(position, BattleUI::partyCardBounds(static_cast<int>(i))))
+                continue;
+            selectAlly(static_cast<int>(i));
+            return;
+        }
         if (CheckCollisionPointRec(position, BattleUI::itemMenuBounds())) {
-            for (std::size_t i = 0; i < items.size() && i < 9; ++i) {
-                if (CheckCollisionPointRec(position, BattleUI::itemRowBounds(static_cast<int>(i)))) {
-                    m_selectedItemIndex = static_cast<int>(i);
-                    doUseItem();
-                    return;
-                }
+            const int scrollIndex = BattleUI::itemScrollbarIndexAt(position,
+                static_cast<int>(items.size()));
+            if (scrollIndex >= 0) {
+                m_selectedItemIndex = std::min(scrollIndex, static_cast<int>(items.size()) - 1);
+                return;
+            }
+            const int itemIndex = BattleUI::itemIndexAt(position,
+                static_cast<int>(items.size()), m_selectedItemIndex);
+            if (itemIndex >= 0) {
+                m_selectedItemIndex = itemIndex;
+                doUseItem();
+                return;
             }
             rejectTargetClick("item menu has priority over battlefield clicks", position);
             return;
@@ -1569,18 +1722,29 @@ void GameEngine::handleBattleClick(Vector2 position)
             m_isSelectingTarget = false;
             return;
         }
-        if (CheckCollisionPointRec(position, BattleUI::controlPanelBounds())) {
-            rejectTargetClick("control panel has priority over combatant bounds", position);
+        if (BattleUI::isVisibleHudAt(position, true, m_isSelectingSkill, m_isSelectingItem,
+                                     m_battleLogOpen, m_ui.battleLogTickerVisible())) {
+            rejectTargetClick("visible HUD panel has priority over combatant bounds", position);
             return;
         }
 
         std::size_t livingCandidates = 0;
+        std::vector<std::size_t> hitOrder;
+        hitOrder.reserve(m_combatants.size() - std::min(m_party.size(), m_combatants.size()));
         for (std::size_t i = m_party.size(); i < m_combatants.size(); ++i) {
             Character* candidate = m_combatants[i].get();
             if (!candidate || !candidate->isAlive() || isHero(candidate)) continue;
             ++livingCandidates;
-            if (i >= m_views.size() || !m_views[i] || !m_views[i]->containsPoint(position)) continue;
+            if (i < m_views.size() && m_views[i]) hitOrder.push_back(i);
+        }
+        std::stable_sort(hitOrder.begin(), hitOrder.end(), [this](std::size_t a, std::size_t b) {
+            return m_views[a]->getSlot().m_feetPos.y < m_views[b]->getSlot().m_feetPos.y;
+        });
 
+        for (auto hit = hitOrder.rbegin(); hit != hitOrder.rend(); ++hit) {
+            const std::size_t i = *hit;
+            Character* candidate = m_combatants[i].get();
+            if (!candidate->isAlive() || !m_views[i]->containsPoint(position)) continue;
             m_selectedTarget = candidate;
             m_isSelectingTarget = false;
             if (m_targetAction == TargetAction::BASIC_ATTACK) {
@@ -1632,6 +1796,12 @@ void GameEngine::handleBattleClick(Vector2 position)
     }
 
     if (m_isSelectingSkill) {
+        const int scrollIndex = BattleUI::skillScrollbarIndexAt(position,
+            static_cast<int>(m_heroSkills.size()));
+        if (scrollIndex >= 0) {
+            m_selectedSkillIndex = std::min(scrollIndex, static_cast<int>(m_heroSkills.size()) - 1);
+            return;
+        }
         for (std::size_t i = 0; i < m_heroSkills.size(); ++i) {
             if (!CheckCollisionPointRec(position, BattleUI::skillRowBounds(
                     static_cast<int>(i), static_cast<int>(m_heroSkills.size()), m_selectedSkillIndex)))
@@ -1670,8 +1840,9 @@ void GameEngine::processPlayerInput()
 {
     if (!m_currentCharacter || !isHero(m_currentCharacter)) return;
 
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        handleBattleClick(UiCanvas::mousePosition());
+    if (UiInput::pressed(MOUSE_BUTTON_LEFT)) {
+        handleBattleClick(UiInput::mousePosition());
+        UiInput::consumeClick();
         return;
     }
 
@@ -1755,7 +1926,7 @@ void GameEngine::doBasicAttack()
 
     m_battleLog = Strings::localizedName(attacker->getName()) + u8" tấn công " +
         Strings::localizedName(target->getName()) + u8" gây " + std::to_string(dealt) +
-        u8" sát thương!  [ENTER] kết thúc lượt, [ESC/Z] hoàn tác";
+        u8" sát thương!";
     m_battlePhase = BattlePhase::PLAYER_CONFIRM;
 }
 
@@ -1785,7 +1956,7 @@ void GameEngine::doUseItem()
     if (!queuePlayerCommand(std::make_unique<UseItemCommand>(executeAction, undoAction))) return;
     m_battleLog = Strings::localizedName(hero()->getName()) + u8" dùng " +
         item->getNameVi() + u8" cho " + Strings::localizedName(target->getName()) +
-        u8" (+" + std::to_string(*amount) + u8") [ENTER] xác nhận, [Z] hoàn tác";
+        u8" (+" + std::to_string(*amount) + u8")";
     m_isSelectingItem = false;
     m_battlePhase = BattlePhase::PLAYER_CONFIRM;
 }
@@ -1946,6 +2117,7 @@ void GameEngine::advanceTurn()
         }
 
         m_battlePhase = isHero(m_currentCharacter) ? BattlePhase::PLAYER_TURN : BattlePhase::AI_THINKING;
+        ++m_turnCount;
         if (isHero(m_currentCharacter)) refreshCurrentSkills();
         return;
     }
@@ -2008,6 +2180,37 @@ void GameEngine::update(float deltaTime)
     // Cap nhat sprite + hieu ung UI (chu bay)
     for (auto& v : m_views) v->update(deltaTime);
     m_ui.update(deltaTime);
+    const float wheel = UiInput::wheel();
+    const Vector2 mouse = UiInput::mousePosition();
+    if (m_battleLogOpen) {
+        m_ui.scrollBattleLog(wheel);
+        if (UiInput::down(MOUSE_BUTTON_LEFT)) m_ui.dragBattleLogScrollbar(mouse);
+    }
+    if (wheel != 0.0f && m_isSelectingSkill &&
+        CheckCollisionPointRec(mouse, UiTheme::battleSkillList) && !m_heroSkills.empty()) {
+        const int direction = wheel > 0.0f ? -1 : 1;
+        m_selectedSkillIndex = std::max(0, std::min(
+            static_cast<int>(m_heroSkills.size()) - 1, m_selectedSkillIndex + direction));
+    }
+    if (wheel != 0.0f && m_isSelectingItem &&
+        CheckCollisionPointRec(mouse, UiTheme::battleItemList)) {
+        const int itemCount = static_cast<int>(availableItems().size());
+        if (itemCount > 0) {
+            const int direction = wheel > 0.0f ? -1 : 1;
+            m_selectedItemIndex = std::max(0, std::min(itemCount - 1,
+                m_selectedItemIndex + direction));
+        }
+    }
+    if (UiInput::down(MOUSE_BUTTON_LEFT) && m_isSelectingSkill) {
+        const int first = BattleUI::skillScrollbarIndexAt(mouse, static_cast<int>(m_heroSkills.size()));
+        if (first >= 0)
+            m_selectedSkillIndex = std::min(first, static_cast<int>(m_heroSkills.size()) - 1);
+    }
+    if (UiInput::down(MOUSE_BUTTON_LEFT) && m_isSelectingItem) {
+        const int itemCount = static_cast<int>(availableItems().size());
+        const int first = BattleUI::itemScrollbarIndexAt(mouse, itemCount);
+        if (first >= 0) m_selectedItemIndex = std::min(first, itemCount - 1);
+    }
     for (GoldPopup& p : m_goldPopups) { p.m_life -= deltaTime; p.m_pos.y -= 35.0f * deltaTime; }
     m_goldPopups.erase(std::remove_if(m_goldPopups.begin(), m_goldPopups.end(),
                                       [](const GoldPopup& p) { return p.m_life <= 0.0f; }), m_goldPopups.end());
@@ -2229,15 +2432,13 @@ void GameEngine::render()
     if (!canvasFrame) {
         ClearBackground(Color{ 244, 244, 244, 255 });
         DrawRectangleRounded(Rectangle{ 28, 28, 1224, 110 }, 0.05f, 8, Color{ 15, 15, 30, 245 });
-        UiText::draw(u8"Không thể mở khung giao diện", 56, 58, 24, WHITE);
+        UiText::draw(Strings::unavailableScreen, 56, 58, 24, WHITE);
         std::cerr << "[BattleUI] render fallback: UiCanvas frame could not start\n";
         return;
     }
     UiWidgets::beginFrame();
     ClearBackground(RAYWHITE);
-    if (UiDevGallery::visible()) {
-        UiDevGallery::draw();
-    } else switch (m_stateMachine.getState())
+    switch (m_stateMachine.getState())
     {
     case GameStateMachine::State::MENU:
         m_startMenu.draw();
@@ -2254,6 +2455,7 @@ void GameEngine::render()
     if (m_shopOpen) m_shop.draw();
     break;
     case GameStateMachine::State::IN_BATTLE:
+#if defined(UI_DEV_TOOLS)
         {
         static std::uint64_t battleDrawFrame = 0;
         ++battleDrawFrame;
@@ -2263,6 +2465,7 @@ void GameEngine::render()
                   << " views=" << m_views.size()
                   << " selectedTarget=" << (m_selectedTarget ? "set" : "none") << '\n';
         }
+#endif
         if (m_sceneShader.isActive())
         {
             m_sceneShader.begin();            // nen + nhan vat -> RenderTexture
@@ -2282,17 +2485,26 @@ void GameEngine::render()
         break;
 
     case GameStateMachine::State::VICTORY:
-        UiText::draw(Strings::victory, 500, 250, 50, GREEN);
-        UiText::draw(Strings::returnToMenu, 420, 340, 22, DARKGRAY);
+        DrawRectangle(0, 0, UiCanvas::width(), UiCanvas::height(), Color{ 9, 12, 28, 255 });
+        UiShapes::roundedRect(Rectangle{ 300.0f, 200.0f, 680.0f, 300.0f }, 18.0f,
+                              Color{ 20, 27, 48, 255 }, Color{ 200, 170, 80, 255 }, 2.0f);
+        UiText::draw(Strings::victory, 420, 270, 56, GREEN, UiFontRole::DISPLAY);
+        UiWidgets::Button(RETURN_MENU_BUTTON, Strings::returnToMenu);
         break;
 
     case GameStateMachine::State::GAME_OVER:
-        UiText::draw(Strings::gameOver, 480, 250, 50, RED);
-        UiText::draw(Strings::returnToMenu, 420, 340, 22, DARKGRAY);
+        DrawRectangle(0, 0, UiCanvas::width(), UiCanvas::height(), Color{ 9, 12, 28, 255 });
+        UiShapes::roundedRect(Rectangle{ 300.0f, 200.0f, 680.0f, 300.0f }, 18.0f,
+                              Color{ 20, 27, 48, 255 }, Color{ 150, 70, 80, 255 }, 2.0f);
+        UiText::draw(Strings::gameOver, 455, 270, 56, RED, UiFontRole::DISPLAY);
+        UiWidgets::Button(RETURN_MENU_BUTTON, Strings::returnToMenu);
         break;
     }
 
     UiWidgets::Toast();
+    if (m_stateMachine.is(GameStateMachine::State::PREP_MENU) && !m_shopOpen)
+        m_prepMenu.drawTooltip();
+    UiWidgets::DrawTooltip();
     UiCursor::draw();
 }
 
@@ -2346,10 +2558,12 @@ void GameEngine::renderCombatants()
 void GameEngine::renderBattleUI()
 {
     const std::size_t count = std::min(m_combatants.size(), m_views.size());
+    m_ui.observeBattleLog(m_battleLog);
+    m_ui.drawRoundChip(m_stage, m_turnCount);
+    m_ui.drawBattleLogButton(m_battleLog, m_ui.battleLogUnread());
+    m_ui.drawBattleLogPanel(m_battleLogOpen);
     if (count == 0) {
-        m_ui.drawControlPanel();
-        UiText::draw(u8"ĐANG TẢI TRẬN ĐẤU", 48, 584, 20, YELLOW);
-        m_ui.drawBattleLog(m_battleLog.empty() ? u8"Chưa có đơn vị chiến đấu." : m_battleLog);
+        UiText::draw(Strings::loadingBattle, 48, 584, 20, YELLOW);
         std::cerr << "[BattleUI] placeholder HUD: no matched combatants/views\n";
         return;
     }
@@ -2365,10 +2579,12 @@ void GameEngine::renderBattleUI()
         if (!c->isAlive()) continue;
 
         const Vector2 head = m_views[i]->getHeadPos();
-        m_ui.drawHpMpBar(*c, head);
+        const bool hovered = m_views[i]->containsPoint(UiCanvas::mousePosition());
+        m_ui.drawFieldStatus(*c, m_views[i]->getSlot().m_feetPos, hovered);
 
-        if (c == m_selectedTarget)
-            m_ui.drawTargetCursor(m_views[i]->getSlot());
+        if (m_isSelectingTarget && i >= m_party.size())
+            m_ui.drawTargetCursor(m_views[i]->getSlot(), m_views[i]->getDrawBounds(),
+                                  c == m_selectedTarget);
 
         // Hieu ung dang co (giu logic cu cua Core; BattleUI chua ve phan nay)
         auto fx = m_statusEffects.find(c);
@@ -2379,8 +2595,8 @@ void GameEngine::renderBattleUI()
             for (const StatusEffect& effect : fx->second.getEffects())
             {
                 const char* label = TextFormat("%s(%d)", statusName(effect.type), effect.durationTurns);
-                UiText::draw(label, ex, ey, 12, ORANGE);
-                ex += UiText::measure(label, 12) + 6;
+                UiText::draw(label, ex, ey, 16, ORANGE, UiFontRole::HUD);
+                ex += UiText::measure(label, 16, UiFontRole::HUD) + 6;
             }
         }
     }
@@ -2392,47 +2608,37 @@ void GameEngine::renderBattleUI()
         const unsigned char a = static_cast<unsigned char>(255.0f * t);
         const char* text = TextFormat(u8"+%d vàng", p.m_amount);
         const int w = UiText::measure(text, 22);
-        UiText::draw(text, static_cast<int>(p.m_pos.x - w / 2.0f) + 2, static_cast<int>(p.m_pos.y) + 2, 22, Color{ 0, 0, 0, a });
-        UiText::draw(text, static_cast<int>(p.m_pos.x - w / 2.0f), static_cast<int>(p.m_pos.y), 22, Color{ 255, 215, 70, a });
+        UiText::drawOutlined(text, static_cast<int>(p.m_pos.x - w / 2.0f), static_cast<int>(p.m_pos.y),
+                             22, Color{ 255, 215, 70, a }, Color{ 8, 10, 17, a }, 2,
+                             UiFontRole::NUMERALS);
     }
 
-    // ----- Danh sach luot (goc phai tren) -----
-       m_turnOrderBar.draw(upcomingOrder(), m_currentCharacter);
+    m_turnOrderBar.draw(upcomingOrder(), m_currentCharacter, m_views);
 
-    // ----- Bang dieu khien -----
-    m_ui.drawControlPanel();
-    m_ui.drawTurnBanner(m_stage, m_currentCharacter,
-                        m_currentCharacter && isHero(m_currentCharacter),
-                        m_battlePhase == BattlePhase::PLAYER_CONFIRM);
+    std::array<Character*, 3> partyCards{};
+    const int partyCount = static_cast<int>(std::min<std::size_t>(m_party.size(), partyCards.size()));
+    for (int i = 0; i < partyCount; ++i) partyCards[static_cast<std::size_t>(i)] = m_party.getMember(i);
+    m_ui.drawPartyCards(partyCards, partyCount, m_currentCharacter,
+                        m_isSelectingItem ? m_selectedAlly : nullptr);
 
-    if (m_battlePhase == BattlePhase::PLAYER_CONFIRM ||
-        (m_battlePhase == BattlePhase::PLAYER_TURN && m_currentCharacter &&
-         isHero(m_currentCharacter) && !m_isSelectingItem))
-        m_ui.drawBattleControls(m_battlePhase == BattlePhase::PLAYER_CONFIRM,
-                                m_isSelectingTarget, !m_commandStack.empty());
-    m_ui.drawBattleLog(std::string(Strings::battleLog) + m_battleLog);
+    if (m_battlePhase == BattlePhase::AI_THINKING) {
+        m_ui.drawEnemyTurnChip(m_currentCharacter);
+    } else {
+        m_ui.drawControlPanel();
+        m_ui.drawTurnBanner(m_stage, m_currentCharacter,
+                            m_currentCharacter && isHero(m_currentCharacter),
+                            m_battlePhase == BattlePhase::PLAYER_CONFIRM);
+        if (m_battlePhase == BattlePhase::PLAYER_CONFIRM ||
+            (m_battlePhase == BattlePhase::PLAYER_TURN && m_currentCharacter &&
+             isHero(m_currentCharacter)))
+            m_ui.drawBattleControls(m_battlePhase == BattlePhase::PLAYER_CONFIRM,
+                                    m_isSelectingTarget, !m_commandStack.empty());
+    }
 
-    // ----- Menu ky nang (popup giua man hinh, ve cuoi cung de nam tren cung) -----
     if (m_isSelectingSkill)
         m_ui.drawSkillMenu(m_heroSkills, m_selectedSkillIndex, hero() ? hero()->getCurrentMp() : 0);
     if (m_isSelectingItem) {
         const auto items = availableItems();
-        DrawRectangleRec(BattleUI::itemMenuBounds(), Color{20, 25, 40, 235});
-        UiText::draw(Strings::itemPrompt, 355, 177, 18, WHITE);
-        if (m_selectedAlly) {
-            const std::string allyName = Strings::localizedName(m_selectedAlly->getName());
-            UiText::draw(TextFormat(u8"Mục tiêu: %s", allyName.c_str()), 355, 209, 18, YELLOW);
-        }
-        for (std::size_t i = 0; i < items.size() && i < 9; ++i) {
-            const int rowY = 246 + static_cast<int>(i) * 28;
-            m_itemIcons.draw(items[i]->getId(), Rectangle{ 362.0f, static_cast<float>(rowY) - 4.0f, 26.0f, 26.0f }, WHITE);
-            const std::string itemName = Strings::localizedName(items[i]->getName());
-            UiText::draw(TextFormat("%d. %s  x%d", static_cast<int>(i + 1), itemName.c_str(),
-                                static_cast<int>(m_party.countItem(items[i]->getId()))),
-                     396, rowY, 18,
-                     static_cast<int>(i) == m_selectedItemIndex ? YELLOW : RAYWHITE);
-        }
-        if (m_selectedItemIndex >= 0 && static_cast<std::size_t>(m_selectedItemIndex) < items.size())
-            UiText::draw(items[static_cast<std::size_t>(m_selectedItemIndex)]->getDescription().c_str(), 355, 515, 16, LIGHTGRAY);
+        m_ui.drawItemMenu(items, m_selectedItemIndex, m_selectedAlly, m_party, m_itemIcons);
     }
 }

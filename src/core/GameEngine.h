@@ -235,9 +235,11 @@ HeroConfig m_heroConfig;
     int m_selectedSkillIndex = 0;
     bool m_isSelectingSkill = false;
     bool m_isSelectingTarget = false;
+    bool m_battleLogOpen = false;
     TargetAction m_targetAction = TargetAction::BASIC_ATTACK;
     float m_aiTurnTimer = 0.0f;
-    std::string m_battleLog = "Chao mung den voi Battle Engine!";
+    int m_turnCount = 0;
+    std::string m_battleLog;
 
     std::mt19937 m_rng{ std::random_device{}() };
     bool m_isRunning = false;
