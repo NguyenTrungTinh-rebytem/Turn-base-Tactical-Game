@@ -50,7 +50,7 @@ void ItemIcons::draw(const std::string& itemId, Rectangle dest, Color tint) cons
         else if (it->second.m_category == 2) c = Color{ 90, 150, 230, 255 };
     }
     DrawRectangleRounded(dest, 0.25f, 4, c);
-    DrawRectangleRoundedLines(dest, 0.25f, 4, 2.0f, Color{ 20, 20, 30, 255 });
+    DrawRectangleLinesEx(dest, 2.0f, Color{ 20, 20, 30, 255 });
     const size_t us = itemId.find('_');
     const char letter[2] = { us != std::string::npos && us + 1 < itemId.size() ? itemId[us + 1] : (itemId.empty() ? '?' : itemId[0]), 0 };
     const int fs = static_cast<int>(dest.height * 0.5f);
