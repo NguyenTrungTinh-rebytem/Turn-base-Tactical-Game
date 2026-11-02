@@ -4,6 +4,7 @@
 #include "graphics/Strings.h"
 #include "graphics/UiIcons.h"
 #include "graphics/UiShapes.h"
+#include "graphics/UiTheme.h"
 #include <algorithm>
 #include <cmath>
 
@@ -19,15 +20,14 @@ constexpr float IDLE_FPS = 6.0f;
 constexpr float SPRITE_SCALE = 1.5f;     // 128px * 1.5 = 192px
 
 // ---- Mau ----
-constexpr Color COL_TITLE      { 255, 214, 96, 255 };
-constexpr Color COL_PANEL      { 16, 13, 36, 215 };
-constexpr Color COL_EDGE       { 140, 120, 180, 255 };
-constexpr Color COL_EDGE_FOCUS { 255, 214, 96, 255 };
-constexpr Color COL_LABEL      { 190, 185, 220, 255 };
-constexpr Color COL_TEXT       { 238, 235, 252, 255 };
-constexpr Color COL_DIM        { 130, 126, 160, 255 };
-constexpr Color COL_BAR_BG     { 34, 30, 60, 255 };
-constexpr Color COL_BAR        { 255, 190, 70, 255 };
+constexpr Color COL_TITLE = UiTheme::silver;
+constexpr Color COL_PANEL = UiTheme::panel;
+constexpr Color COL_EDGE = UiTheme::ash;
+constexpr Color COL_EDGE_FOCUS = UiTheme::crimson;
+constexpr Color COL_LABEL = UiTheme::ashText;
+constexpr Color COL_TEXT = UiTheme::silver;
+constexpr Color COL_DIM = UiTheme::ashText;
+constexpr Color COL_BAR = UiTheme::hpHigh;
 
 const char* const* const ELEMENT_NAMES = Strings::elements;
 constexpr size_t ELEMENT_COUNT = 5;
@@ -44,17 +44,17 @@ Color elementColor(size_t i) {
 
 float clamp01(float v) { return std::max(0.0f, std::min(1.0f, v)); }
 
-void drawCenteredText(const char* text, float cx, float y, int size, Color c) {
-    UiText::draw(text, static_cast<int>(cx - UiText::measure(text, size) / 2.0f), static_cast<int>(y), size, c);
+void drawCenteredText(const char* text, float cx, float y, int size, Color c,
+                      float trackingEm = 0.0f) {
+    UiText::draw(text, static_cast<int>(cx -
+        UiText::measure(text, size, trackingEm) / 2.0f), static_cast<int>(y), size, c, trackingEm);
 }
 
 void drawStatBar(const char* label, int value, int maxValue, float x, float y, float barW) {
     UiText::draw(label, static_cast<int>(x), static_cast<int>(y), 14, COL_LABEL);
     const float bx = x + 48.0f, by = y + 5.0f, bh = 10.0f;
-    DrawRectangleRounded(Rectangle{ bx, by, barW, bh }, 0.8f, 8, COL_BAR_BG);
     const float ratio = clamp01(static_cast<float>(value) / static_cast<float>(std::max(1, maxValue)));
-    if (ratio > 0.0f)
-        DrawRectangleRounded(Rectangle{ bx, by, std::max(10.0f, barW * ratio), bh }, 0.8f, 8, COL_BAR);
+    UiShapes::runeBar(Rectangle{ bx, by, barW, bh }, ratio, COL_BAR);
     UiText::draw(TextFormat("%d", value), static_cast<int>(bx + barW + 8.0f), static_cast<int>(y - 1.0f), 18, COL_TEXT);
 }
 } // namespace
@@ -236,7 +236,7 @@ void HeroCreateScreen::drawBackground() const {
             static_cast<float>(UiCanvas::width()), static_cast<float>(UiCanvas::height()) });
         DrawRectangle(0, 0, 1280, 720, Color{ 0, 0, 0, 120 });
     } else {
-        DrawRectangleGradientV(0, 0, 1280, 720, Color{ 24, 20, 48, 255 }, Color{ 8, 6, 20, 255 });
+        DrawRectangleGradientV(0, 0, 1280, 720, Color{ 25, 16, 23, 255 }, UiTheme::ink);
     }
 }
 
@@ -247,10 +247,10 @@ void HeroCreateScreen::drawCards() const {
         const bool selected = (i == m_selected);
         const bool hover = (static_cast<int>(i) == m_hoverCard);
         if (selected) r.y -= 4.0f;
-        UiShapes::roundedRect(r, 10.0f,
-            selected ? Color{ 45, 37, 66, 245 } : Color{ 17, 15, 34, 205 },
+        UiShapes::plate(r,
+            selected ? Color{ 50, 10, 17, 224 } : UiTheme::panel,
             selected ? COL_EDGE_FOCUS : (hover ? COL_LABEL : COL_EDGE),
-            selected ? 3.0f : 1.5f);
+            selected ? 2.0f : 1.0f);
 
         const float spriteSize = 64.0f;
         const Vector2 spritePos{ r.x + 10.0f, r.y + 10.0f };
@@ -301,7 +301,7 @@ void HeroCreateScreen::drawCards() const {
 
 void HeroCreateScreen::drawDetail() const {
     const Rectangle panel{ AREA_X, DETAIL_Y, AREA_W, DETAIL_H };
-    UiShapes::roundedRect(panel, 16.0f, COL_PANEL, COL_EDGE, 2.0f);
+    UiShapes::plate(panel, COL_PANEL, COL_EDGE, 1.0f);
     if (m_selected >= m_presets.size()) return;
 
     const HeroPreset& p = m_presets[m_selected];
@@ -374,9 +374,9 @@ void HeroCreateScreen::drawDetail() const {
         const Rectangle row{ sx, y, panel.x + panel.width - sx - 24.0f, 40.0f };
         const bool hovered = CheckCollisionPointRec(mouse, row);
         if (hovered) m_hoverSkill = static_cast<int>(i);
-        UiShapes::roundedRect(row, 7.0f,
-            hovered ? Color{ 48, 42, 75, 255 } : Color{ 24, 22, 46, 230 },
-            hovered ? COL_EDGE_FOCUS : Color{ 90, 84, 120, 255 }, hovered ? 1.5f : 1.0f);
+        UiShapes::bladeStrip(row,
+            hovered ? UiTheme::panelRaised : UiTheme::panel,
+            hovered ? COL_EDGE_FOCUS : COL_EDGE, false, hovered, hovered);
         UiIcons::draw("action:skill",
             Rectangle{ row.x + 8.0f, row.y + 7.0f, 26.0f, 26.0f }, element);
         UiText::draw(skills[i].source, static_cast<int>(row.x + 42.0f),
@@ -398,15 +398,18 @@ void HeroCreateScreen::drawButtons() const {
         const Rectangle r = buttonRect(b);
         const bool hover = (m_hoverButton == b);
         const bool primary = (b == BTN_CONFIRM);
-        UiShapes::roundedRect(r, 10.0f, hover ? Color{ 52, 44, 92, 255 } : COL_PANEL,
-                              primary ? COL_EDGE_FOCUS : COL_EDGE, 2.0f);
-        drawCenteredText(labels[b], r.x + r.width / 2.0f, r.y + 14.0f, 24, primary ? COL_TITLE : COL_TEXT);
+        UiShapes::bladeStrip(r, primary ? Color{ 50, 10, 17, 224 } : COL_PANEL,
+                             primary ? COL_EDGE_FOCUS : COL_EDGE, false,
+                             primary, hover);
+        drawCenteredText(labels[b], r.x + r.width / 2.0f, r.y + 14.0f, 24,
+                         primary ? COL_TITLE : COL_TEXT, UiTheme::displayTracking);
     }
 }
 
 void HeroCreateScreen::draw() const {
     drawBackground();
-    drawCenteredText(m_slotLabel.c_str(), 640.0f, 28.0f, 44, COL_TITLE);
+    drawCenteredText(m_slotLabel.c_str(), 640.0f, 28.0f, 44, COL_TITLE,
+                     UiTheme::displayTracking);
     if (!hasOptions()) {
         drawCenteredText(u8"Chưa có dữ liệu tướng (data/heroes.csv, races.csv, classes.csv)", 640.0f, 340.0f, 22, COL_DIM);
         drawButtons();

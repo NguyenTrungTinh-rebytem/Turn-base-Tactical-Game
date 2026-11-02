@@ -23,6 +23,12 @@ inline constexpr Color mpHigh{ 56, 200, 224, 255 };
 inline constexpr Color mpLow{ 43, 127, 209, 255 };
 inline constexpr Color danger{ 239, 75, 75, 255 };
 inline constexpr Color heal{ 125, 240, 165, 255 };
+inline constexpr float plateChamferMax = 16.0f;
+inline constexpr float bladeFadeFraction = 0.35f;
+inline constexpr float bladePointRatio = 0.32f;
+inline constexpr float runeBarSkew = 0.12f;
+inline constexpr float displayTracking = 0.10f;
+inline constexpr float hudTracking = 0.02f;
 
 inline constexpr Color accent = crimson;
 inline constexpr Color text = silver;

@@ -39,7 +39,7 @@ public:
     static Rectangle itemRowBounds(int itemIndex, int itemCount, int selectedIndex);
 
     // ---- HUD tren dau nhan vat ----
-    // anchor = vi tri tren dau nhan vat (BattleMap::getHeadPos). Chia 0 an toan.
+    // anchor = BattleMap::getHeadPos; field bars are placed from the estimated feet anchor.
     void drawHpMpBar(const Character& character, Vector2 anchor) const;
 
     void drawRoundChip(int stage, const Character* current, int gold) const;

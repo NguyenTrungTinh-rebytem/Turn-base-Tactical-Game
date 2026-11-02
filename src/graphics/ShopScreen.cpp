@@ -14,15 +14,15 @@
 #include <utility>
 
 namespace {
-constexpr Color COL_TITLE{ 255, 214, 96, 255 };
-constexpr Color COL_LABEL{ 190, 185, 220, 255 };
-constexpr Color COL_TEXT{ 238, 235, 252, 255 };
-constexpr Color COL_DIM{ 150, 151, 174, 255 };
-constexpr Color COL_ERR{ 255, 115, 115, 255 };
-constexpr Color COL_OK{ 120, 230, 140, 255 };
-constexpr Color COL_GOLD{ 255, 205, 60, 255 };
-constexpr Color COL_AMBER{ 244, 176, 76, 255 };
-constexpr Color COL_PANEL{ 18, 19, 38, 248 };
+constexpr Color COL_TITLE = UiTheme::silver;
+constexpr Color COL_LABEL = UiTheme::ashText;
+constexpr Color COL_TEXT = UiTheme::silver;
+constexpr Color COL_DIM = UiTheme::ashText;
+constexpr Color COL_ERR = UiTheme::danger;
+constexpr Color COL_OK = UiTheme::heal;
+constexpr Color COL_GOLD = UiTheme::gold;
+constexpr Color COL_AMBER = UiTheme::gold;
+constexpr Color COL_PANEL = UiTheme::panel;
 constexpr int VISIBLE_ROWS = 7;
 constexpr float ROW_HEIGHT = 56.0f;
 constexpr float SHOP_SCALE = 0.72f;
@@ -114,7 +114,7 @@ int drawWrapped(const std::string& text, float x, float y, float width,
 }
 
 void drawPill(Rectangle bounds, const std::string& label, Color fill, Color text) {
-    UiShapes::roundedRect(bounds, bounds.height * 0.5f, fill);
+    UiShapes::bladeStrip(bounds, fill, UiTheme::ash, false);
     int fontSize = 13;
     while (fontSize > 9 && UiText::measure(label, fontSize) > bounds.width - u(10.0f))
         --fontSize;
@@ -124,8 +124,7 @@ void drawPill(Rectangle bounds, const std::string& label, Color fill, Color text
 }
 
 void drawPanel(Rectangle bounds) {
-    UiShapes::roundedRect(bounds, UiTheme::radiusMedium, COL_PANEL,
-                          Color{ 97, 105, 137, 255 }, 1.0f);
+    UiShapes::plate(bounds, COL_PANEL, UiTheme::ash, 1.0f);
 }
 }
 
@@ -496,14 +495,12 @@ void ShopScreen::draw() const {
     const Rectangle closeIcon{ panel.x + panel.width - u(54.0f), panel.y + u(14.0f), u(36.0f), u(36.0f) };
     DrawRectangle(0, 0, UiCanvas::width(), UiCanvas::height(), Color{ 0, 0, 0, 150 });
     UiBlur::draw(panel, UiTheme::radiusMedium, Color{ 16, 20, 38, 238 });
-    UiShapes::roundedRect(panel, UiTheme::radiusMedium, Color{ 15, 17, 34, 242 },
-                          Color{ 116, 128, 164, 255 }, 1.5f);
+    UiShapes::plate(panel, Color{ 11, 9, 15, 248 }, UiTheme::silver, 1.5f);
 
     UiText::draw(Strings::shopTitle, static_cast<int>(panel.x + u(24.0f)),
                  static_cast<int>(panel.y + u(19.0f)), 22, COL_TITLE);
     const Rectangle goldChip{ panel.x + panel.width - u(242.0f), panel.y + u(14.0f), u(174.0f), u(40.0f) };
-    UiShapes::roundedRect(goldChip, u(18.0f), Color{ 55, 45, 22, 255 },
-                          Color{ 174, 139, 55, 255 }, 1.0f);
+    UiShapes::bladeStrip(goldChip, Color{ 31, 25, 16, 255 }, COL_GOLD, false);
     DrawCircle(static_cast<int>(goldChip.x + u(20.0f)), static_cast<int>(goldChip.y + u(20.0f)),
                u(9.0f), COL_GOLD);
     DrawCircleLines(static_cast<int>(goldChip.x + u(20.0f)), static_cast<int>(goldChip.y + u(20.0f)),
@@ -527,9 +524,10 @@ void ShopScreen::draw() const {
         const Rectangle bounds = tabRect(tab);
         const bool active = m_tab == tab;
         const bool hover = CheckCollisionPointRec(UiInput::mousePosition(), bounds);
-        UiShapes::roundedRect(bounds, UiTheme::radiusSmall,
-            active ? Color{ 76, 58, 24, 255 } : (hover ? Color{ 35, 44, 66, 255 } : Color{ 25, 30, 48, 255 }),
-            active ? COL_TITLE : Color{ 97, 105, 137, 255 }, active ? 2.0f : 1.0f);
+        UiShapes::angledTab(bounds,
+            active ? Color{ 50, 10, 17, 224 } :
+                (hover ? UiTheme::panelRaised : UiTheme::panel),
+            active ? UiTheme::crimson : UiTheme::ash, active, hover);
         const int width = UiText::measure(tabs[tab], 14);
         UiText::draw(tabs[tab], static_cast<int>(bounds.x + (bounds.width - width) * 0.5f),
                      static_cast<int>(bounds.y + (bounds.height - 14.0f) * 0.5f), 14,
@@ -550,9 +548,10 @@ void ShopScreen::draw() const {
         const Rectangle bounds = filterRect(filter);
         const bool active = m_filter[m_tab] == filter;
         const bool hover = CheckCollisionPointRec(UiInput::mousePosition(), bounds);
-        UiShapes::roundedRect(bounds, bounds.height * 0.5f,
-            active ? Color{ 73, 58, 28, 255 } : (hover ? Color{ 38, 48, 67, 255 } : Color{ 25, 30, 48, 255 }),
-            active ? COL_TITLE : Color{ 97, 105, 137, 255 }, active ? 1.5f : 1.0f);
+        UiShapes::bladeStrip(bounds,
+            active ? Color{ 50, 10, 17, 224 } :
+                (hover ? UiTheme::panelRaised : UiTheme::panel),
+            active ? UiTheme::crimson : UiTheme::ash, false, active, hover);
         const int width = UiText::measure(filterNames[filter], 10);
         UiText::draw(filterNames[filter],
             static_cast<int>(bounds.x + (bounds.width - width) * 0.5f),
@@ -568,9 +567,9 @@ void ShopScreen::draw() const {
     if (m_messageTime > 0.0f && !m_message.empty()) {
         const Rectangle toast{ panel.x + u(394.0f), panel.y + panel.height - u(48.0f),
                                 u(440.0f), u(34.0f) };
-        UiShapes::roundedRect(toast, UiTheme::radiusSmall,
-            m_messageOk ? Color{ 22, 71, 52, 248 } : Color{ 83, 38, 42, 248 },
-            m_messageOk ? Color{ 87, 190, 125, 255 } : Color{ 213, 100, 100, 255 }, 1.0f);
+        UiShapes::plate(toast,
+            m_messageOk ? Color{ 12, 41, 28, 248 } : Color{ 55, 14, 20, 248 },
+            m_messageOk ? UiTheme::heal : UiTheme::danger, 1.0f);
         int fontSize = 11;
         while (fontSize > 8 && UiText::measure(m_message, fontSize) > toast.width - u(24.0f))
             --fontSize;
@@ -660,10 +659,10 @@ void ShopScreen::drawList() const {
     }
 
     const Rectangle track = scrollbarTrackRect();
-    UiShapes::roundedRect(track, track.width * 0.5f, Color{ 28, 33, 50, 255 });
+    UiShapes::plate(track, UiTheme::ink, BLANK);
     const Rectangle thumb = scrollbarThumbRect();
-    UiShapes::roundedRect(thumb, thumb.width * 0.5f,
-        m_draggingScrollbar ? COL_TITLE : Color{ 141, 153, 180, 255 });
+    UiShapes::bladeStrip(thumb, m_draggingScrollbar ? UiTheme::crimson : UiTheme::ash,
+                         UiTheme::silver, false, m_draggingScrollbar);
 }
 
 void ShopScreen::drawMemberSelector(bool shopTab, const Rectangle& bounds) const {
@@ -671,10 +670,10 @@ void ShopScreen::drawMemberSelector(bool shopTab, const Rectangle& bounds) const
         const Rectangle memberBounds = memberRect(static_cast<int>(index), shopTab);
         const bool selected = static_cast<int>(index) == m_selectedMember;
         const bool hover = CheckCollisionPointRec(UiInput::mousePosition(), memberBounds);
-        const Color cardFill = selected ? Color{ 67, 55, 27, 255 }
-            : (hover ? Color{ 34, 43, 62, 255 } : Color{ 24, 30, 47, 255 });
-        UiShapes::roundedRect(memberBounds, UiTheme::radiusSmall, cardFill,
-            selected ? COL_TITLE : Color{ 97, 105, 137, 255 }, selected ? 2.0f : 1.0f);
+        const Color cardFill = selected ? Color{ 50, 10, 17, 224 }
+            : (hover ? UiTheme::panelRaised : UiTheme::panel);
+        UiShapes::bladeStrip(memberBounds, cardFill,
+            selected ? UiTheme::crimson : UiTheme::ash, false, selected, hover);
         const Rectangle hex{ memberBounds.x + u(5.0f), memberBounds.y + u(5.0f),
                              u(32.0f), u(32.0f) };
         const Vector2 center{ hex.x + hex.width * 0.5f, hex.y + hex.height * 0.5f };
@@ -745,8 +744,8 @@ void ShopScreen::drawShopDetail() const {
     const int descriptionLines = drawWrapped(item.m_description, detail.x + u(18.0f),
         detail.y + u(96.0f), detail.width - u(36.0f), 12, 17, COL_TEXT, 3);
     const float noteY = detail.y + u(104.0f) + std::max(1, descriptionLines) * 17.0f;
-    UiShapes::roundedRect(Rectangle{ detail.x + u(14.0f), noteY, detail.width - u(28.0f), u(42.0f) },
-                          UiTheme::radiusSmall, Color{ 25, 36, 52, 255 });
+    UiShapes::plate(Rectangle{ detail.x + u(14.0f), noteY, detail.width - u(28.0f), u(42.0f) },
+                    UiTheme::panelRaised, BLANK);
     drawWrapped(usageText(item.m_category), detail.x + u(24.0f), noteY + u(7.0f),
                 detail.width - u(48.0f), 10, 13, COL_LABEL, 2);
 
@@ -769,7 +768,7 @@ void ShopScreen::drawShopDetail() const {
             ? &m_info.m_members[static_cast<std::size_t>(m_selectedMember)] : nullptr;
         const Rectangle compare{ detail.x + u(18.0f), detail.y + u(330.0f),
                                  detail.width - u(36.0f), u(54.0f) };
-        UiShapes::roundedRect(compare, UiTheme::radiusSmall, Color{ 25, 35, 51, 255 });
+        UiShapes::plate(compare, UiTheme::panelRaised, BLANK);
         if (member) {
             const auto comparison = compareEffects(!member->m_gearId.empty(),
                 member->m_gearEffect, member->m_gearValue, member->m_gearValue2,
@@ -784,7 +783,7 @@ void ShopScreen::drawShopDetail() const {
     } else {
         const Rectangle effect{ detail.x + u(18.0f), detail.y + u(254.0f),
                                 detail.width - u(36.0f), u(54.0f) };
-        UiShapes::roundedRect(effect, UiTheme::radiusSmall, Color{ 25, 35, 51, 255 });
+        UiShapes::plate(effect, UiTheme::panelRaised, BLANK);
         UiText::draw(u8"Hiệu quả", static_cast<int>(effect.x + u(10.0f)),
                      static_cast<int>(effect.y + u(7.0f)), 10, COL_LABEL);
         UiText::draw(effectValue(item.m_effect, item.m_value, item.m_value2, item.m_duration),
@@ -840,7 +839,7 @@ void ShopScreen::drawBagDetail() const {
         ? &m_info.m_members[static_cast<std::size_t>(m_selectedMember)] : nullptr;
     const Rectangle slot{ detail.x + u(18.0f), detail.y + u(214.0f),
                           detail.width - u(36.0f), u(78.0f) };
-    UiShapes::roundedRect(slot, UiTheme::radiusSmall, Color{ 25, 35, 51, 255 });
+    UiShapes::plate(slot, UiTheme::panelRaised, BLANK);
     UiText::draw(u8"Trang bị đang mang", static_cast<int>(slot.x + u(12.0f)),
                  static_cast<int>(slot.y + u(8.0f)), 10, COL_LABEL);
     if (member && !member->m_gearId.empty()) {
@@ -860,7 +859,7 @@ void ShopScreen::drawBagDetail() const {
             member->m_gearDuration, item->m_duration);
         const Rectangle compare{ detail.x + u(18.0f), detail.y + u(300.0f),
                                  detail.width - u(36.0f), u(42.0f) };
-        UiShapes::roundedRect(compare, UiTheme::radiusSmall, Color{ 25, 35, 51, 255 });
+        UiShapes::plate(compare, UiTheme::panelRaised, BLANK);
         drawWrapped(comparison.first, compare.x + u(10.0f), compare.y + u(8.0f),
                     compare.width - u(20.0f), 10, 13, comparison.second, 2);
     } else if (item && !canEquip) {

@@ -1,4 +1,6 @@
 #include "UiIcons.h"
+#include "graphics/UiShapes.h"
+#include "graphics/UiTheme.h"
 #include "graphics/UiText.h"
 #include <iostream>
 #include <unordered_map>
@@ -154,8 +156,9 @@ void UiIcons::draw(const std::string& key, Rectangle bounds, Color tint) {
         return;
     }
 
-    DrawRectangleRec(bounds, Color{ 20, 20, 35, 255 });
-    DrawRectangleLinesEx(bounds, 1.0f, Color{ 230, 230, 240, 255 });
+    UiShapes::plate(bounds, Color{ UiTheme::panel.r, UiTheme::panel.g,
+                                   UiTheme::panel.b, UiTheme::panel.a },
+                    Color{ tint.r, tint.g, tint.b, 180 }, 1.0f);
     const std::size_t colon = key.find(':');
     const char fallback[] = { colon == std::string::npos || colon + 1 >= key.size()
         ? '?' : key[colon + 1], '\0' };

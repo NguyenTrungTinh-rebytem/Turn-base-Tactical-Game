@@ -126,8 +126,7 @@ void TurnOrderBar::draw(const std::vector<Character*>& upcoming, const Character
         const Rectangle box{ row.m_y + row.m_x, startY - size * 0.5f, size, size };
         const Vector2 center{ box.x + box.width * 0.5f, box.y + box.height * 0.5f };
         const Color ring = active ? UiTheme::crimson : UiTheme::ash;
-        DrawPoly(center, 6, size * 0.5f, 30.0f,
-                 withAlpha(UiTheme::ink, row.m_alpha));
+        UiShapes::seal(box, withAlpha(ring, row.m_alpha), active);
         const Rectangle portrait{ box.x + size * 0.17f, box.y + size * 0.12f,
                                   size * 0.66f, size * 0.74f };
         const auto view = std::find_if(views.begin(), views.end(),
@@ -137,20 +136,6 @@ void TurnOrderBar::draw(const std::vector<Character*>& upcoming, const Character
         if (view == views.end() || !(*view)->drawPortrait(portrait, withAlpha(WHITE, row.m_alpha)))
             UiIcons::draw(elementKey(row.m_element), portrait,
                           withAlpha(WHITE, row.m_alpha));
-        DrawPolyLines(center, 6, size * 0.5f, 30.0f,
-                      withAlpha(ring, row.m_alpha));
-        DrawPolyLines(center, 6, size * 0.5f - 2.0f, 30.0f,
-                      withAlpha(Color{ 141, 135, 148, 155 }, row.m_alpha));
-        if (active) {
-            for (int tick = 0; tick < 4; ++tick) {
-                const float angle = (30.0f + tick * 60.0f) * DEG2RAD;
-                const Vector2 inner{ center.x + std::cos(angle) * size * 0.50f,
-                                     center.y + std::sin(angle) * size * 0.50f };
-                const Vector2 outer{ center.x + std::cos(angle) * (size * 0.50f + 4.0f),
-                                     center.y + std::sin(angle) * (size * 0.50f + 4.0f) };
-                DrawLineEx(inner, outer, 1.0f, withAlpha(UiTheme::crimsonGlow, row.m_alpha));
-            }
-        }
         if (row.m_isCurrent && m_flash > 0.0f)
             DrawPolyLines(center, 6, size * 0.5f + pulse * 2.0f, 30.0f,
                           withAlpha(WHITE, 0.5f * m_flash * row.m_alpha));

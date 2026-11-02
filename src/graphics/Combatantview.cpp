@@ -36,7 +36,9 @@ BattleAnchor CombatantView::getAnchor() const {
     return BattleAnchors::forUnit(m_slot, m_frameWidth, m_frameHeight);
 }
 
-Vector2 CombatantView::getHeadPos() const { return getAnchor().feet; }
+Vector2 CombatantView::getHeadPos() const {
+    return BattleMap::getHeadPos(m_slot, m_frameHeight);
+}
 
 Rectangle CombatantView::getDrawBounds() const { return getAnchor().spriteBounds; }
 

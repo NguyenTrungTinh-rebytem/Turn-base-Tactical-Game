@@ -17,6 +17,7 @@
 
 namespace {
 bool galleryVisible = false;
+int galleryPage = 0;
 int selectedTab = 0;
 int quantity = 3;
 float scroll = 0.0f;
@@ -53,6 +54,74 @@ void UiDevGallery::draw() {
                           UiTheme::ink, UiTheme::accent, 2.0f);
     UiText::draw(u8"Thư viện thành phần giao diện (F10 đóng)", 52, 38, 24, UiTheme::text);
     UiText::draw(u8"Di chuột để xem hover/tooltip; nhấn để kiểm tra trạng thái tương tác.", 52, 72, 15, UiTheme::text);
+    UiWidgets::TabBar(Rectangle{ 900, 42, 300, 36 },
+                      { u8"Thành phần", u8"Blade & Seal" }, galleryPage);
+
+    if (galleryPage == 1) {
+        UiText::draw("S1 · blade strips — normal / hover / selected / disabled", 54, 118, 17, UiTheme::silver);
+        const Color edge = UiTheme::ash;
+        const Rectangle leftRows[] = {
+            { 70, 152, 500, 40 }, { 70, 202, 500, 40 },
+            { 70, 252, 500, 40 }, { 70, 302, 500, 40 }
+        };
+        const Rectangle rightRows[] = {
+            { 710, 152, 500, 40 }, { 710, 202, 500, 40 },
+            { 710, 252, 500, 40 }, { 710, 302, 500, 40 }
+        };
+        const char* const states[] = { "normal", "hover", "selected", "disabled" };
+        for (int index = 0; index < 4; ++index) {
+            UiShapes::bladeStrip(leftRows[index], UiTheme::panel, edge, false,
+                index == 2, index == 1, index != 3);
+            UiShapes::bladeStrip(rightRows[index], UiTheme::panel, edge, true,
+                index == 2, index == 1, index != 3);
+            UiText::draw(states[index], static_cast<int>(leftRows[index].x + 36), 164 + index * 50,
+                         14, index == 2 ? UiTheme::silver : UiTheme::ashText);
+            UiText::draw(states[index], static_cast<int>(rightRows[index].x + 366), 164 + index * 50,
+                         14, index == 2 ? UiTheme::silver : UiTheme::ashText);
+        }
+
+        UiText::draw("S2 · plate", 60, 372, 15, UiTheme::silver);
+        UiShapes::plate(Rectangle{ 62, 398, 270, 94 }, UiTheme::panelRaised, edge);
+        UiText::draw("Thẻ / hộp thoại", 86, 430, 16, UiTheme::silver);
+        UiText::draw("vát góc, viền trong", 86, 456, 13, UiTheme::ashText);
+
+        UiText::draw("S3 · seals", 364, 372, 15, UiTheme::silver);
+        UiShapes::seal(Rectangle{ 366, 398, 72, 72 }, edge);
+        UiShapes::seal(Rectangle{ 462, 398, 72, 72 }, UiTheme::crimson, true);
+        UiText::draw("thường", 366, 476, 12, UiTheme::ashText);
+        UiText::draw("đang chọn", 462, 476, 12, UiTheme::ashText);
+
+        UiText::draw("S4 · rune bars · S5 · diamond / divider", 560, 372, 15, UiTheme::silver);
+        UiShapes::runeBar(Rectangle{ 560, 408, 400, 12 }, 0.72f, UiTheme::hpHigh,
+                          UiTheme::danger);
+        UiShapes::runeBar(Rectangle{ 560, 432, 400, 8 }, 0.46f, UiTheme::mpHigh);
+        UiShapes::diamond(Vector2{ 990, 419 }, 18, UiTheme::crimsonGlow);
+        UiShapes::divider(Vector2{ 1020, 420 }, Vector2{ 1200, 420 }, edge);
+        UiText::draw("HP", 560, 449, 12, UiTheme::ashText);
+        UiText::draw("MP", 560, 464, 12, UiTheme::ashText);
+
+        UiText::draw("S6 · angled tabs", 62, 520, 15, UiTheme::silver);
+        for (int index = 0; index < 3; ++index) {
+            const Rectangle tab{ 62.0f + index * 145.0f, 548, 138, 38 };
+            UiShapes::angledTab(tab, index == 1 ? Color{ 50, 10, 17, 220 } : UiTheme::panel,
+                edge, index == 1, index == 2);
+            UiText::draw(index == 0 ? u8"Đội hình" : index == 1 ? u8"Vật phẩm" : u8"Kỹ năng",
+                static_cast<int>(tab.x + 18), 559, 14,
+                index == 1 ? UiTheme::silver : UiTheme::ashText);
+        }
+
+        UiText::draw("S7 · icon seals", 560, 520, 15, UiTheme::silver);
+        UiWidgets::IconButton(Rectangle{ 560, 548, 48, 48 }, "action:attack");
+        UiWidgets::IconButton(Rectangle{ 624, 548, 48, 48 }, "action:pause");
+        UiWidgets::IconButton(Rectangle{ 688, 548, 48, 48 }, "action:undo", false);
+        UiWidgets::Tooltip(Rectangle{ 560, 548, 48, 48 }, u8"Nút biểu tượng · hover");
+        UiText::draw("Ash", 760, 550, 13, UiTheme::ashText);
+        UiShapes::divider(Vector2{ 760, 575 }, Vector2{ 1180, 575 }, UiTheme::ash);
+        UiText::draw("chú thích: hairline + diamond", 760, 586, 13, UiTheme::ashText);
+        UiWidgets::Toast();
+        UiCursor::draw();
+        return;
+    }
 
     UiWidgets::Button(Rectangle{ 52, 112, 172, 44 }, u8"Nút thường");
     UiWidgets::Button(Rectangle{ 236, 112, 172, 44 }, u8"Vô hiệu hóa", false);

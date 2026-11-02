@@ -6,32 +6,18 @@
 #include "graphics/UiBlur.h"
 #include "graphics/UiIcons.h"
 #include "graphics/UiShapes.h"
+#include "graphics/UiTheme.h"
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 namespace {
-// ---- Bo cuc (thiet ke cho 1280x720, tinh theo kich thuoc cua so) ----
-constexpr float TITLE_Y_RATIO   = 0.17f;
-constexpr float BUTTON_W        = 280.0f;
-constexpr float BUTTON_H        = 44.0f;
-constexpr float BUTTON_GAP      = 16.0f;
-constexpr float BUTTONS_Y_RATIO = 0.54f;
+constexpr float BUTTON_W        = 306.0f;
+constexpr float BUTTON_H        = 38.0f;
+constexpr float BUTTON_GAP      = 10.0f;
+constexpr float BUTTONS_Y_RATIO = 0.37f;
 constexpr float FADE_IN_SECONDS = 0.8f;
 constexpr float HOVER_SPEED     = 10.0f;
-
-// ---- Mau ----
-constexpr Color COL_TITLE        { 255, 214, 96, 255 };
-constexpr Color COL_TITLE_SHADOW { 60, 30, 10, 255 };
-constexpr Color COL_SUBTITLE     { 220, 210, 240, 255 };
-constexpr Color COL_BTN          { 18, 14, 40, 190 };
-constexpr Color COL_BTN_SELECTED { 90, 60, 20, 230 };
-constexpr Color COL_BTN_EDGE     { 140, 120, 180, 255 };
-constexpr Color COL_BTN_EDGE_SEL { 255, 214, 96, 255 };
-constexpr Color COL_TEXT         { 235, 232, 250, 255 };
-constexpr Color COL_TEXT_SEL     { 255, 240, 170, 255 };
-constexpr Color COL_OK           { 120, 230, 140, 255 };
-constexpr Color COL_ERR          { 255, 110, 110, 255 };
-constexpr Color COL_EMBER(unsigned char alpha) { return Color{ 255, 140, 70, alpha }; }   // tan lua (doi sang 190,255,120 neu muon dom dom xanh)
 
 float clamp01(float v) { return std::max(0.0f, std::min(1.0f, v)); }
 
@@ -42,9 +28,49 @@ float hash01(int n) {
     return static_cast<float>(x & 0xFFFFu) / 65535.0f;
 }
 
-void drawCenteredText(const char* text, float centerX, float y, int size, Color color) {
-    const int w = UiText::measure(text, size);
-    UiText::draw(text, static_cast<int>(centerX - w / 2.0f), static_cast<int>(y), size, color);
+void drawCenteredText(const char* text, float centerX, float y, int size, Color color,
+                      float trackingEm = 0.0f, bool shadow = true) {
+    const int width = UiText::measure(text, size, trackingEm);
+    const int x = static_cast<int>(centerX - width * 0.5f);
+    if (shadow)
+        UiText::draw(text, x + 1, static_cast<int>(y) + 1, size, Color{ 0, 0, 0, color.a },
+                     trackingEm);
+    UiText::draw(text, x, static_cast<int>(y), size, color, trackingEm);
+}
+
+void sampleMenuSide(Texture2D texture, bool& right, float& centerX) {
+    Image image = LoadImageFromTexture(texture);
+    if (!image.data || image.width < 2 || image.height < 2) {
+        std::cerr << "StartMenu: unable to sample background luminance; using right-side layout\n";
+        right = true;
+        centerX = 0.82f;
+        UnloadImage(image);
+        return;
+    }
+    Color* pixels = LoadImageColors(image);
+    if (!pixels) {
+        std::cerr << "StartMenu: unable to read background pixels; using right-side layout\n";
+        UnloadImage(image);
+        right = true;
+        centerX = 0.82f;
+        return;
+    }
+
+    double luminance[2]{ 0.0, 0.0 };
+    std::size_t count[2]{ 0, 0 };
+    for (int y = image.height / 10; y < image.height * 9 / 10; y += 4) {
+        for (int x = 0; x < image.width; x += 4) {
+            const int side = x < image.width / 2 ? 0 : 1;
+            const Color color = pixels[static_cast<std::size_t>(y) * image.width + x];
+            luminance[side] += 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;
+            ++count[side];
+        }
+    }
+    right = luminance[1] / static_cast<double>(count[1]) <
+            luminance[0] / static_cast<double>(count[0]);
+    centerX = right ? 0.82f : 0.18f;
+    UnloadImageColors(pixels);
+    UnloadImage(image);
 }
 } // namespace
 
@@ -60,7 +86,10 @@ bool StartMenu::loadBackground(const std::string& path) {
     if (path.empty() || !FileExists(path.c_str())) return false;   // thieu anh -> nen thu tuc
     m_background = LoadTexture(path.c_str());
     m_hasBackground = (m_background.id != 0);
-    if (m_hasBackground) SetTextureFilter(m_background, TEXTURE_FILTER_BILINEAR);   // anh minh hoa (khong phai pixel art): lam muot khi phong/thu
+    if (m_hasBackground) {
+        SetTextureFilter(m_background, TEXTURE_FILTER_BILINEAR);
+        sampleMenuSide(m_background, m_menuOnRight, m_menuCenterX);
+    }
     return m_hasBackground;
 }
 
@@ -90,22 +119,11 @@ void StartMenu::update(float deltaTime) {
 
 MenuAction StartMenu::handleInput() {
     if (m_confirmExit) {
-        const Rectangle dialog{ 430.0f, 260.0f, 420.0f, 190.0f };
+        const Rectangle dialog{ 420.0f, 248.0f, 440.0f, 224.0f };
         const Rectangle buttons[] = {
-            { dialog.x + 34.0f, dialog.y + 126.0f, 160.0f, 42.0f },
-            { dialog.x + 226.0f, dialog.y + 126.0f, 160.0f, 42.0f }
+            { dialog.x + 40.0f, dialog.y + 154.0f, 160.0f, 42.0f },
+            { dialog.x + 240.0f, dialog.y + 154.0f, 160.0f, 42.0f }
         };
-        if (IsKeyPressed(KEY_ESCAPE)) {
-            m_confirmExit = false;
-            return MenuAction::NONE;
-        }
-        if (IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A)) m_dialogSelected = 0;
-        if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D)) m_dialogSelected = 1;
-        if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER) || IsKeyPressed(KEY_SPACE)) {
-            if (m_dialogSelected == 0) return MenuAction::EXIT;
-            m_confirmExit = false;
-            return MenuAction::NONE;
-        }
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             const Vector2 mouse = UiCanvas::mousePosition();
             if (CheckCollisionPointRec(mouse, buttons[0])) return MenuAction::EXIT;
@@ -117,21 +135,6 @@ MenuAction StartMenu::handleInput() {
     if (m_buttons.empty()) return MenuAction::NONE;
     const int count = static_cast<int>(m_buttons.size());
 
-    // ---- Ban phim ----
-    if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) m_selected = (m_selected + 1) % count;
-    if (IsKeyPressed(KEY_UP)   || IsKeyPressed(KEY_W)) m_selected = (m_selected + count - 1) % count;
-    if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER) || IsKeyPressed(KEY_SPACE))
-    {
-        const MenuAction action = m_buttons[static_cast<size_t>(m_selected)].m_action;
-        if (action == MenuAction::EXIT) {
-            m_confirmExit = true;
-            m_dialogSelected = 1;
-            return MenuAction::NONE;
-        }
-        return action;
-    }
-
-    // ---- Chuot: di chuyen thi chon nut dang tro, bam trai thi kich hoat ----
     const Vector2 mouse = UiCanvas::mousePosition();
     const Vector2 moved = UiCanvas::mouseDelta();
     for (int i = 0; i < count; ++i) {
@@ -142,7 +145,6 @@ MenuAction StartMenu::handleInput() {
             const MenuAction action = m_buttons[static_cast<size_t>(i)].m_action;
             if (action == MenuAction::EXIT) {
                 m_confirmExit = true;
-                m_dialogSelected = 1;
                 return MenuAction::NONE;
             }
             return action;
@@ -156,32 +158,33 @@ void StartMenu::draw() const {
     drawBackground();
     drawTitle();
     drawButtons();
+    drawFooter();
 
-    // Fade-in tu mau den khi vao menu
     const float fade = 1.0f - clamp01(m_time / FADE_IN_SECONDS);
     if (fade > 0.0f)
         DrawRectangle(0, 0, UiCanvas::width(), UiCanvas::height(),
                       Color{ 0, 0, 0, static_cast<unsigned char>(255 * fade) });
     if (m_confirmExit) {
-        const Rectangle dialog{ 430.0f, 260.0f, 420.0f, 190.0f };
+        const Rectangle dialog{ 420.0f, 248.0f, 440.0f, 224.0f };
         UiBlur::draw(Rectangle{ 0.0f, 0.0f, 1280.0f, 720.0f }, 0.0f, Color{ 6, 8, 18, 175 });
-        UiShapes::roundedRect(dialog, 18.0f, Color{ 18, 16, 38, 240 },
-                              Color{ 200, 170, 80, 255 }, 2.0f);
-        drawCenteredText(u8"Thoát trò chơi?", dialog.x + dialog.width / 2.0f,
-                         dialog.y + 30.0f, 30, COL_TITLE);
-        drawCenteredText(u8"Tiến trình hiện tại sẽ không được lưu.",
-                         dialog.x + dialog.width / 2.0f, dialog.y + 76.0f, 18, COL_TEXT);
+        UiShapes::plate(dialog, UiTheme::panelRaised, UiTheme::crimson, 1.5f);
+        drawCenteredText(Strings::exitQuestion, dialog.x + dialog.width / 2.0f,
+                         dialog.y + 30.0f, 26, UiTheme::silver,
+                         UiTheme::displayTracking);
+        drawCenteredText(Strings::exitWarning, dialog.x + dialog.width / 2.0f,
+                         dialog.y + 84.0f, 15, UiTheme::ashText);
         const Rectangle buttons[] = {
-            { dialog.x + 34.0f, dialog.y + 126.0f, 160.0f, 42.0f },
-            { dialog.x + 226.0f, dialog.y + 126.0f, 160.0f, 42.0f }
+            { dialog.x + 40.0f, dialog.y + 154.0f, 160.0f, 42.0f },
+            { dialog.x + 240.0f, dialog.y + 154.0f, 160.0f, 42.0f }
         };
         for (int i = 0; i < 2; ++i) {
-            const bool selected = i == m_dialogSelected;
-            UiShapes::roundedRect(buttons[i], 9.0f,
-                selected ? Color{ 75, 54, 18, 255 } : Color{ 29, 26, 54, 255 },
-                selected ? Color{ 255, 214, 96, 255 } : COL_BTN_EDGE, selected ? 2.0f : 1.0f);
-            drawCenteredText(i == 0 ? u8"Thoát" : u8"Ở lại",
-                buttons[i].x + buttons[i].width / 2.0f, buttons[i].y + 10.0f, 20, COL_TEXT);
+            const bool over = CheckCollisionPointRec(UiCanvas::mousePosition(), buttons[i]);
+            const bool selected = i == 1;
+            UiShapes::bladeStrip(buttons[i], selected ? Color{ 50, 10, 17, 224 } : UiTheme::panel,
+                selected ? UiTheme::crimson : UiTheme::ash, m_menuOnRight, selected, over);
+            drawCenteredText(i == 0 ? Strings::exitConfirm : Strings::stay,
+                buttons[i].x + buttons[i].width * 0.5f, buttons[i].y + 11.0f, 15,
+                UiTheme::silver);
         }
     }
 }
@@ -195,21 +198,16 @@ void StartMenu::drawBackground() const {
         drawProceduralBackground();
     }
 
-    // Dom dom bay nhe (tinh tu thoi gian, khong luu trang thai)
-    for (int i = 0; i < 18; ++i) {
-        const float t = m_time * (0.25f + 0.5f * hash01(i * 3 + 1)) + hash01(i * 7) * 20.0f;
-        const float x = hash01(i * 11 + 2) * W + std::sin(t) * 24.0f;
-        const float y = H * (0.55f + 0.38f * hash01(i * 5 + 3)) + std::cos(t * 0.8f) * 14.0f;
-        const float glow = 0.5f + 0.5f * std::sin(m_time * 2.0f + i);
-        DrawCircleV(Vector2{ x, y }, 2.0f + glow, COL_EMBER(static_cast<unsigned char>(80 + 150 * glow)));
-    }
-
-    DrawCircleGradient(Vector2{ W * m_menuCenterX, H * 0.30f }, 500.0f,
-        Color{ 7, 8, 22, 175 }, Color{ 7, 8, 22, 0 });
-
-    // Toi nhe phia tren/duoi de chu de doc
-    DrawRectangleGradientV(0, 0, W, H / 3, Color{ 0, 0, 0, 90 }, Color{ 0, 0, 0, 0 });
-    DrawRectangleGradientV(0, H * 2 / 3, W, H - H * 2 / 3, Color{ 0, 0, 0, 0 }, Color{ 0, 0, 0, 120 });
+    const Color transparent{ 7, 6, 10, 0 };
+    const Color vignette{ 7, 6, 10, 190 };
+    if (m_menuOnRight)
+        DrawRectangleGradientH(0, 0, W, H, transparent, vignette);
+    else
+        DrawRectangleGradientH(0, 0, W, H, vignette, transparent);
+    DrawRectangleGradientV(0, 0, W, H / 4,
+        Color{ 0, 0, 0, 120 }, Color{ 0, 0, 0, 0 });
+    DrawRectangleGradientV(0, H * 3 / 4, W, H / 4,
+        Color{ 0, 0, 0, 0 }, Color{ 0, 0, 0, 145 });
 }
 
 // Nen thu tuc khi chua co anh: bau troi dem + trang + sao nhap nhay + nui
@@ -217,37 +215,39 @@ void StartMenu::drawProceduralBackground() const {
     const int W = UiCanvas::width(), H = UiCanvas::height();
     const int horizon = static_cast<int>(H * 0.68f);
 
-    DrawRectangleGradientV(0, 0, W, horizon, Color{ 10, 8, 36, 255 }, Color{ 214, 104, 96, 255 });
+    DrawRectangleGradientV(0, 0, W, horizon, Color{ 13, 11, 13, 255 },
+                           Color{ 69, 19, 28, 255 });
     for (int i = 0; i < 90; ++i) {
         const float tw = 0.5f + 0.5f * std::sin(m_time * (1.0f + hash01(i)) + i);
         DrawCircle(static_cast<int>(hash01(i * 2) * W), static_cast<int>(hash01(i * 2 + 1) * H * 0.5f),
                    1.0f + hash01(i + 500), Color{ 255, 255, 235, static_cast<unsigned char>(90 + 150 * tw) });
     }
-    DrawCircle(static_cast<int>(W * 0.90f), static_cast<int>(H * 0.20f), 70.0f, Color{ 70, 48, 110, 255 });
-    DrawCircle(static_cast<int>(W * 0.90f), static_cast<int>(H * 0.20f), 62.0f, Color{ 250, 238, 190, 255 });
+    DrawCircle(static_cast<int>(W * 0.90f), static_cast<int>(H * 0.20f), 70.0f, Color{ 82, 20, 28, 255 });
+    DrawCircle(static_cast<int>(W * 0.90f), static_cast<int>(H * 0.20f), 62.0f, UiTheme::silver);
 
     for (int i = 0; i < 9; ++i)
-        DrawCircle(static_cast<int>(i * W / 8.0f), horizon + 30, 120.0f + hash01(i + 40) * 60.0f, Color{ 58, 36, 86, 255 });
-    DrawRectangle(0, horizon + 20, W, H - horizon, Color{ 22, 16, 44, 255 });
-    DrawRectangle(0, H - 70, W, 70, Color{ 14, 11, 30, 255 });
+        DrawCircle(static_cast<int>(i * W / 8.0f), horizon + 30,
+                   120.0f + hash01(i + 40) * 60.0f, Color{ 31, 15, 21, 255 });
+    DrawRectangle(0, horizon + 20, W, H - horizon, Color{ 13, 10, 13, 255 });
+    DrawRectangle(0, H - 70, W, 70, UiTheme::ink);
 }
 
 void StartMenu::drawTitle() const {
     const float W = static_cast<float>(UiCanvas::width());
-    const float H = static_cast<float>(UiCanvas::height());
     const float cx = W * m_menuCenterX;
-    const float bob = std::sin(m_time * 1.8f) * 4.0f;
-    const float y = H * TITLE_Y_RATIO + bob;
-
-    // Bong + chu vang
-    drawCenteredText(Strings::gameTitle, cx + 4.0f, y + 4.0f, 76, COL_TITLE_SHADOW);
-    drawCenteredText(Strings::gameTitle, cx, y, 76, COL_TITLE);
-
-    drawCenteredText(u8"RPG chiến thuật theo lượt 2.5D", cx, y + 92.0f, 24, COL_SUBTITLE);
-
-    // Duong ke trang tri
-    const float lineW = 300.0f, lineY = y + 128.0f;
-    DrawLineEx(Vector2{ cx - lineW / 2.0f, lineY }, Vector2{ cx + lineW / 2.0f, lineY }, 2.0f, Color{ 255, 214, 96, 160 });
+    const Rectangle emblem{ cx - 42.0f, 54.0f, 84.0f, 84.0f };
+    UiShapes::seal(emblem, UiTheme::ash, false);
+    DrawLineEx(Vector2{ cx, 40.0f }, Vector2{ cx, 55.0f }, 1.0f, UiTheme::crimson);
+    DrawLineEx(Vector2{ cx - 26.0f, 52.0f }, Vector2{ cx - 35.0f, 42.0f },
+               1.0f, UiTheme::crimson);
+    DrawLineEx(Vector2{ cx + 26.0f, 52.0f }, Vector2{ cx + 35.0f, 42.0f },
+               1.0f, UiTheme::crimson);
+    drawCenteredText(Strings::gameTitle, cx, 82.0f, 31, UiTheme::silver,
+                     UiTheme::displayTracking);
+    drawCenteredText(Strings::menuTagline, cx, 148.0f, 10, UiTheme::ashText,
+                     UiTheme::hudTracking);
+    UiShapes::divider(Vector2{ cx - 114.0f, 176.0f },
+                      Vector2{ cx + 114.0f, 176.0f }, UiTheme::ash);
 }
 
 void StartMenu::drawButtons() const {
@@ -255,35 +255,39 @@ void StartMenu::drawButtons() const {
         const Button& b = m_buttons[i];
         const bool selected = (static_cast<int>(i) == m_selected);
 
-        // Nut dang chon phong to nhe va sang len
         Rectangle r = buttonRect(i);
-        const float grow = 10.0f * b.m_hover;
-        r.x -= grow; r.width += grow * 2.0f;
+        r.x += (m_menuOnRight ? -1.0f : 1.0f) * 8.0f * b.m_hover;
+        const bool over = CheckCollisionPointRec(UiCanvas::mousePosition(), buttonRect(i));
+        UiShapes::bladeStrip(r, selected ? Color{ 50, 10, 17, 224 } : UiTheme::panel,
+            selected ? UiTheme::crimson : UiTheme::ash, m_menuOnRight,
+            selected, over, true);
 
-        DrawRectangleRec(Rectangle{ r.x + 4, r.y + 5, r.width, r.height }, Color{ 0, 0, 0, 110 });   // bong
-        DrawRectangleRec(r, selected ? COL_BTN_SELECTED : COL_BTN);
-        DrawRectangleLinesEx(r, selected ? 3.0f : 2.0f, selected ? COL_BTN_EDGE_SEL : COL_BTN_EDGE);
-
-        const int fontSize = 24;
+        const int fontSize = 16;
         const bool start = b.m_action == MenuAction::START_GAME;
-        const float iconSize = 26.0f;
+        const float iconSize = 20.0f;
+        const float iconX = m_menuOnRight
+            ? r.x + r.width - iconSize - 18.0f : r.x + 18.0f;
         UiIcons::draw(start ? "action:confirm" : "action:close",
-            Rectangle{ r.x + 22.0f, r.y + 9.0f, iconSize, iconSize },
-            selected ? COL_TEXT_SEL : COL_TEXT);
-        const float labelX = r.x + r.width / 2.0f + 12.0f;
-        const float textY = r.y + (r.height - fontSize) / 2.0f;
-        drawCenteredText(b.m_label.c_str(), labelX, textY, fontSize, selected ? COL_TEXT_SEL : COL_TEXT);
-
-        if (selected) {   // mui ten hai ben
-            const float ax = 16.0f + 4.0f * std::sin(m_time * 6.0f);
-            const float cy = r.y + r.height / 2.0f;
-            DrawTriangle(Vector2{ r.x + 12.0f, cy - 9.0f }, Vector2{ r.x + 12.0f, cy + 9.0f }, Vector2{ r.x + ax + 10.0f, cy }, COL_BTN_EDGE_SEL);
-            DrawTriangle(Vector2{ r.x + r.width - 12.0f, cy + 9.0f }, Vector2{ r.x + r.width - 12.0f, cy - 9.0f },
-                         Vector2{ r.x + r.width - ax - 10.0f, cy }, COL_BTN_EDGE_SEL);
-        }
+            Rectangle{ iconX, r.y + (r.height - iconSize) * 0.5f, iconSize, iconSize },
+            UiTheme::silver);
+        const float labelX = r.x + r.width * (m_menuOnRight ? 0.57f : 0.43f);
+        drawCenteredText(b.m_label.c_str(), labelX,
+            r.y + (r.height - fontSize) * 0.5f, fontSize, UiTheme::silver,
+            UiTheme::displayTracking);
     }
 }
 
 void StartMenu::drawFooter() const {
-    // Intentionally omitted: the menu has no developer/help footer.
+    const float x = 56.0f;
+    const float y = 614.0f;
+    DrawLineEx(Vector2{ x, y - 2.0f }, Vector2{ x, y + 48.0f }, 1.0f, UiTheme::ash);
+    UiShapes::diamond(Vector2{ x, y - 2.0f }, 7.0f, UiTheme::crimson);
+    UiText::draw(Strings::menuLoreLine1, static_cast<int>(x + 17.0f),
+                 static_cast<int>(y + 1.0f), 13, Color{ 0, 0, 0, 210 });
+    UiText::draw(Strings::menuLoreLine1, static_cast<int>(x + 16.0f),
+                 static_cast<int>(y), 13, UiTheme::ashText);
+    UiText::draw(Strings::menuLoreLine2, static_cast<int>(x + 17.0f),
+                 static_cast<int>(y + 23.0f), 13, Color{ 0, 0, 0, 210 });
+    UiText::draw(Strings::menuLoreLine2, static_cast<int>(x + 16.0f),
+                 static_cast<int>(y + 22.0f), 13, UiTheme::silver);
 }

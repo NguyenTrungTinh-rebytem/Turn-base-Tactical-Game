@@ -1,7 +1,9 @@
 // src/graphics/SkillTooltip.cpp
 #include "SkillTooltip.h"
 #include "graphics/UiCanvas.h"
+#include "graphics/UiShapes.h"
 #include "graphics/UiText.h"
+#include "graphics/UiTheme.h"
 #include "graphics/Strings.h"
 #include <algorithm>
 #include <vector>
@@ -154,13 +156,17 @@ void SkillTooltip::draw(const SkillTipInfo& info, Vector2 mousePos, const Stats*
     x = std::max(MARGIN, x);
     y = std::max(MARGIN, y);
 
-    DrawRectangle(x + 3, y + 3, w, h, Color{ 0, 0, 0, 90 });
-    DrawRectangle(x, y, w, h, Color{ 20, 18, 34, 245 });
-    DrawRectangleLinesEx(Rectangle{ static_cast<float>(x), static_cast<float>(y),
-                                    static_cast<float>(w), static_cast<float>(h) }, 2.0f, accent);
+    UiShapes::plate(Rectangle{ static_cast<float>(x + 3), static_cast<float>(y + 3),
+                               static_cast<float>(w), static_cast<float>(h) },
+                    Color{ 0, 0, 0, 100 }, BLANK);
+    UiShapes::plate(Rectangle{ static_cast<float>(x), static_cast<float>(y),
+                               static_cast<float>(w), static_cast<float>(h) },
+                    UiTheme::panelRaised, accent, 1.5f);
 
     UiText::draw(info.m_name.c_str(), x + PAD, y + PAD, TITLE_SIZE, accent);
-    DrawLine(x + PAD, y + PAD + titleH - 4, x + w - PAD, y + PAD + titleH - 4, Fade(accent, 0.5f));
+    UiShapes::divider(Vector2{ static_cast<float>(x + PAD), static_cast<float>(y + PAD + titleH - 4) },
+                      Vector2{ static_cast<float>(x + w - PAD), static_cast<float>(y + PAD + titleH - 4) },
+                      Fade(accent, 0.65f));
 
     int ty = y + PAD + titleH;
     for (const TipLine& l : lines) {

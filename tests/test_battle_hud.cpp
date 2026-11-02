@@ -174,6 +174,12 @@ int main() {
 
     GameEngine engine;
     GameEngineTestAccess::prepareNormalWave(engine);
+    const CombatantView& enemyView = GameEngineTestAccess::enemyView(engine);
+    const BattleSlot enemySlot = enemyView.getSlot();
+    const Vector2 enemyHead = enemyView.getHeadPos();
+    assert(std::abs(enemyHead.x - enemySlot.m_feetPos.x) < 0.01f);
+    assert(std::abs(enemyHead.y -
+        (enemySlot.m_feetPos.y - 64.0f * enemySlot.m_scale - 10.0f)) < 0.01f);
     const Rectangle cancel = BattleUI::buttonBounds(BattleUIButton::CANCEL_TARGET);
 
     const Rectangle logButton = BattleUI::logButtonBounds();

@@ -5,6 +5,7 @@
 #include "graphics/Strings.h"
 #include "graphics/UiIcons.h"
 #include "graphics/UiShapes.h"
+#include "graphics/UiTheme.h"
 #include <algorithm>
 #include <cmath>
 
@@ -16,17 +17,17 @@ constexpr float BTN_W = 220.0f, BTN_H = 48.0f, BTN_GAP = 30.0f, BTN_Y = 642.0f;
 constexpr size_t MAX_ENEMY_LINES = 7;
 
 // ---- Mau ----
-constexpr Color COL_TITLE      { 255, 214, 96, 255 };
-constexpr Color COL_PANEL      { 16, 13, 36, 225 };
-constexpr Color COL_EDGE       { 140, 120, 180, 255 };
-constexpr Color COL_EDGE_SEL   { 255, 214, 96, 255 };
-constexpr Color COL_LABEL      { 190, 185, 220, 255 };
-constexpr Color COL_TEXT       { 238, 235, 252, 255 };
-constexpr Color COL_DIM        { 130, 126, 160, 255 };
-constexpr Color COL_ERR        { 255, 110, 110, 255 };
-constexpr Color COL_OK         { 120, 230, 140, 255 };
-constexpr Color COL_HEAD_NORMAL{ 40, 62, 128, 255 };
-constexpr Color COL_HEAD_BOSS  { 130, 32, 44, 255 };
+constexpr Color COL_TITLE = UiTheme::silver;
+constexpr Color COL_PANEL = UiTheme::panel;
+constexpr Color COL_EDGE = UiTheme::ash;
+constexpr Color COL_EDGE_SEL = UiTheme::crimson;
+constexpr Color COL_LABEL = UiTheme::ashText;
+constexpr Color COL_TEXT = UiTheme::silver;
+constexpr Color COL_DIM = UiTheme::ashText;
+constexpr Color COL_ERR = UiTheme::danger;
+constexpr Color COL_OK = UiTheme::heal;
+constexpr Color COL_HEAD_NORMAL = UiTheme::panelRaised;
+constexpr Color COL_HEAD_BOSS{ 50, 10, 17, 224 };
 
 Color elementColor(Element e) {
     switch (e) {
@@ -49,8 +50,10 @@ const char* elementName(Element e) {
     return "?";
 }
 
-void drawCenteredText(const char* text, float cx, float y, int size, Color c) {
-    UiText::draw(text, static_cast<int>(cx - UiText::measure(text, size) / 2.0f), static_cast<int>(y), size, c);
+void drawCenteredText(const char* text, float cx, float y, int size, Color c,
+                      float trackingEm = 0.0f) {
+    UiText::draw(text, static_cast<int>(cx -
+        UiText::measure(text, size, trackingEm) / 2.0f), static_cast<int>(y), size, c, trackingEm);
 }
 
 std::vector<std::string> splitLines(const std::string& s) {
@@ -190,7 +193,8 @@ void WaveSelectScreen::update(float deltaTime) {
 void WaveSelectScreen::draw() const {
     drawBackground();
     const float cx = UiCanvas::width() / 2.0f;
-    drawCenteredText(Strings::selectWave, cx, 30.0f, 44, COL_TITLE);
+    drawCenteredText(Strings::selectWave, cx, 30.0f, 44, COL_TITLE,
+                     UiTheme::displayTracking);
     if (!m_heroSummary.empty())
         drawCenteredText(TextFormat(u8"Anh hùng: %s", m_heroSummary.c_str()), cx, 92.0f, 18, COL_LABEL);
 
@@ -201,8 +205,7 @@ void WaveSelectScreen::draw() const {
         if (m_selected + 1 < m_waves.size()) drawCard(m_selected + 1);
         else {
             const Rectangle next = cardRect(m_selected + 1);
-            UiShapes::roundedRect(next, 16.0f, Color{ 18, 16, 36, 210 },
-                                  Color{ 110, 102, 132, 180 }, 2.0f);
+            UiShapes::plate(next, UiTheme::panel, UiTheme::ash, 1.0f);
             UiIcons::draw("action:close",
                 Rectangle{ next.x + next.width * 0.5f - 28.0f, next.y + 92.0f, 56.0f, 56.0f },
                 Color{ 120, 116, 132, 200 });
@@ -223,7 +226,8 @@ void WaveSelectScreen::drawBackground() const {
         UiCanvas::drawCover(m_background, Rectangle{ 0.0f, 0.0f,
             static_cast<float>(W), static_cast<float>(H) });
     } else {
-        DrawRectangleGradientV(0, 0, W, H, Color{ 10, 8, 36, 255 }, Color{ 60, 30, 70, 255 });
+        DrawRectangleGradientV(0, 0, W, H, Color{ 18, 12, 16, 255 },
+                               Color{ 57, 14, 23, 255 });
     }
     DrawRectangle(0, 0, W, H, Color{ 0, 0, 0, 125 });
 }
@@ -234,20 +238,20 @@ void WaveSelectScreen::drawCard(size_t index) const {
     Rectangle r = cardRect(index);
     if (selected) r.y -= SELECT_LIFT;
     const bool hovered = static_cast<int>(index) == m_hoverCard;
-    UiShapes::roundedRect(Rectangle{ r.x + 5.0f, r.y + 6.0f, r.width, r.height },
-                          16.0f, Color{ 0, 0, 0, 120 });
-    UiShapes::roundedRect(r, 16.0f, w.m_locked ? Color{ 34, 34, 46, 220 } : COL_PANEL,
+    UiShapes::plate(Rectangle{ r.x + 5.0f, r.y + 6.0f, r.width, r.height },
+                    Color{ 0, 0, 0, 120 }, BLANK);
+    UiShapes::plate(r, w.m_locked ? Color{ 14, 12, 20, 220 } : COL_PANEL,
                           selected ? COL_EDGE_SEL : (hovered ? COL_TITLE : COL_EDGE),
                           selected ? 3.0f : 2.0f);
 
-    // ---- Dai tieu de ----
-    DrawRectangleRounded(Rectangle{ r.x, r.y, r.width, HEADER_H }, 0.15f, 8,
-                         w.m_isBoss ? COL_HEAD_BOSS : COL_HEAD_NORMAL);
-    drawCenteredText(w.m_title.c_str(), r.x + r.width / 2.0f, r.y + 16.0f, 32, COL_TEXT);
+    UiShapes::bladeStrip(Rectangle{ r.x, r.y, r.width, HEADER_H },
+                         w.m_isBoss ? COL_HEAD_BOSS : COL_HEAD_NORMAL,
+                         selected ? UiTheme::crimson : COL_EDGE, false, selected, hovered);
+    drawCenteredText(w.m_title.c_str(), r.x + r.width / 2.0f, r.y + 16.0f, 32, COL_TEXT,
+                     UiTheme::displayTracking);
     if (w.m_isBoss) {
         const Rectangle tag = { r.x + r.width - 92.0f, r.y + 16.0f, 70.0f, 28.0f };
-        DrawRectangleRec(tag, Color{ 200, 50, 60, 255 });
-        DrawRectangleLinesEx(tag, 1.0f, Color{ 255, 150, 150, 255 });
+        UiShapes::bladeStrip(tag, Color{ 50, 10, 17, 224 }, UiTheme::crimson, false, true);
         drawCenteredText(u8"BOSS", tag.x + tag.width / 2.0f, tag.y + 5.0f, 16, WHITE);
     }
 
@@ -266,8 +270,9 @@ void WaveSelectScreen::drawCard(size_t index) const {
         const WaveEnemy& e = w.m_enemies[i];
         const Rectangle row{ r.x + 18.0f, y - 3.0f, r.width - 36.0f, 26.0f };
         const bool enemyHover = CheckCollisionPointRec(UiCanvas::mousePosition(), row);
-        UiShapes::roundedRect(row, 6.0f,
-            enemyHover ? Color{ 48, 42, 75, 245 } : Color{ 27, 24, 50, 230 });
+        UiShapes::bladeStrip(row,
+            enemyHover ? UiTheme::panelRaised : UiTheme::panel,
+            enemyHover ? UiTheme::silver : UiTheme::ash, false, enemyHover, enemyHover);
         UiIcons::draw(std::string("element:") + (static_cast<int>(e.m_element) == 0 ? "kim" :
             static_cast<int>(e.m_element) == 1 ? "moc" : static_cast<int>(e.m_element) == 2 ? "thuy" :
             static_cast<int>(e.m_element) == 3 ? "hoa" : "tho"),
@@ -295,11 +300,11 @@ void WaveSelectScreen::drawCard(size_t index) const {
 
     // ---- Khoa: phu toi + o khoa ----
     if (w.m_locked) {
-        DrawRectangleRounded(r, 0.1f, 10, Color{ 0, 0, 0, 130 });
+        UiShapes::plate(r, Color{ 7, 6, 10, 150 }, BLANK);
         const float cx = r.x + r.width / 2.0f, cy = r.y + r.height / 2.0f - 10.0f;
-        DrawRectangleLinesEx(Rectangle{ cx - 14, cy - 34, 28, 30 }, 5.0f, Color{ 200, 170, 80, 255 });   // quai khoa
-        DrawRectangleRec(Rectangle{ cx - 24, cy - 8, 48, 36 }, Color{ 200, 170, 80, 255 });              // than khoa
-        DrawRectangle(static_cast<int>(cx - 4), static_cast<int>(cy + 4), 8, 12, Color{ 60, 44, 20, 255 });
+        DrawCircleLines(static_cast<int>(cx), static_cast<int>(cy - 14.0f), 13.0f, UiTheme::gold);
+        UiShapes::plate(Rectangle{ cx - 24, cy - 8, 48, 36 }, UiTheme::gold, UiTheme::silver, 1.0f);
+        UiShapes::diamond(Vector2{ cx, cy + 10.0f }, 8.0f, UiTheme::ink, true);
         const std::string hint = w.m_lockHint.empty()
             ? std::string(TextFormat(u8"Hoàn thành màn %d\nđể mở khóa", std::max(1, w.m_number - 1)))
             : w.m_lockHint;
@@ -308,8 +313,8 @@ void WaveSelectScreen::drawCard(size_t index) const {
             drawCenteredText(line.c_str(), cx, hy, 16, COL_TEXT);
             hy += 22.0f;
         }
-        DrawRectangleRoundedLinesEx(r, 0.1f, 10, selected ? 3.0f : 2.0f,
-                                    selected ? COL_EDGE_SEL : COL_EDGE);
+        UiShapes::plate(r, BLANK, selected ? COL_EDGE_SEL : COL_EDGE,
+                        selected ? 3.0f : 2.0f);
     }
 }
 
@@ -320,14 +325,10 @@ void WaveSelectScreen::drawButtons() const {
         const bool hover = (m_hoverButton == i);
         const bool primary = (i == BTN_START);
         const bool disabled = primary && selectedLocked();
-        UiShapes::roundedRect(Rectangle{ r.x + 4, r.y + 5, r.width, r.height }, 10.0f,
-                              Color{ 0, 0, 0, 110 });
-        UiShapes::roundedRect(r, 10.0f,
-            disabled ? Color{ 24, 22, 34, 220 } :
-            (hover ? Color{ 90, 60, 20, 235 } : (primary ? Color{ 50, 40, 14, 230 } : COL_PANEL)),
-            disabled ? Color{ 80, 76, 100, 255 } :
-            ((hover || primary) ? COL_EDGE_SEL : COL_EDGE), hover && !disabled ? 3.0f : 2.0f);
+        UiShapes::bladeStrip(r, primary ? Color{ 50, 10, 17, 224 } : COL_PANEL,
+            disabled ? COL_DIM : (primary ? UiTheme::crimson : COL_EDGE),
+            false, primary && !disabled, hover, !disabled);
         drawCenteredText(labels[i], r.x + r.width / 2.0f, r.y + (r.height - 24.0f) / 2.0f, 24,
-                         disabled ? COL_DIM : (hover ? Color{ 255, 240, 170, 255 } : COL_TEXT));
+                         disabled ? COL_DIM : COL_TEXT, UiTheme::displayTracking);
     }
 }

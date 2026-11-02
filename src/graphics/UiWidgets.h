@@ -8,10 +8,14 @@
 namespace UiWidgets {
 void beginFrame();
 bool Button(Rectangle bounds, const std::string& label, bool enabled = true);
+bool BladeButton(Rectangle bounds, const std::string& label, bool rightAnchored,
+                 bool selected = false, bool enabled = true,
+                 const std::string& iconKey = {});
 bool IconButton(Rectangle bounds, const std::string& iconKey, bool enabled = true);
 bool TabBar(Rectangle bounds, const std::vector<std::string>& labels, int& selected);
 bool ListRow(Rectangle bounds, const std::string& title, const std::string& detail = {},
-             bool selected = false, bool enabled = true, float textInset = 14.0f);
+             bool selected = false, bool enabled = true, float textInset = 14.0f,
+             bool rightAnchored = false);
 bool ItemTile(Rectangle bounds, const std::string& iconKey, const std::string& label,
               const std::string& quantity = {}, bool enabled = true,
               const std::function<void(Rectangle)>& drawIcon = {});
