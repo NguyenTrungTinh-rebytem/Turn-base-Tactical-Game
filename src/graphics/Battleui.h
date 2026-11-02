@@ -28,6 +28,7 @@ public:
     static Rectangle turnStripBounds();
     static Rectangle roundChipBounds();
     static Rectangle partyCardBounds(int index);
+    static Rectangle fieldHpBounds(const Character& character, Vector2 feet);
     static Rectangle buttonBounds(BattleUIButton button);
     static Rectangle controlPanelBounds();
     static Rectangle itemMenuBounds();

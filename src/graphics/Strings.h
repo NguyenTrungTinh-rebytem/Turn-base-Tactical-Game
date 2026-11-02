@@ -4,7 +4,10 @@
 #include <string_view>
 
 namespace Strings {
-inline constexpr char gameTitle[] = u8"Chiến Thuật Theo Lượt";
+inline constexpr char gameTitle[] = u8"NĂM PHONG ẤN";
+inline constexpr char menuTagline[] = u8"NĂM CỔNG. MỘT THẾ GIỚI. KHÔNG CƠ HỘI THỨ HAI.";
+inline constexpr char menuLoreLine1[] = u8"Thế giới không kết thúc...";
+inline constexpr char menuLoreLine2[] = u8"Nó đang bị phong ấn.";
 inline constexpr char menuStart[] = u8"BẮT ĐẦU";
 inline constexpr char menuExit[] = u8"THOÁT";
 inline constexpr char victory[] = u8"CHIẾN THẮNG!";

@@ -6,7 +6,11 @@
 #include "graphics/UiShapes.h"
 #include "graphics/UiTheme.h"
 #include "graphics/Strings.h"
+#include "graphics/UiIcons.h"
 #include "entities/Character.h"
+#include "entities/Player.h"
+#include "entities/Boss.h"
+#include "data/Element.h"
 #include <algorithm>
 #include <cmath>
 #include <sstream>
@@ -20,26 +24,24 @@ constexpr Rectangle COMMAND_PANEL = UiTheme::battleHud;
 constexpr Rectangle LOG_BUTTON = UiTheme::battleLogButtonHud;
 constexpr Rectangle LOG_PANEL = UiTheme::battleLogHud;
 constexpr Rectangle LIST_PANEL = UiTheme::battleListHud;
-constexpr float LIST_BOTTOM = 1056.0f;
+constexpr float LIST_BOTTOM = 810.0f;
 constexpr float LIST_HEADER = 64.0f;
 constexpr float LIST_ROW_HEIGHT = 32.0f;
-constexpr int SKILL_MAX_VISIBLE = 4;
-constexpr int ITEM_MAX_VISIBLE = 5;
-constexpr float BAR_W = 188.0f;
-constexpr float HP_H = 12.0f;
-constexpr float MP_H = 10.0f;
+constexpr int SKILL_MAX_VISIBLE = 7;
+constexpr int ITEM_MAX_VISIBLE = 7;
+constexpr float FIELD_HP_H = 6.0f;
 constexpr float FLOAT_SPEED = 45.0f;
 constexpr float FLOAT_LIFE = 1.0f;
 
-constexpr Color COL_PANEL{ 15, 15, 30, 235 };
-constexpr Color COL_PANEL_EDGE{ 200, 170, 80, 255 };
-constexpr Color COL_BAR_BG{ 30, 30, 30, 220 };
-constexpr Color COL_HP_HIGH{ 60, 200, 80, 255 };
-constexpr Color COL_HP_MID{ 240, 200, 50, 255 };
-constexpr Color COL_HP_LOW{ 220, 50, 50, 255 };
-constexpr Color COL_MP{ 60, 120, 240, 255 };
-constexpr Color COL_DAMAGE{ 255, 70, 70, 255 };
-constexpr Color COL_HEAL{ 80, 255, 120, 255 };
+constexpr Color COL_PANEL = UiTheme::panel;
+constexpr Color COL_PANEL_EDGE = UiTheme::ash;
+constexpr Color COL_BAR_BG{ 14, 12, 20, 230 };
+constexpr Color COL_HP_HIGH = UiTheme::hpHigh;
+constexpr Color COL_HP_MID = UiTheme::hpHigh;
+constexpr Color COL_HP_LOW = UiTheme::danger;
+constexpr Color COL_MP = UiTheme::mpHigh;
+constexpr Color COL_DAMAGE = UiTheme::danger;
+constexpr Color COL_HEAL = UiTheme::heal;
 
 Rectangle toDesign(Rectangle bounds) {
     return Rectangle{ bounds.x / HUD_SCALE, bounds.y / HUD_SCALE,
@@ -65,7 +67,7 @@ Rectangle rowBounds(int index, int rowCount, int selectedIndex, int maximum) {
     panel.y = LIST_BOTTOM - panel.height;
     return toDesign(Rectangle{ panel.x + 12.0f,
         panel.y + LIST_HEADER + (index - first) * LIST_ROW_HEIGHT,
-        panel.width - 24.0f, LIST_ROW_HEIGHT });
+        panel.width - 24.0f, LIST_ROW_HEIGHT - 1.0f });
 }
 
 float ratioOf(int current, int maximum) {
@@ -83,6 +85,29 @@ void drawBar(Rectangle bounds, float ratio, Color fill) {
     DrawRectangleLinesEx(bounds, 1.0f, BLACK);
 }
 
+std::string elementKey(Element element) {
+    switch (element) {
+        case Element::KIM: return "element:kim";
+        case Element::MOC: return "element:moc";
+        case Element::THUY: return "element:thuy";
+        case Element::HOA: return "element:hoa";
+        case Element::THO: return "element:tho";
+    }
+    return "element:kim";
+}
+
+float fieldBarWidth(const Character& character, float feetY) {
+    const float depth = std::clamp((feetY / UiCanvas::height() - 0.60f) / 0.12f, 0.0f, 1.0f);
+    const float perspectiveScale = 1.6f + 0.4f * depth;
+    float spriteWidth = 64.0f * perspectiveScale * 1.3f;
+    if (dynamic_cast<const Player*>(&character))
+        spriteWidth = 128.0f * perspectiveScale * 1.3f;
+    if (dynamic_cast<const Boss*>(&character))
+        spriteWidth = 64.0f * perspectiveScale * 3.2f;
+    const float maximum = dynamic_cast<const Boss*>(&character) ? 240.0f : 180.0f;
+    return std::clamp(spriteWidth * 0.8f, 96.0f, maximum);
+}
+
 std::string localized(const Character* character) {
     return character ? Strings::localizedName(character->getName()) : std::string{};
 }
@@ -96,15 +121,20 @@ Rectangle BattleUI::partyCardBounds(int index) {
                                212.0f, PARTY_CARDS.height });
 }
 
+Rectangle BattleUI::fieldHpBounds(const Character& character, Vector2 feet) {
+    const float width = fieldBarWidth(character, feet.y);
+    return { feet.x - width * 0.5f, feet.y + 10.0f, width, FIELD_HP_H };
+}
+
 Rectangle BattleUI::buttonBounds(BattleUIButton button) {
     switch (button) {
-        case BattleUIButton::ATTACK:        return toDesign(Rectangle{ 44, 916, 200, 56 });
-        case BattleUIButton::SKILL:         return toDesign(Rectangle{ 260, 916, 200, 56 });
-        case BattleUIButton::ITEM:          return toDesign(Rectangle{ 476, 916, 200, 56 });
-        case BattleUIButton::END_TURN:      return toDesign(Rectangle{ 44, 916, 300, 56 });
-        case BattleUIButton::UNDO:           return toDesign(Rectangle{ 364, 916, 200, 56 });
-        case BattleUIButton::CANCEL_TARGET: return toDesign(Rectangle{ 584, 916, 136, 56 });
-        case BattleUIButton::PAUSE:         return toDesign(Rectangle{ 684, 846, 40, 40 });
+        case BattleUIButton::ATTACK:        return toDesign(Rectangle{ 1440, 858, 440, 48 });
+        case BattleUIButton::SKILL:         return toDesign(Rectangle{ 1440, 918, 440, 48 });
+        case BattleUIButton::ITEM:          return toDesign(Rectangle{ 1440, 978, 440, 48 });
+        case BattleUIButton::END_TURN:      return toDesign(Rectangle{ 1440, 978, 210, 48 });
+        case BattleUIButton::UNDO:           return toDesign(Rectangle{ 1660, 978, 220, 48 });
+        case BattleUIButton::CANCEL_TARGET: return toDesign(Rectangle{ 1660, 858, 220, 48 });
+        case BattleUIButton::PAUSE:         return toDesign(Rectangle{ 1848, 820, 40, 40 });
         case BattleUIButton::LOG_BUTTON:    return logButtonBounds();
     }
     return {};
@@ -130,37 +160,44 @@ Rectangle BattleUI::itemRowBounds(int itemIndex, int itemCount, int selectedInde
 
 void BattleUI::drawHpMpBar(const Character& character, Vector2 anchor) const {
     const int maxHp = character.getStats().m_hp;
-    const int maxMp = character.getStats().m_mp;
     const float hpRatio = ratioOf(character.getCurrentHp(), maxHp);
-    const float x = anchor.x - 60.0f;
-    const float y = anchor.y - 40.0f;
-    const std::string name = localized(&character);
-    UiText::draw(TextFormat("%s", name.c_str()), static_cast<int>(x),
-                 static_cast<int>(y - 16.0f), 14,
-                 character.isAlive() ? RAYWHITE : DARKGRAY);
+    const Rectangle hpBounds = fieldHpBounds(character, anchor);
+    const float x = hpBounds.x;
+    const float y = hpBounds.y;
+    const float barWidth = hpBounds.width;
     const Color hpColor = hpRatio > 0.5f ? COL_HP_HIGH :
         (hpRatio > 0.25f ? COL_HP_MID : COL_HP_LOW);
-    drawBar(Rectangle{ x, y, 120.0f, HP_H }, hpRatio, hpColor);
-    const char* hpText = TextFormat("%d/%d", std::max(0, character.getCurrentHp()), maxHp);
-    UiText::draw(hpText, static_cast<int>(x + (120.0f - UiText::measure(hpText, 10)) / 2.0f),
-                 static_cast<int>(y + 1.0f), 10, WHITE);
-    drawBar(Rectangle{ x, y + HP_H + 3.0f, 120.0f, MP_H },
-            ratioOf(character.getCurrentMp(), maxMp), COL_MP);
+    drawBar(hpBounds, hpRatio, hpColor);
+    UiIcons::draw(elementKey(character.getElement()),
+                  Rectangle{ x - 11.0f, y - 4.0f, 14.0f, 14.0f });
+
+    const float depth = std::clamp((anchor.y / UiCanvas::height() - 0.60f) / 0.12f, 0.0f, 1.0f);
+    const float spriteHeight = (dynamic_cast<const Boss*>(&character) ? 192.0f
+        : dynamic_cast<const Player*>(&character) ? 128.0f : 64.0f) *
+        (1.6f + 0.4f * depth) * (dynamic_cast<const Boss*>(&character) ? 3.2f * 64.0f / 192.0f : 1.3f);
+    const Rectangle hoverBounds{ anchor.x - barWidth * 0.5f,
+                                 anchor.y - spriteHeight,
+                                 barWidth, spriteHeight };
+    const std::string name = localized(&character);
+    const char* elementName = Strings::elements[static_cast<int>(character.getElement())];
+    UiWidgets::Tooltip(hoverBounds, TextFormat(u8"%s · %s · HP %d/%d · MP %d/%d",
+        name.c_str(), elementName, std::max(0, character.getCurrentHp()), maxHp,
+        std::max(0, character.getCurrentMp()), character.getStats().m_mp));
 }
 
 void BattleUI::drawRoundChip(int stage, const Character* current, int gold) const {
     const Rectangle bounds = roundChipBounds();
-    UiShapes::roundedRect(bounds, 12.0f, COL_PANEL, COL_PANEL_EDGE, 1.5f);
-    UiText::draw(TextFormat(Strings::stage, stage), static_cast<int>(bounds.x + 14.0f),
-                 static_cast<int>(bounds.y + 8.0f), 18, GOLD);
-    UiText::draw(TextFormat(Strings::gold, gold),
-                 static_cast<int>(bounds.x + bounds.width - 60.0f),
-                 static_cast<int>(bounds.y + 10.0f), 12, Color{ 255, 225, 120, 255 });
+    UiShapes::roundedRect(bounds, 8.0f, COL_PANEL, COL_PANEL_EDGE, 1.0f);
+    UiText::draw(TextFormat(u8"Màn %d · Lượt", stage), static_cast<int>(bounds.x + 12.0f),
+                 static_cast<int>(bounds.y + 10.0f), 17, UiTheme::silver);
     const std::string name = localized(current);
     UiText::draw(name.empty() ? u8"Đang chờ lượt" : name,
-                 static_cast<int>(bounds.x + 14.0f), static_cast<int>(bounds.y + 34.0f),
-                 14, current ? SKYBLUE : LIGHTGRAY);
-    UiWidgets::Tooltip(bounds, u8"Màn hiện tại và nhân vật đang hành động");
+                 static_cast<int>(bounds.x + 12.0f), static_cast<int>(bounds.y + 33.0f),
+                 13, UiTheme::ashText);
+    const Rectangle coin{ bounds.x + bounds.width - 104.0f, bounds.y + 8.0f, 92.0f, 34.0f };
+    UiShapes::roundedRect(coin, 8.0f, UiTheme::ink, UiTheme::gold, 1.0f);
+    UiText::draw(TextFormat("%d", gold), static_cast<int>(coin.x + 12.0f),
+                 static_cast<int>(coin.y + 9.0f), 16, UiTheme::gold);
 }
 
 void BattleUI::drawPartyCards(const std::vector<Character*>& party, const Character* current,
@@ -172,59 +209,54 @@ void BattleUI::drawPartyCards(const std::vector<Character*>& party, const Charac
         const Rectangle bounds = partyCardBounds(index);
         const bool active = character == current;
         const bool selected = character == selectedAlly;
-        UiShapes::roundedRect(bounds, 10.0f,
-            active ? Color{ 38, 58, 76, 248 } : COL_PANEL,
-            selected || active ? GOLD : Color{ 82, 98, 122, 255 },
+        UiShapes::roundedRect(bounds, 8.0f,
+            active ? UiTheme::panelRaised : COL_PANEL,
+            selected || active ? UiTheme::crimson : UiTheme::ash,
             selected || active ? 2.0f : 1.0f);
 
         const std::string name = localized(character);
-        UiText::draw(name, static_cast<int>(bounds.x + 10.0f),
-                     static_cast<int>(bounds.y + 4.0f), 12,
-                     character->isAlive() ? RAYWHITE : DARKGRAY);
+        UiIcons::draw(elementKey(character->getElement()),
+                      Rectangle{ bounds.x + 8.0f, bounds.y + 8.0f, 28.0f, 28.0f });
+        UiText::draw(name, static_cast<int>(bounds.x + 42.0f),
+                     static_cast<int>(bounds.y + 8.0f), 13,
+                     character->isAlive() ? UiTheme::silver : UiTheme::ashText);
         const char* hp = TextFormat(u8"HP %d/%d", std::max(0, character->getCurrentHp()),
                                     character->getStats().m_hp);
-        UiText::draw(hp, static_cast<int>(bounds.x + 10.0f),
-                     static_cast<int>(bounds.y + 23.0f), 10, RAYWHITE);
+        UiText::draw(hp, static_cast<int>(bounds.x + 8.0f),
+                     static_cast<int>(bounds.y + 39.0f), 10, UiTheme::silver);
         const float hpRatio = ratioOf(character->getCurrentHp(), character->getStats().m_hp);
-        const Color hpColor = hpRatio > 0.5f ? COL_HP_HIGH :
-            (hpRatio > 0.25f ? COL_HP_MID : COL_HP_LOW);
-        drawBar(Rectangle{ bounds.x * HUD_SCALE + 10.0f, bounds.y * HUD_SCALE + 52.0f,
-                           192.0f, 10.0f }, hpRatio, hpColor);
+        drawBar(Rectangle{ bounds.x * HUD_SCALE + 10.0f, bounds.y * HUD_SCALE + 82.0f,
+                           192.0f, 8.0f }, hpRatio, COL_HP_HIGH);
         const char* mp = TextFormat("MP %d/%d", std::max(0, character->getCurrentMp()),
                                     character->getStats().m_mp);
-        UiText::draw(mp, static_cast<int>(bounds.x + 10.0f),
-                     static_cast<int>(bounds.y + 39.0f), 10, SKYBLUE);
-        drawBar(Rectangle{ bounds.x * HUD_SCALE + 10.0f, bounds.y * HUD_SCALE + 76.0f,
-                           192.0f, 8.0f },
-                ratioOf(character->getCurrentMp(), character->getStats().m_mp), COL_MP);
+        UiText::draw(mp, static_cast<int>(bounds.x + 8.0f),
+                     static_cast<int>(bounds.y + 68.0f), 10, UiTheme::mpHigh);
+        drawBar(Rectangle{ bounds.x * HUD_SCALE + 10.0f, bounds.y * HUD_SCALE + 128.0f,
+                           192.0f, 6.0f },
+                ratioOf(character->getCurrentMp(), character->getStats().m_mp), UiTheme::mpLow);
         UiWidgets::Tooltip(bounds, u8"Chọn đồng đội làm mục tiêu của vật phẩm");
     }
 }
 
 void BattleUI::drawControlPanel() const {
-    UiShapes::roundedRect(controlPanelBounds(), 14.0f, COL_PANEL, COL_PANEL_EDGE, 2.0f);
+    UiShapes::roundedRect(controlPanelBounds(), 8.0f, COL_PANEL, COL_PANEL_EDGE, 1.0f);
 }
 
 void BattleUI::drawTurnBanner(int stage, const Character* current, bool isPlayerTurn,
                               bool waitingConfirm) const {
+    (void)stage;
     const Rectangle panel = controlPanelBounds();
     const std::string name = localized(current);
-    UiText::draw(isPlayerTurn ? Strings::yourTurn : u8"ĐẾN LƯỢT:",
-                 static_cast<int>(panel.x + 20.0f / HUD_SCALE),
-                 static_cast<int>(panel.y + 20.0f / HUD_SCALE), 16, YELLOW);
-    UiText::draw(name.empty() ? u8"Đang chờ" : name,
-                 static_cast<int>(panel.x + 20.0f / HUD_SCALE),
-                 static_cast<int>(panel.y + 42.0f / HUD_SCALE), 18,
-                 isPlayerTurn ? GREEN : ORANGE);
+    UiText::draw(name.empty() ? u8"Đang chờ lượt" : name,
+                 static_cast<int>(panel.x + 14.0f),
+                 static_cast<int>(panel.y + 10.0f), 16,
+                 isPlayerTurn ? UiTheme::silver : UiTheme::ashText);
     const Rectangle pauseBounds = buttonBounds(BattleUIButton::PAUSE);
     UiWidgets::IconButton(pauseBounds, "action:pause");
     UiWidgets::Tooltip(pauseBounds, u8"Tạm dừng trận đấu");
     if (waitingConfirm)
-        UiText::draw(u8"Xác nhận hành động", static_cast<int>(panel.x + 216.0f / HUD_SCALE),
-                     static_cast<int>(panel.y + 24.0f / HUD_SCALE), 14, LIGHTGRAY);
-    UiText::draw(TextFormat(Strings::stage, stage),
-                 static_cast<int>(panel.x + 342.0f),
-                 static_cast<int>(panel.y + 24.0f / HUD_SCALE), 16, SKYBLUE);
+        UiText::draw(u8"Chờ xác nhận", static_cast<int>(panel.x + 14.0f),
+                     static_cast<int>(panel.y + 32.0f), 11, UiTheme::ashText);
 }
 
 void BattleUI::drawCommandHelp(const std::string& helpText) const {
@@ -232,8 +264,8 @@ void BattleUI::drawCommandHelp(const std::string& helpText) const {
         ? std::string(u8"Chọn một hành động.")
         : helpText;
     const Rectangle panel = controlPanelBounds();
-    UiText::draw(text, static_cast<int>(panel.x + 20.0f / HUD_SCALE),
-                 static_cast<int>(panel.y + 148.0f / HUD_SCALE), 13, LIGHTGRAY);
+    UiText::draw(text, static_cast<int>(panel.x + 12.0f),
+                 static_cast<int>(panel.y + panel.height - 18.0f), 11, UiTheme::ashText);
 }
 
 void BattleUI::drawBattleControls(bool waitingConfirm, bool selectingTarget,
@@ -339,12 +371,20 @@ void BattleUI::drawSkillMenu(const std::vector<Skill>& skills, int selectedIndex
 }
 
 void BattleUI::drawTargetCursor(Rectangle targetBounds) const {
-    const float bob = std::sin(static_cast<float>(GetTime()) * 6.0f) * 5.0f;
+    const float pulse = 0.5f + 0.5f * std::sin(static_cast<float>(GetTime()) * 5.0f);
     const float centerX = targetBounds.x + targetBounds.width * 0.5f;
-    const float tipY = targetBounds.y - 14.0f + bob;
-    DrawTriangle(Vector2{ centerX - 12.0f, tipY - 18.0f },
-                 Vector2{ centerX, tipY },
-                 Vector2{ centerX + 12.0f, tipY - 18.0f }, GOLD);
+    const Vector2 feet{ centerX, targetBounds.y + targetBounds.height };
+    const float radius = std::max(18.0f,
+        std::min(targetBounds.width * 0.38f, targetBounds.height * 0.14f));
+    DrawPolyLines(feet, 24, radius + pulse * 4.0f, 0.0f,
+                  UiTheme::crimsonGlow);
+    DrawPolyLines(feet, 24, radius - 4.0f, 0.0f,
+                  Color{ 255, 59, 59, 110 });
+    const float bob = 5.0f + pulse * 3.0f;
+    DrawTriangle(Vector2{ centerX - 7.0f, feet.y + bob + 10.0f },
+                 Vector2{ centerX, feet.y + bob },
+                 Vector2{ centerX + 7.0f, feet.y + bob + 10.0f },
+                 UiTheme::crimsonGlow);
 }
 
 void BattleUI::spawnFloatingText(Vector2 pos, int value, bool isHeal) {

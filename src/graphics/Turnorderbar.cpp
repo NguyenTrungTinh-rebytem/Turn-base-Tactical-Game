@@ -4,6 +4,7 @@
 #include "graphics/UiIcons.h"
 #include "graphics/UiWidgets.h"
 #include "graphics/UiShapes.h"
+#include "graphics/UiTheme.h"
 #include "graphics/Strings.h"
 #include "entities/Character.h"
 #include "entities/Player.h"
@@ -64,9 +65,9 @@ void TurnOrderBar::draw(const std::vector<Character*>& upcoming, const Character
     const Rectangle strip = BattleUI::turnStripBounds();
     const float startX = strip.x + 8.0f;
     const float startY = strip.y + strip.height * 0.5f;
-    UiShapes::roundedRect(Rectangle{ strip.x, strip.y, strip.width, strip.height },
-                          10.0f, Color{ 15, 15, 30, 225 },
-                          Color{ 200, 170, 80, 255 }, 1.0f);
+    DrawRectangleGradientH(static_cast<int>(strip.x), static_cast<int>(startY),
+        static_cast<int>(strip.width), 1, Color{ 141, 135, 148, 105 },
+        Color{ 141, 135, 148, 0 });
 
     if (current != m_lastCurrent) {
         if (current) m_flash = 1.0f;
@@ -124,10 +125,9 @@ void TurnOrderBar::draw(const std::vector<Character*>& upcoming, const Character
         const float size = baseSize + (active ? pulse * 1.0f : 0.0f);
         const Rectangle box{ row.m_y + row.m_x, startY - size * 0.5f, size, size };
         const Vector2 center{ box.x + box.width * 0.5f, box.y + box.height * 0.5f };
-        const Color ring = active ? GOLD : row.m_isHero ? Color{ 94, 194, 149, 255 }
-                                                        : Color{ 224, 89, 92, 255 };
+        const Color ring = active ? UiTheme::crimson : UiTheme::ash;
         DrawPoly(center, 6, size * 0.5f, 30.0f,
-                 withAlpha(Color{ 22, 30, 44, 255 }, row.m_alpha));
+                 withAlpha(UiTheme::ink, row.m_alpha));
         const Rectangle portrait{ box.x + size * 0.17f, box.y + size * 0.12f,
                                   size * 0.66f, size * 0.74f };
         const auto view = std::find_if(views.begin(), views.end(),
@@ -139,6 +139,18 @@ void TurnOrderBar::draw(const std::vector<Character*>& upcoming, const Character
                           withAlpha(WHITE, row.m_alpha));
         DrawPolyLines(center, 6, size * 0.5f, 30.0f,
                       withAlpha(ring, row.m_alpha));
+        DrawPolyLines(center, 6, size * 0.5f - 2.0f, 30.0f,
+                      withAlpha(Color{ 141, 135, 148, 155 }, row.m_alpha));
+        if (active) {
+            for (int tick = 0; tick < 4; ++tick) {
+                const float angle = (30.0f + tick * 60.0f) * DEG2RAD;
+                const Vector2 inner{ center.x + std::cos(angle) * size * 0.50f,
+                                     center.y + std::sin(angle) * size * 0.50f };
+                const Vector2 outer{ center.x + std::cos(angle) * (size * 0.50f + 4.0f),
+                                     center.y + std::sin(angle) * (size * 0.50f + 4.0f) };
+                DrawLineEx(inner, outer, 1.0f, withAlpha(UiTheme::crimsonGlow, row.m_alpha));
+            }
+        }
         if (row.m_isCurrent && m_flash > 0.0f)
             DrawPolyLines(center, 6, size * 0.5f + pulse * 2.0f, 30.0f,
                           withAlpha(WHITE, 0.5f * m_flash * row.m_alpha));

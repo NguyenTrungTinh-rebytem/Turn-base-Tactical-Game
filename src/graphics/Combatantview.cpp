@@ -32,14 +32,13 @@ bool CombatantView::isOneShotFinished() const { return m_sprite->isOneShotFinish
 
 void CombatantView::triggerHitFlash() { m_flashTimer = FLASH_SECONDS; }
 
-Vector2 CombatantView::getHeadPos() const { return BattleMap::getHeadPos(m_slot, m_frameHeight); }
-
-Rectangle CombatantView::getDrawBounds() const {
-    const Vector2 topLeft = BattleMap::toTopLeft(m_slot, m_frameWidth, m_frameHeight);
-    return { topLeft.x, topLeft.y,
-             static_cast<float>(m_frameWidth) * m_slot.m_scale,
-             static_cast<float>(m_frameHeight) * m_slot.m_scale };
+BattleAnchor CombatantView::getAnchor() const {
+    return BattleAnchors::forUnit(m_slot, m_frameWidth, m_frameHeight);
 }
+
+Vector2 CombatantView::getHeadPos() const { return getAnchor().feet; }
+
+Rectangle CombatantView::getDrawBounds() const { return getAnchor().spriteBounds; }
 
 bool CombatantView::containsPoint(Vector2 point) const {
     return isVisible() && CheckCollisionPointRec(point, getDrawBounds());
@@ -54,8 +53,17 @@ void CombatantView::draw(const BattleMap& map, Color baseTint) const {
     tint.a = static_cast<unsigned char>(tint.a * m_alpha);
 
     map.drawShadow(m_slot, static_cast<float>(m_frameWidth), m_alpha);
-    const Rectangle bounds = getDrawBounds();
+    const BattleAnchor anchor = getAnchor();
+    const Rectangle bounds = anchor.spriteBounds;
     m_sprite->drawFrame(Vector2{ bounds.x, bounds.y }, m_slot.m_flipX, m_slot.m_scale, tint);
+
+#if UI_DEV_TOOLS
+    DrawRectangleLinesEx(bounds, 1.0f, Color{ 255, 59, 59, 220 });
+    DrawLineEx(Vector2{ anchor.feet.x - 8.0f, anchor.feet.y },
+               Vector2{ anchor.feet.x + 8.0f, anchor.feet.y }, 1.0f, YELLOW);
+    DrawLineEx(Vector2{ anchor.feet.x, anchor.feet.y - 8.0f },
+               Vector2{ anchor.feet.x, anchor.feet.y + 8.0f }, 1.0f, YELLOW);
+#endif
 }
 
 bool CombatantView::drawPortrait(Rectangle bounds, Color tint) const {

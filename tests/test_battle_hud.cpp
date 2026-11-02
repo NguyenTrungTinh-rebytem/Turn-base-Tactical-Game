@@ -150,8 +150,20 @@ int main() {
         area(UiTheme::partyCardsHud) + area(UiTheme::battleHud) +
         area(UiTheme::battleLogButtonHud);
     const float activeArea = fixedArea + area(UiTheme::battleLogHud);
-    assert(std::abs(fixedArea - 282352.0f) < 0.5f);
+    assert(std::abs(fixedArea - 323736.0f) < 0.5f);
     assert(activeArea <= 1920.0f * 1080.0f * 0.22f);
+
+    const BattleSlot anchorSlot{ Vector2{ 640.0f, 520.0f }, 1.5f, false, 0.5f };
+    const BattleAnchor anchor = BattleAnchors::forUnit(anchorSlot, 128, 128);
+    assert(anchor.feet.x == anchorSlot.m_feetPos.x && anchor.feet.y == anchorSlot.m_feetPos.y);
+    assert(std::abs(anchor.spriteBounds.x - 544.0f) < 0.01f);
+    assert(std::abs(anchor.spriteBounds.y - 328.0f) < 0.01f);
+    assert(std::abs(anchor.spriteBounds.width - 192.0f) < 0.01f);
+    Player anchorPlayer("Anchor hero", Stats{ 100, 30, 10, 0, 0, 0, 10 }, Element::KIM);
+    const Rectangle playerHp = BattleUI::fieldHpBounds(anchorPlayer, anchor.feet);
+    assert(std::abs(playerHp.y - (anchor.feet.y + 10.0f)) < 0.01f);
+    assert(playerHp.x + playerHp.width * 0.5f == anchor.feet.x);
+    assert(playerHp.width >= 96.0f && playerHp.width <= 180.0f);
 
     const Rectangle compactList = BattleUI::listPanelBounds(1);
     assert(std::abs(compactList.height * 1.5f - 96.0f) < 0.5f);
