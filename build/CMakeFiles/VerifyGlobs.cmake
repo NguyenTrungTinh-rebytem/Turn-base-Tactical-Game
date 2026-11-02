@@ -31,6 +31,7 @@ set(OLD_GLOB
   "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/ItemFactory.cpp"
   "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Party.cpp"
   "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Player.cpp"
+  "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/BattleAnchors.cpp"
   "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/BattleMap.cpp"
   "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Battleui.cpp"
   "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Combatantview.cpp"

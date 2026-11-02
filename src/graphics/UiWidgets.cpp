@@ -272,7 +272,7 @@ void UiWidgets::EndScrollArea() { scrollAreaScissor.reset(); }
 
 bool UiWidgets::Dialog(Rectangle bounds, const std::string& title, const std::string& body,
                        const std::string& actionLabel) {
-    UiBlur::draw(bounds, UiTheme::radiusMedium, UiTheme::panelRaised);
+    UiBlur::draw(bounds, UiTheme::radiusMedium, UiTheme::glassModal);
     UiShapes::plate(bounds, BLANK, UiTheme::crimson, 2.0f);
     UiText::draw(title, static_cast<int>(bounds.x + 22.0f), static_cast<int>(bounds.y + 18.0f),
                  22, UiTheme::silver);
@@ -309,7 +309,7 @@ void UiWidgets::Tooltip(Rectangle anchor, const std::string& text) {
     if (bounds.x + bounds.width > UiCanvas::width() - 8.0f) bounds.x = mouse.x - width - 14.0f;
     if (bounds.y + bounds.height > UiCanvas::height() - 8.0f)
         bounds.y = std::max(8.0f, mouse.y - bounds.height - 12.0f);
-    UiShapes::plate(bounds, UiTheme::panelRaised, outline, borderWidth);
+    UiShapes::plate(bounds, UiTheme::glassTooltip, outline, borderWidth);
     UiShapes::diamond(Vector2{ bounds.x, bounds.y + bounds.height * 0.5f },
                       8.0f, outline, false);
     for (std::size_t index = 0; index < lines.size(); ++index)

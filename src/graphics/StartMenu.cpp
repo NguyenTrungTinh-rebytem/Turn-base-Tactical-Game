@@ -272,7 +272,7 @@ void StartMenu::drawButtons() const {
         const bool start = b.m_action == MenuAction::START_GAME;
         const float iconSize = 24.0f;
         const float iconX = r.x + 16.0f;
-        UiIcons::draw(start ? "action:confirm" : "action:close",
+        UiIcons::draw(start ? "action:start" : "action:exit",
             Rectangle{ iconX, r.y + (r.height - iconSize) * 0.5f, iconSize, iconSize },
             UiTheme::silver);
         const int fontSize = 20;

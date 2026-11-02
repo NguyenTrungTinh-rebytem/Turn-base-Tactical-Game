@@ -273,7 +273,7 @@ void PrepMenuScreen::drawBackground() const {
 
 void PrepMenuScreen::drawTabs() const {
     static const char* iconKeys[TAB_COUNT] = {
-        "action:confirm", "action:skill", "action:item", "action:target"
+        "action:party", "action:skill", "action:item", "action:banner"
     };
     for (int i = 0; i < TAB_COUNT; ++i) {
         const Rectangle r = tabRect(i);
@@ -318,7 +318,7 @@ void PrepMenuScreen::drawPartyTab(const Rectangle& area) const {
             drawCenteredText(heroName.c_str(), cx, r.y + 9.0f, 22, COL_TEXT);
             drawCenteredText((race + u8" · " + heroClass).c_str(), cx, r.y + 43.0f, 16, COL_LABEL);
             if (i == 0) {
-                UiIcons::draw("action:confirm",
+                UiIcons::draw("action:crown",
                     Rectangle{ r.x + 10.0f, r.y + 87.0f, 20.0f, 20.0f }, COL_TITLE);
                 UiText::draw(u8"Thủ lĩnh", static_cast<int>(r.x + 36.0f),
                              static_cast<int>(r.y + 88.0f), 16, COL_TITLE);
@@ -391,8 +391,12 @@ void PrepMenuScreen::drawSkillsTab(const Rectangle& area) const {
         if (rowHover) m_hoverSkill = static_cast<int>(i);
         UiShapes::bladeStrip(r, rowHover ? UiTheme::panelRaised : UiTheme::panel,
                              rowHover ? COL_EDGE_SEL : COL_EDGE, false, rowHover, rowHover);
-        UiShapes::seal(Rectangle{ r.x + 7.0f, r.y + 22.0f, 20.0f, 20.0f },
-                       elementColor(s.m_element));
+        const SkillType skillType = s.m_typeText.find(u8"Hồi") != std::string::npos
+            ? SkillType::HEAL : s.m_typeText.find(u8"Tăng") != std::string::npos
+            ? SkillType::BUFF : s.m_typeText.find(u8"Giảm") != std::string::npos
+            ? SkillType::DEBUFF : SkillType::DAMAGE;
+        UiIcons::drawSkill(s.m_element, skillType, s.m_isMagic,
+            Rectangle{ r.x + 5.0f, r.y + 18.0f, 28.0f, 28.0f });
 
         const std::string skillName = Strings::localizedName(s.m_name);
         UiText::draw(skillName.c_str(), static_cast<int>(r.x + 39), static_cast<int>(r.y + 10), 22, COL_TEXT);
@@ -573,8 +577,8 @@ void PrepMenuScreen::drawButtons() const {
             : ((hover || i == BTN_SHOP) ? COL_EDGE_SEL : COL_EDGE);
         UiShapes::bladeStrip(r, primary ? Color{ 50, 10, 17, 224 } : COL_PANEL,
                              edge, false, primary, hover);
-        const char* iconKey = i == BTN_SHOP ? "action:shop" :
-                              (primary ? "action:confirm" : "action:close");
+        const char* iconKey = i == BTN_SHOP ? "action:coin" :
+                              (primary ? "action:start" : "action:back");
         UiIcons::draw(iconKey, Rectangle{ r.x + 20.0f, r.y + 11.0f, 24.0f, 24.0f },
                       hover ? Color{ 255, 240, 170, 255 } : COL_TITLE);
         UiText::draw(labels[i], static_cast<int>(r.x + 52.0f),

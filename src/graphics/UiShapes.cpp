@@ -93,6 +93,10 @@ Color withAlpha(Color color, float alpha) {
     return color;
 }
 
+bool sameRgb(Color left, Color right) {
+    return left.r == right.r && left.g == right.g && left.b == right.b;
+}
+
 Color fillAt(Color start, Color end, float amount) {
     if (end.a == 0) return withAlpha(start, amount);
     const float t = std::clamp(amount, 0.0f, 1.0f);
@@ -265,10 +269,18 @@ void UiShapes::plate(Rectangle bounds, Color fill, Color edge, float lineWidth) 
     style.cutTopRight = std::min(5.0f, bounds.height * 0.12f);
     style.cutBottomRight = cut;
     style.cutBottomLeft = std::min(5.0f, bounds.height * 0.12f);
-    style.fill = fill;
-    style.topLine = edge;
+    if (sameRgb(fill, UiTheme::panel) || sameRgb(fill, UiTheme::panelRaised)) {
+        style.fill = UiTheme::glassFillTop;
+        style.fillEnd = UiTheme::glassFillBottom;
+    } else {
+        style.fill = fill;
+    }
+    style.topLine = edge.a > 0 ? UiTheme::glassHighlight : BLANK;
     style.bottomLine = edge;
     style.lineWidth = lineWidth;
+    style.shadow = Color{ 0, 0, 0, 64 };
+    style.shadowBlur = 10.0f;
+    style.shadowOffset = Vector2{ 0.0f, 4.0f };
     draw(bounds, style);
     const Rectangle inner{ bounds.x + 6.0f, bounds.y + 6.0f,
                            bounds.width - 12.0f, bounds.height - 12.0f };
@@ -289,7 +301,7 @@ void UiShapes::plate(Rectangle bounds, Color fill, Color edge, float lineWidth) 
 void UiShapes::bladeStrip(Rectangle bounds, Color fill, Color edge, bool rightAnchored,
                           bool selected, bool hovered, bool enabled) {
     UiShapeStyle style;
-    const float cut = std::min(12.0f, bounds.height * 0.28f);
+    const float cut = std::min(18.0f, bounds.height * 0.32f);
     style.cutTopLeft = rightAnchored ? 4.0f : cut;
     style.cutBottomLeft = rightAnchored ? 4.0f : cut;
     style.cutTopRight = rightAnchored ? cut : 4.0f;
@@ -304,10 +316,24 @@ void UiShapes::bladeStrip(Rectangle bounds, Color fill, Color edge, bool rightAn
         style.fadeStart = 1.0f - UiTheme::bladeFadeFraction;
         style.fadeEnd = 1.0f;
     }
-    style.fill = fill;
-    style.fill.a = static_cast<unsigned char>(std::min<unsigned>(style.fill.a, 224));
-    style.topLine = selected ? UiTheme::crimson : hovered ? UiTheme::silver : edge;
-    style.bottomLine = selected ? UiTheme::crimson : hovered ? UiTheme::silver : edge;
+    if (selected) {
+        style.fill = UiTheme::selectedGlassTop;
+        style.fillEnd = UiTheme::selectedGlassBottom;
+    } else if (sameRgb(fill, UiTheme::panel) || sameRgb(fill, UiTheme::panelRaised)) {
+        style.fill = UiTheme::glassFillTop;
+        style.fillEnd = UiTheme::glassFillBottom;
+    } else {
+        style.fill = fill;
+    }
+    if (hovered && !selected) {
+        style.fill.r = static_cast<unsigned char>(std::min(255, style.fill.r + 18));
+        style.fill.g = static_cast<unsigned char>(std::min(255, style.fill.g + 18));
+        style.fill.b = static_cast<unsigned char>(std::min(255, style.fill.b + 18));
+    }
+    style.topLine = selected ? UiTheme::crimsonGlow :
+        hovered ? UiTheme::silver : edge;
+    style.bottomLine = selected ? UiTheme::crimson :
+        hovered ? UiTheme::silver : edge;
     style.lineWidth = 1.0f;
     if (selected) {
         style.glow = UiTheme::crimsonGlow;

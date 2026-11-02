@@ -109,5 +109,6 @@ void UiBlur::draw(Rectangle bounds, float radius, Color tint) {
         -bounds.height * scale
     };
     DrawTexturePro(blurred.texture, source, bounds, Vector2{ 0.0f, 0.0f }, 0.0f, WHITE);
+    UiShapes::roundedRect(bounds, radius, Color{ 0, 0, 0, 77 });
     UiShapes::roundedRect(bounds, radius, tint);
 }

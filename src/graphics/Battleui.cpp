@@ -257,7 +257,7 @@ void BattleUI::drawRoundChip(int stage, const Character* current, int gold) cons
     const Rectangle coin{ bounds.x + bounds.width - coinRowWidth - 8.0f,
                           bounds.y + 29.0f, coinRowWidth, 20.0f };
     UiShapes::bladeStrip(coin, UiTheme::ink, UiTheme::gold, true);
-    UiIcons::draw("action:shop", Rectangle{ coin.x + 6.0f, coin.y + 2.0f,
+    UiIcons::draw("action:coin", Rectangle{ coin.x + 6.0f, coin.y + 2.0f,
                                              goldIconSize, goldIconSize }, UiTheme::gold);
     UiText::draw(coinText, static_cast<int>(coin.x + coin.width -
                      UiText::measure(coinText, 16) - 7.0f),
@@ -384,7 +384,7 @@ void BattleUI::drawBattleControls(bool waitingConfirm, bool selectingTarget,
 void BattleUI::drawLogButton(bool open) const {
     const Rectangle bounds = logButtonBounds();
     const bool clicked = UiWidgets::BladeButton(bounds, open ? u8"ĐÓNG" : u8"NHẬT KÝ",
-                                                false, open, true, "action:close");
+                                                false, open, true, "action:log");
     (void)clicked;
     UiWidgets::Tooltip(bounds, u8"Bật hoặc tắt nhật ký trận đấu");
 }
@@ -452,8 +452,10 @@ void BattleUI::drawSkillMenu(const std::vector<Skill>& skills, int selectedIndex
             skill.m_type == SkillType::HEAL ? " HP" : "%");
         const bool enabled = currentMp >= skill.m_mpCost;
         const Rectangle row = skillRowBounds(index, static_cast<int>(skills.size()), selectedIndex);
+        UiIcons::drawSkill(skill.m_element, skill.m_type, skill.m_isMagic,
+            Rectangle{ row.x + 4.0f, row.y + 4.0f, 24.0f, 24.0f });
         UiWidgets::ListRow(row, TextFormat("%s  ·  %s", name.c_str(), detail), {},
-                           index == selectedIndex, enabled, 14.0f, true);
+                           index == selectedIndex, enabled, 42.0f, true);
         UiWidgets::Tooltip(row,
                            TextFormat(u8"%s · tiêu hao %d MP", name.c_str(), skill.m_mpCost));
     }

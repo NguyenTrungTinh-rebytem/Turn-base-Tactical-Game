@@ -161,7 +161,7 @@ void SkillTooltip::draw(const SkillTipInfo& info, Vector2 mousePos, const Stats*
                     Color{ 0, 0, 0, 100 }, BLANK);
     UiShapes::plate(Rectangle{ static_cast<float>(x), static_cast<float>(y),
                                static_cast<float>(w), static_cast<float>(h) },
-                    UiTheme::panelRaised, accent, 1.5f);
+                    UiTheme::glassTooltip, accent, 1.5f);
 
     UiText::draw(info.m_name.c_str(), x + PAD, y + PAD, TITLE_SIZE, accent);
     UiShapes::divider(Vector2{ static_cast<float>(x + PAD), static_cast<float>(y + PAD + titleH - 4) },
