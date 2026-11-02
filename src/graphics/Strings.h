@@ -41,6 +41,7 @@ inline constexpr char heroStats[] = u8"CHỈ SỐ - %s";
 inline constexpr char noSelectedItem[] = u8"Chưa chọn vật phẩm";
 inline constexpr char noData[] = u8"Không có dữ liệu";
 inline constexpr char gold[] = u8"%d vàng";
+inline constexpr char roundTurn[] = u8"Màn %d · Lượt %d";
 inline constexpr char stage[] = u8"MÀN %d";
 inline constexpr char damage[] = u8"%s tấn công %s gây %d sát thương!";
 inline constexpr char mpCost[] = u8"Không đủ MP để dùng %s!";

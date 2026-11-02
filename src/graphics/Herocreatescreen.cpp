@@ -55,7 +55,8 @@ void drawStatBar(const char* label, int value, int maxValue, float x, float y, f
     const float bx = x + 48.0f, by = y + 5.0f, bh = 10.0f;
     const float ratio = clamp01(static_cast<float>(value) / static_cast<float>(std::max(1, maxValue)));
     UiShapes::runeBar(Rectangle{ bx, by, barW, bh }, ratio, COL_BAR);
-    UiText::draw(TextFormat("%d", value), static_cast<int>(bx + barW + 8.0f), static_cast<int>(y - 1.0f), 18, COL_TEXT);
+    UiText::draw(TextFormat("%d", value), static_cast<int>(bx + barW + 8.0f),
+                 static_cast<int>(y - 3.0f), 22, COL_TEXT);
 }
 } // namespace
 

@@ -235,13 +235,20 @@ void StartMenu::drawProceduralBackground() const {
 void StartMenu::drawTitle() const {
     const float W = static_cast<float>(UiCanvas::width());
     const float cx = W * m_menuCenterX;
-    const Rectangle emblem{ cx - 42.0f, 54.0f, 84.0f, 84.0f };
-    UiShapes::seal(emblem, UiTheme::ash, false);
-    DrawLineEx(Vector2{ cx, 40.0f }, Vector2{ cx, 55.0f }, 1.0f, UiTheme::crimson);
-    DrawLineEx(Vector2{ cx - 26.0f, 52.0f }, Vector2{ cx - 35.0f, 42.0f },
-               1.0f, UiTheme::crimson);
-    DrawLineEx(Vector2{ cx + 26.0f, 52.0f }, Vector2{ cx + 35.0f, 42.0f },
-               1.0f, UiTheme::crimson);
+    const Vector2 emblemCenter{ cx, 45.0f };
+    const Color emblemColor{ UiTheme::ash.r, UiTheme::ash.g, UiTheme::ash.b, 76 };
+    DrawCircleLines(static_cast<int>(emblemCenter.x), static_cast<int>(emblemCenter.y),
+                    30.0f, emblemColor);
+    DrawCircleLines(static_cast<int>(emblemCenter.x), static_cast<int>(emblemCenter.y),
+                    24.0f, emblemColor);
+    for (int tick = 0; tick < 8; ++tick) {
+        const float angle = static_cast<float>(tick) * PI / 4.0f;
+        const Vector2 from{ emblemCenter.x + std::cos(angle) * 32.0f,
+                            emblemCenter.y + std::sin(angle) * 32.0f };
+        const Vector2 to{ emblemCenter.x + std::cos(angle) * 38.0f,
+                          emblemCenter.y + std::sin(angle) * 38.0f };
+        DrawLineEx(from, to, 1.0f, emblemColor);
+    }
     drawCenteredText(Strings::gameTitle, cx, 82.0f, 31, UiTheme::silver,
                      UiTheme::displayTracking);
     drawCenteredText(Strings::menuTagline, cx, 148.0f, 10, UiTheme::ashText,
@@ -262,18 +269,16 @@ void StartMenu::drawButtons() const {
             selected ? UiTheme::crimson : UiTheme::ash, m_menuOnRight,
             selected, over, true);
 
-        const int fontSize = 16;
         const bool start = b.m_action == MenuAction::START_GAME;
-        const float iconSize = 20.0f;
-        const float iconX = m_menuOnRight
-            ? r.x + r.width - iconSize - 18.0f : r.x + 18.0f;
+        const float iconSize = 24.0f;
+        const float iconX = r.x + 16.0f;
         UiIcons::draw(start ? "action:confirm" : "action:close",
             Rectangle{ iconX, r.y + (r.height - iconSize) * 0.5f, iconSize, iconSize },
             UiTheme::silver);
-        const float labelX = r.x + r.width * (m_menuOnRight ? 0.57f : 0.43f);
-        drawCenteredText(b.m_label.c_str(), labelX,
-            r.y + (r.height - fontSize) * 0.5f, fontSize, UiTheme::silver,
-            UiTheme::displayTracking);
+        const int fontSize = 20;
+        UiText::draw(b.m_label, static_cast<int>(iconX + iconSize + 12.0f),
+            static_cast<int>(r.y + (r.height - fontSize) * 0.5f),
+            fontSize, UiTheme::silver, UiTheme::displayTracking);
     }
 }
 

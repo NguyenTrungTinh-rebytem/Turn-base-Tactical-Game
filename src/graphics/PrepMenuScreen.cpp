@@ -93,20 +93,15 @@ Rectangle partyCardRect(Rectangle area, int index) {
     const float w = (area.width - 2.0f * pad - 2.0f * gap) / 3.0f;
     return Rectangle{area.x + pad + index * (w + gap), area.y + pad, w, area.height - 2.0f * pad};
 }
-void drawStatRow(const char* label, int value, float x, float y, float w) {
-    static const int maxima[] = { 160, 80, 60, 60, 40, 40, 30 };
-    static const char* labels[] = { "HP", "MP", "ATK", "MATK", "DEF", "MDEF", "SPD" };
-    int statIndex = 0;
-    for (int i = 0; i < 7; ++i)
-        if (std::string(labels[i]) == label) { statIndex = i; break; }
+void drawStatRow(const char* label, int value, int maximum, float x, float y, float w) {
     UiText::draw(label, static_cast<int>(x), static_cast<int>(y), 15, COL_LABEL);
     const float barX = x + 48.0f;
     const float barWidth = std::max(18.0f, w - 86.0f);
-    const Rectangle bar{ barX, y + 7.0f, barWidth, 6.0f };
+    const Rectangle bar{ barX, y + 5.0f, barWidth, 10.0f };
     const float fraction = std::max(0.0f, std::min(1.0f,
-        static_cast<float>(value) / static_cast<float>(maxima[statIndex])));
+        static_cast<float>(value) / static_cast<float>(std::max(1, maximum))));
     UiShapes::runeBar(bar, fraction, UiTheme::hpHigh);
-    drawRightText(TextFormat("%d", value), x + w, y - 1.0f, 17, COL_TEXT);
+    drawRightText(TextFormat("%d", value), x + w, y - 4.0f, 22, COL_TEXT);
 }
 } // namespace
 
@@ -291,8 +286,7 @@ void PrepMenuScreen::drawTabs() const {
         UiIcons::draw(iconKeys[i], Rectangle{ r.x + 14.0f, r.y + 10.0f, 26.0f, 26.0f },
                       active ? COL_TITLE : COL_LABEL);
         const char* label = tabLabel(i);
-        UiText::draw(label,
-            static_cast<int>(r.x + 48.0f + (r.width - 56.0f - UiText::measure(label, 17)) * 0.5f),
+        UiText::draw(label, static_cast<int>(r.x + 14.0f + 26.0f + 12.0f),
             static_cast<int>(r.y + (r.height - 17.0f) * 0.5f), 17,
             active ? COL_TITLE : (hover ? COL_TEXT : COL_LABEL));
     }
@@ -300,6 +294,12 @@ void PrepMenuScreen::drawTabs() const {
 
 // ---------------- Tab 1: DOI HINH ----------------
 void PrepMenuScreen::drawPartyTab(const Rectangle& area) const {
+    const auto statMax = [this](int Stats::* field) {
+        int maximum = m_info.m_hero.m_stats.*field;
+        for (const PrepHeroInfo& member : m_info.m_members)
+            maximum = std::max(maximum, member.m_stats.*field);
+        return std::max(1, maximum);
+    };
     for (int i = 0; i < 3; ++i) {
         const Rectangle r = partyCardRect(area, i);
         const PrepHeroInfo* h = (static_cast<std::size_t>(i) < m_info.m_members.size())
@@ -347,13 +347,13 @@ void PrepMenuScreen::drawPartyTab(const Rectangle& area) const {
 
             float y = r.y + 105.0f;
             const float x = r.x + 142.0f, w = r.width - 164.0f;
-            drawStatRow("HP", h->m_stats.m_hp, x, y, w); y += 36.0f;
-            drawStatRow("MP", h->m_stats.m_mp, x, y, w); y += 36.0f;
-            drawStatRow("ATK", h->m_stats.m_a, x, y, w); y += 36.0f;
-            drawStatRow("MATK", h->m_stats.m_ma, x, y, w); y += 36.0f;
-            drawStatRow("DEF", h->m_stats.m_d, x, y, w); y += 36.0f;
-            drawStatRow("MDEF", h->m_stats.m_md, x, y, w); y += 36.0f;
-            drawStatRow("SPD", h->m_stats.m_spd, x, y, w);
+            drawStatRow("HP", h->m_stats.m_hp, statMax(&Stats::m_hp), x, y, w); y += 36.0f;
+            drawStatRow("MP", h->m_stats.m_mp, statMax(&Stats::m_mp), x, y, w); y += 36.0f;
+            drawStatRow("ATK", h->m_stats.m_a, statMax(&Stats::m_a), x, y, w); y += 36.0f;
+            drawStatRow("MATK", h->m_stats.m_ma, statMax(&Stats::m_ma), x, y, w); y += 36.0f;
+            drawStatRow("DEF", h->m_stats.m_d, statMax(&Stats::m_d), x, y, w); y += 36.0f;
+            drawStatRow("MDEF", h->m_stats.m_md, statMax(&Stats::m_md), x, y, w); y += 36.0f;
+            drawStatRow("SPD", h->m_stats.m_spd, statMax(&Stats::m_spd), x, y, w);
             drawCenteredText(u8"Nhấp để đổi", cx, r.y + r.height - 28.0f, 14, COL_OK);
         } else {
             const float cy = r.y + r.height / 2.0f;
@@ -395,10 +395,10 @@ void PrepMenuScreen::drawSkillsTab(const Rectangle& area) const {
                        elementColor(s.m_element));
 
         const std::string skillName = Strings::localizedName(s.m_name);
-        UiText::draw(skillName.c_str(), static_cast<int>(r.x + 24), static_cast<int>(r.y + 10), 22, COL_TEXT);
+        UiText::draw(skillName.c_str(), static_cast<int>(r.x + 39), static_cast<int>(r.y + 10), 22, COL_TEXT);
         std::string sub = s.m_typeText;
         if (!s.m_effectText.empty()) sub += "  |  " + s.m_effectText;
-        UiText::draw(sub.c_str(), static_cast<int>(r.x + 24), static_cast<int>(r.y + 38), 16, COL_LABEL);
+        UiText::draw(sub.c_str(), static_cast<int>(r.x + 39), static_cast<int>(r.y + 38), 16, COL_LABEL);
 
         UiText::draw(elementName(s.m_element), static_cast<int>(r.x + r.width - 410), static_cast<int>(r.y + 20), 18, elementColor(s.m_element));
         drawRightText(TextFormat("%d", s.m_mpCost), r.x + r.width - 226.0f, r.y + 20.0f, 20, Color{ 110, 170, 255, 255 });

@@ -1,5 +1,6 @@
 #include "UiCanvas.h"
 #include "UiTheme.h"
+#include "UiCursor.h"
 #include "RaylibScope.h"
 #include <algorithm>
 #include <iostream>
@@ -70,6 +71,7 @@ void UiCanvas::end() {
         Rectangle{ 0.0f, 0.0f, static_cast<float>(GetScreenWidth()),
                    static_cast<float>(GetScreenHeight()) },
         Vector2{ 0.0f, 0.0f }, 0.0f, WHITE);
+    UiCursor::draw();
 }
 
 bool UiCanvas::suspend() {

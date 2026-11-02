@@ -278,7 +278,7 @@ void WaveSelectScreen::drawCard(size_t index) const {
             static_cast<int>(e.m_element) == 3 ? "hoa" : "tho"),
             Rectangle{ r.x + 24.0f, y + 1.0f, 20.0f, 20.0f }, elementColor(e.m_element));
         const std::string name = Strings::localizedName(e.m_name);
-        UiText::draw(name.c_str(), static_cast<int>(r.x + 54), static_cast<int>(y), 18, COL_TEXT);
+        UiText::draw(name.c_str(), static_cast<int>(r.x + 56), static_cast<int>(y), 18, COL_TEXT);
         const char* el = elementName(e.m_element);
         if (e.m_isBoss) {
             UiText::draw(TextFormat(u8"BOSS · HP %d", e.m_hp),

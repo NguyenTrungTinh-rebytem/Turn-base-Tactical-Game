@@ -4,6 +4,7 @@
 // Core noi su kien:  ICombatObserver::onHealthChanged -> ui.spawnFloatingText(...)
 #include "raylib.h"
 #include "BattleMap.h"        // BattleSlot
+#include "BattleAnchors.h"
 #include "data/Skill.h"
 #include <string>
 #include <vector>
@@ -29,6 +30,7 @@ public:
     static Rectangle roundChipBounds();
     static Rectangle partyCardBounds(int index);
     static Rectangle fieldHpBounds(const Character& character, Vector2 feet);
+    static Rectangle fieldHpBounds(const Character& character, const BattleAnchor& anchor);
     static Rectangle buttonBounds(BattleUIButton button);
     static Rectangle controlPanelBounds();
     static Rectangle itemMenuBounds();
@@ -39,7 +41,7 @@ public:
     static Rectangle itemRowBounds(int itemIndex, int itemCount, int selectedIndex);
 
     // ---- HUD tren dau nhan vat ----
-    // anchor = BattleMap::getHeadPos; field bars are placed from the estimated feet anchor.
+    // anchor is the existing core-facing head point; bars use the sprite anchor reconstructed by BattleAnchors.
     void drawHpMpBar(const Character& character, Vector2 anchor) const;
 
     void drawRoundChip(int stage, const Character* current, int gold) const;
@@ -79,4 +81,7 @@ private:
         float       m_maxLife = 1.0f;
     };
     std::vector<FloatingText> m_floatingTexts;
+    mutable const Character* m_lastRoundCharacter = nullptr;
+    mutable int m_lastRoundStage = -1;
+    mutable int m_turnNumber = 0;
 };

@@ -8,7 +8,9 @@
 #include "UiTheme.h"
 #include "RaylibScope.h"
 #include <algorithm>
+#include <cassert>
 #include <cmath>
+#include <iostream>
 #include <optional>
 #include <sstream>
 #include <utility>
@@ -26,6 +28,46 @@ std::optional<RaylibScope::ScissorMode> scrollAreaScissor;
 
 bool hovered(Rectangle bounds) {
     return CheckCollisionPointRec(UiInput::mousePosition(), bounds);
+}
+
+bool overlaps(Rectangle a, Rectangle b) {
+    return a.width > 0.0f && a.height > 0.0f && b.width > 0.0f && b.height > 0.0f &&
+        a.x < b.x + b.width && a.x + a.width > b.x &&
+        a.y < b.y + b.height && a.y + a.height > b.y;
+}
+
+std::string fitLabel(const std::string& text, int size, float width) {
+    if (UiText::measure(text, size) <= width) return text;
+    constexpr const char* ellipsis = u8"…";
+    const float available = width - UiText::measure(ellipsis, size);
+    if (available <= 0.0f) return {};
+    std::string fitted;
+    for (const char* cursor = text.c_str(); *cursor;) {
+        int bytes = 0;
+        const int codepoint = GetCodepoint(cursor, &bytes);
+        if (bytes <= 0) break;
+        const std::string next = fitted + std::string(cursor, static_cast<std::size_t>(bytes));
+        if (UiText::measure(next, size) > available) break;
+        fitted = next;
+        cursor += bytes;
+        (void)codepoint;
+    }
+    return fitted + ellipsis;
+}
+
+void verifyRowLayout(Rectangle icon, Rectangle labelBounds, Rectangle trailing,
+                     const std::string& id) {
+#if defined(UI_DEV_TOOLS) && UI_DEV_TOOLS
+    const bool valid = !overlaps(icon, labelBounds) && !overlaps(icon, trailing) &&
+                       !overlaps(labelBounds, trailing);
+    assert(valid && "row icon, label and trailing slot must not overlap");
+    if (!valid) std::cerr << "[UI row overlap] " << id << '\n';
+#else
+    (void)icon;
+    (void)labelBounds;
+    (void)trailing;
+    (void)id;
+#endif
 }
 
 void drawLabel(Rectangle bounds, const std::string& text, int size, Color color,
@@ -97,22 +139,28 @@ bool UiWidgets::BladeButton(Rectangle bounds, const std::string& text, bool righ
     UiShapes::bladeStrip(visualBounds, fill,
         enabled ? UiTheme::ash : muted, rightAnchored, selected || held, over, enabled);
 
-    if (!iconKey.empty()) {
-        const float size = std::min(bounds.height * 0.52f, 22.0f);
-        const float iconX = rightAnchored
-            ? visualBounds.x + visualBounds.width - size - 16.0f
-            : visualBounds.x + 14.0f;
-        UiIcons::draw(iconKey, Rectangle{ iconX,
-            visualBounds.y + (visualBounds.height - size) * 0.5f, size, size },
-            enabled ? UiTheme::silver : muted);
-    }
-
-    const float opaqueCenter = visualBounds.x + visualBounds.width *
-        (rightAnchored ? 0.82f : 0.18f);
     const int fontSize = 16;
-    const int width = UiText::measure(text, fontSize);
-    const int x = static_cast<int>(opaqueCenter - width * 0.5f);
-    UiText::draw(text, x,
+    const float pad = 14.0f;
+    const float trailingWidth = 0.0f;
+    const float iconSize = iconKey.empty() ? 0.0f :
+        std::min(24.0f, std::max(16.0f, bounds.height * 0.52f));
+    const Rectangle iconBounds = iconSize > 0.0f
+        ? Rectangle{ visualBounds.x + pad,
+                     visualBounds.y + (visualBounds.height - iconSize) * 0.5f,
+                     iconSize, iconSize } : Rectangle{};
+    const float labelX = visualBounds.x + pad + iconSize +
+                         (iconSize > 0.0f ? 12.0f : 0.0f);
+    const Rectangle labelBounds{ labelX, visualBounds.y,
+        std::max(0.0f, visualBounds.x + visualBounds.width - pad - trailingWidth - labelX),
+        visualBounds.height };
+    const Rectangle trailingBounds = trailingWidth > 0.0f
+        ? Rectangle{ visualBounds.x + visualBounds.width - pad - trailingWidth,
+                     visualBounds.y, trailingWidth, visualBounds.height } : Rectangle{};
+    verifyRowLayout(iconBounds, labelBounds, trailingBounds, text);
+    if (iconSize > 0.0f)
+        UiIcons::draw(iconKey, iconBounds, enabled ? UiTheme::silver : muted);
+    const std::string fitted = fitLabel(text, fontSize, labelBounds.width);
+    UiText::draw(fitted, static_cast<int>(labelBounds.x),
         static_cast<int>(visualBounds.y + (visualBounds.height - fontSize) * 0.5f),
         fontSize, enabled ? UiTheme::silver : muted);
     return clicked;
@@ -166,26 +214,24 @@ bool UiWidgets::ListRow(Rectangle bounds, const std::string& title,
     UiShapes::bladeStrip(visualBounds,
         selected ? Color{ 50, 10, 17, 224 } : UiTheme::panel,
         enabled ? outline : muted, rightAnchored, selected || held, over, enabled);
-    const int titleSize = bounds.height < 30.0f ? 11 : bounds.height < 45.0f ? 14 : 16;
-    const float textX = rightAnchored
-        ? bounds.x + bounds.width * 0.82f - UiText::measure(title, titleSize) * 0.5f
-        : bounds.x + textInset;
+    const int titleSize = bounds.height < 30.0f ? 14 : bounds.height < 45.0f ? 16 : 16;
+    const float left = bounds.x + std::max(14.0f, textInset);
+    const float right = bounds.x + bounds.width - 14.0f;
+    const Rectangle titleBounds{ left, bounds.y + 2.0f, std::max(0.0f, right - left),
+                                  std::max(0.0f, bounds.height - (detail.empty() ? 4.0f : 22.0f)) };
+    const Rectangle detailBounds{ left, bounds.y + bounds.height - 20.0f,
+                                  std::max(0.0f, right - left), 18.0f };
+    verifyRowLayout({}, titleBounds, detail.empty() ? Rectangle{} : detailBounds, title);
     const Color tint = enabled ? UiTheme::text : muted;
-    if (bounds.height < 30.0f) {
-        UiText::draw(title, static_cast<int>(textX),
-                     static_cast<int>(bounds.y + (bounds.height - 11.0f) * 0.5f), 11, tint);
-    } else if (bounds.height < 45.0f) {
-        UiText::draw(title, static_cast<int>(textX),
-                     static_cast<int>(bounds.y + 2.0f), 14, tint);
-        if (!detail.empty())
-            UiText::draw(detail, static_cast<int>(textX), static_cast<int>(bounds.y + 22.0f),
-                         11, selected ? label : muted);
-    } else {
-        UiText::draw(title, static_cast<int>(textX), static_cast<int>(bounds.y + 7.0f), 16, tint);
-        if (!detail.empty())
-            UiText::draw(detail, static_cast<int>(textX), static_cast<int>(bounds.y + 29.0f), 13,
-                         selected ? label : muted);
-    }
+    UiText::draw(fitLabel(title, titleSize, titleBounds.width),
+                 static_cast<int>(titleBounds.x),
+                 static_cast<int>(titleBounds.y + (titleBounds.height - titleSize) * 0.5f),
+                 titleSize, tint);
+    if (!detail.empty())
+        UiText::draw(fitLabel(detail, 14, detailBounds.width),
+                     static_cast<int>(detailBounds.x),
+                     static_cast<int>(detailBounds.y + (detailBounds.height - 14.0f) * 0.5f),
+                     14, selected ? label : muted);
     return enabled && over && UiInput::pressed();
 }
 

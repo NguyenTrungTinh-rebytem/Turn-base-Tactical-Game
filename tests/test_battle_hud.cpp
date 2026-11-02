@@ -160,10 +160,31 @@ int main() {
     assert(std::abs(anchor.spriteBounds.y - 328.0f) < 0.01f);
     assert(std::abs(anchor.spriteBounds.width - 192.0f) < 0.01f);
     Player anchorPlayer("Anchor hero", Stats{ 100, 30, 10, 0, 0, 0, 10 }, Element::KIM);
-    const Rectangle playerHp = BattleUI::fieldHpBounds(anchorPlayer, anchor.feet);
-    assert(std::abs(playerHp.y - (anchor.feet.y + 10.0f)) < 0.01f);
-    assert(playerHp.x + playerHp.width * 0.5f == anchor.feet.x);
+    const Rectangle playerHp = BattleUI::fieldHpBounds(anchorPlayer, anchor);
+    assert(std::abs(playerHp.y - (anchor.feet.y + 12.0f)) < 0.01f);
+    assert(playerHp.height == 8.0f);
+    assert(std::abs(playerHp.x + playerHp.width * 0.5f - anchor.feet.x) < 0.01f);
     assert(playerHp.width >= 96.0f && playerHp.width <= 180.0f);
+
+    struct AnchorCase { int frame; float multiplier; float depth; };
+    const AnchorCase anchorCases[] = {
+        { 64, 1.3f, 0.0f }, { 64, 1.3f, 1.0f }, { 64, 1.3f, 0.5f },
+        { 128, 0.78f, 1.0f }, { 128, 0.78f, 0.0f },
+        { 192, 1.0666667f, 0.5f }
+    };
+    for (const AnchorCase& testCase : anchorCases) {
+        const float feetY = 432.0f + 86.4f * testCase.depth;
+        const float scale = (1.6f + 0.4f * testCase.depth) * testCase.multiplier;
+        const BattleSlot slot{ Vector2{ 510.0f, feetY }, scale, false, testCase.depth };
+        const BattleAnchor drawn = BattleAnchors::forUnit(slot, testCase.frame, testCase.frame);
+        const Vector2 head{ drawn.feet.x, drawn.spriteBounds.y - 10.0f };
+        const BattleAnchor reconstructed =
+            BattleAnchors::fromHead(head, testCase.frame, testCase.frame, testCase.multiplier);
+        assert(std::abs(reconstructed.feet.x - drawn.feet.x) < 0.01f);
+        assert(std::abs(reconstructed.feet.y - drawn.feet.y) < 0.01f);
+        assert(std::abs(reconstructed.spriteBounds.x - drawn.spriteBounds.x) < 0.01f);
+        assert(std::abs(reconstructed.spriteBounds.y - drawn.spriteBounds.y) < 0.01f);
+    }
 
     const Rectangle compactList = BattleUI::listPanelBounds(1);
     assert(std::abs(compactList.height * 1.5f - 96.0f) < 0.5f);

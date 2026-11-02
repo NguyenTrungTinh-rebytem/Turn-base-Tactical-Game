@@ -1,13 +1,15 @@
 #include "UiIcons.h"
 #include "graphics/UiShapes.h"
 #include "graphics/UiTheme.h"
-#include "graphics/UiText.h"
+#include <algorithm>
 #include <iostream>
+#include <unordered_set>
 #include <unordered_map>
 #include <vector>
 
 namespace {
 std::unordered_map<std::string, Texture2D> textures;
+std::unordered_set<std::string> loggedUnknown;
 
 const std::vector<std::string>& iconKeys() {
     static const std::vector<std::string> keys = {
@@ -95,7 +97,7 @@ bool drawActionIcon(const std::string& key, Rectangle bounds, Color tint) {
         DrawTriangle({ left + size * 0.12f, top - size * 0.02f },
                      { left - size * 0.08f, top + size * 0.1f },
                      { left + size * 0.12f, top + size * 0.22f }, tint);
-    } else if (key == "action:shop") {
+    } else if (key == "action:shop" || key == "action:coin") {
         DrawCircleLines(static_cast<int>(center.x), static_cast<int>(center.y), size * 0.28f, tint);
         line({ center.x, top + size * 0.04f }, { center.x, bottom - size * 0.04f });
         line({ center.x + size * 0.13f, top + size * 0.18f },
@@ -120,15 +122,9 @@ bool UiIcons::initialize(const std::string& assetsDirectory) {
     shutdown();
     for (const std::string& key : iconKeys()) {
         const std::string path = assetPath(assetsDirectory, key);
-        if (!FileExists(path.c_str())) {
-            std::cerr << "UiIcons: missing generated icon: " << path << '\n';
-            continue;
-        }
+        if (!FileExists(path.c_str())) continue;
         Texture2D texture = LoadTexture(path.c_str());
-        if (texture.id == 0) {
-            std::cerr << "UiIcons: failed to load icon: " << path << '\n';
-            continue;
-        }
+        if (texture.id == 0 || texture.width <= 0 || texture.height <= 0) continue;
         SetTextureFilter(texture, TEXTURE_FILTER_POINT);
         textures.emplace(key, texture);
     }
@@ -149,20 +145,58 @@ void UiIcons::draw(const std::string& key, Rectangle bounds, Color tint) {
     if (drawActionIcon(key, bounds, tint)) return;
     const auto found = textures.find(key);
     if (found != textures.end()) {
+        if (found->second.id == 0 || found->second.width <= 0 ||
+            found->second.height <= 0) {
+            textures.erase(found);
+        } else {
         DrawTexturePro(found->second,
             Rectangle{ 0.0f, 0.0f, static_cast<float>(found->second.width),
                        static_cast<float>(found->second.height) },
             bounds, Vector2{ 0.0f, 0.0f }, 0.0f, tint);
         return;
+        }
     }
 
-    UiShapes::plate(bounds, Color{ UiTheme::panel.r, UiTheme::panel.g,
-                                   UiTheme::panel.b, UiTheme::panel.a },
-                    Color{ tint.r, tint.g, tint.b, 180 }, 1.0f);
-    const std::size_t colon = key.find(':');
-    const char fallback[] = { colon == std::string::npos || colon + 1 >= key.size()
-        ? '?' : key[colon + 1], '\0' };
-    const int size = static_cast<int>(bounds.height * 0.55f);
-    UiText::draw(fallback, static_cast<int>(bounds.x + (bounds.width - UiText::measure(fallback, size)) / 2.0f),
-                 static_cast<int>(bounds.y + (bounds.height - size) / 2.0f), size, WHITE);
+    const bool known = std::find(iconKeys().begin(), iconKeys().end(), key) != iconKeys().end() ||
+                       key == "action:pause" || key == "action:coin";
+    if (!known) {
+        if (loggedUnknown.insert(key).second)
+            std::cerr << "UiIcons: unknown icon id: " << key << '\n';
+#if defined(UI_DEV_TOOLS) && UI_DEV_TOOLS
+        DrawLineEx(Vector2{ bounds.x + 2.0f, bounds.y + 2.0f },
+                   Vector2{ bounds.x + bounds.width - 2.0f,
+                            bounds.y + bounds.height - 2.0f }, 2.0f, MAGENTA);
+        DrawLineEx(Vector2{ bounds.x + bounds.width - 2.0f, bounds.y + 2.0f },
+                   Vector2{ bounds.x + 2.0f, bounds.y + bounds.height - 2.0f },
+                   2.0f, MAGENTA);
+        return;
+#endif
+    }
+
+    const float size = std::min(bounds.width, bounds.height);
+    const Vector2 center{ bounds.x + bounds.width * 0.5f,
+                          bounds.y + bounds.height * 0.5f };
+    if (key.rfind("element:", 0) == 0) {
+        UiShapes::seal(bounds, tint, true);
+        if (key == "element:kim")
+            DrawPoly(center, 4, size * 0.22f, 45.0f, tint);
+        else if (key == "element:moc")
+            DrawPoly(center, 3, size * 0.25f, -90.0f, tint);
+        else if (key == "element:thuy")
+            DrawPoly(center, 5, size * 0.24f, -90.0f, tint);
+        else if (key == "element:hoa")
+            DrawPoly(center, 6, size * 0.23f, 0.0f, tint);
+        else
+            DrawPoly(center, 4, size * 0.23f, 0.0f, tint);
+    } else {
+        UiShapes::seal(bounds, UiTheme::ash, false);
+        if (known) {
+            DrawLineEx(Vector2{ center.x - size * 0.16f, center.y },
+                       Vector2{ center.x + size * 0.16f, center.y }, 1.5f, tint);
+            DrawLineEx(Vector2{ center.x, center.y - size * 0.16f },
+                       Vector2{ center.x, center.y + size * 0.16f }, 1.5f, tint);
+        } else {
+            DrawCircleV(center, size * 0.08f, tint);
+        }
+    }
 }

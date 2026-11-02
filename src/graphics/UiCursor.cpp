@@ -1,12 +1,13 @@
 #include "UiCursor.h"
-#include "UiInput.h"
+#include "UiCanvas.h"
 #include "UiShapes.h"
 
 void UiCursor::initialize() { HideCursor(); }
 void UiCursor::shutdown() { ShowCursor(); }
 
 void UiCursor::draw() {
-    const Vector2 position = UiInput::mousePosition();
+    if (UiCanvas::isDrawing()) return;
+    const Vector2 position = GetMousePosition();
     const Vector2 points[] = {
         { position.x, position.y },
         { position.x + 5.0f, position.y + 17.0f },

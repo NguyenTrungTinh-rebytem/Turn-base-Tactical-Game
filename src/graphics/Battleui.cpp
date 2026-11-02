@@ -7,13 +7,18 @@
 #include "graphics/UiTheme.h"
 #include "graphics/Strings.h"
 #include "graphics/UiIcons.h"
+#include "graphics/BattleAnchors.h"
 #include "entities/Character.h"
 #include "entities/Player.h"
 #include "entities/Boss.h"
 #include "data/Element.h"
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <sstream>
+#include <iostream>
+#include <string>
+#include <unordered_set>
 
 namespace {
 constexpr float HUD_SCALE = 1.5f;
@@ -29,7 +34,6 @@ constexpr float LIST_HEADER = 64.0f;
 constexpr float LIST_ROW_HEIGHT = 32.0f;
 constexpr int SKILL_MAX_VISIBLE = 7;
 constexpr int ITEM_MAX_VISIBLE = 7;
-constexpr float FIELD_HP_H = 6.0f;
 constexpr float FLOAT_SPEED = 45.0f;
 constexpr float FLOAT_LIFE = 1.0f;
 
@@ -92,14 +96,7 @@ std::string elementKey(Element element) {
     return "element:kim";
 }
 
-float fieldBarWidth(const Character& character, float feetY) {
-    const float depth = std::clamp((feetY / UiCanvas::height() - 0.60f) / 0.12f, 0.0f, 1.0f);
-    const float perspectiveScale = 1.6f + 0.4f * depth;
-    float spriteWidth = 64.0f * perspectiveScale * 1.3f;
-    if (dynamic_cast<const Player*>(&character))
-        spriteWidth = 128.0f * perspectiveScale * 1.3f;
-    if (dynamic_cast<const Boss*>(&character))
-        spriteWidth = 64.0f * perspectiveScale * 3.2f;
+float fieldBarWidth(const Character& character, float spriteWidth) {
     const float maximum = dynamic_cast<const Boss*>(&character) ? 240.0f : 180.0f;
     return std::clamp(spriteWidth * 0.8f, 96.0f, maximum);
 }
@@ -118,8 +115,13 @@ Rectangle BattleUI::partyCardBounds(int index) {
 }
 
 Rectangle BattleUI::fieldHpBounds(const Character& character, Vector2 feet) {
-    const float width = fieldBarWidth(character, feet.y);
-    return { feet.x - width * 0.5f, feet.y + 10.0f, width, FIELD_HP_H };
+    const float width = fieldBarWidth(character, 128.0f);
+    return { feet.x - width * 0.5f, feet.y + 12.0f, width, 8.0f };
+}
+
+Rectangle BattleUI::fieldHpBounds(const Character& character, const BattleAnchor& anchor) {
+    const float width = fieldBarWidth(character, anchor.spriteBounds.width);
+    return { anchor.feet.x - width * 0.5f, anchor.feet.y + 12.0f, width, 8.0f };
 }
 
 Rectangle BattleUI::buttonBounds(BattleUIButton button) {
@@ -157,33 +159,71 @@ Rectangle BattleUI::itemRowBounds(int itemIndex, int itemCount, int selectedInde
 void BattleUI::drawHpMpBar(const Character& character, Vector2 head) const {
     const int maxHp = character.getStats().m_hp;
     const float hpRatio = ratioOf(character.getCurrentHp(), maxHp);
-    const float baseHeight = dynamic_cast<const Boss*>(&character) ? 192.0f
-        : dynamic_cast<const Player*>(&character) ? 128.0f : 64.0f;
-    const float sizeMultiplier = dynamic_cast<const Boss*>(&character)
-        ? 3.2f * 64.0f / 192.0f : 1.3f;
-    float feetY = head.y + 10.0f;
-    float spriteHeight = 0.0f;
-    for (int iteration = 0; iteration < 3; ++iteration) {
-        const float depth = std::clamp((feetY / UiCanvas::height() - 0.60f) / 0.12f, 0.0f, 1.0f);
-        spriteHeight = baseHeight * (1.6f + 0.4f * depth) * sizeMultiplier;
-        feetY = head.y + spriteHeight + 10.0f;
-    }
-    const Vector2 feet{ head.x, feetY };
-    const Rectangle hpBounds = fieldHpBounds(character, feet);
+    const bool boss = dynamic_cast<const Boss*>(&character) != nullptr;
+    const bool player = dynamic_cast<const Player*>(&character) != nullptr;
+    const int frameSize = boss ? 192 : player ? 128 : 64;
+    const float scaleMultiplier = boss ? 1.0666667f : player ? 0.78f : 1.3f;
+    const BattleAnchor anchor = BattleAnchors::fromHead(head, frameSize, frameSize,
+                                                        scaleMultiplier);
+    const Rectangle hpBounds = fieldHpBounds(character, anchor);
     const float x = hpBounds.x;
     const float y = hpBounds.y;
     const float barWidth = hpBounds.width;
     const Color hpColor = hpRatio > 0.5f ? COL_HP_HIGH :
         (hpRatio > 0.25f ? COL_HP_MID : COL_HP_LOW);
-    drawBar(hpBounds, hpRatio, hpColor);
+    UiShapes::runeBar(hpBounds, hpRatio, hpColor);
     const Rectangle sealBounds{ x - 13.0f, y - 5.0f, 16.0f, 16.0f };
     UiShapes::seal(sealBounds, UiTheme::ash);
     UiIcons::draw(elementKey(character.getElement()),
                   Rectangle{ sealBounds.x + 3.0f, sealBounds.y + 3.0f, 10.0f, 10.0f });
 
-    const Rectangle hoverBounds{ head.x - barWidth * 0.5f,
-                                 head.y + 10.0f,
-                                 barWidth, spriteHeight };
+    const Rectangle hoverBounds = anchor.spriteBounds;
+#if defined(UI_DEV_TOOLS) && UI_DEV_TOOLS
+    static std::unordered_set<const Character*> logged;
+    static std::unordered_set<const Character*> violations;
+    const Character* unitId = &character;
+    const float centerX = hpBounds.x + hpBounds.width * 0.5f;
+    const float barGap = hpBounds.y - anchor.feet.y;
+    const bool valid = std::abs(centerX - anchor.feet.x) <= 4.0f &&
+                       barGap >= 8.0f && barGap <= 40.0f;
+    if (logged.insert(unitId).second) {
+        const float windowX = static_cast<float>(GetScreenWidth()) /
+                              static_cast<float>(UiCanvas::width());
+        const float windowY = static_cast<float>(GetScreenHeight()) /
+                              static_cast<float>(UiCanvas::height());
+        const auto logRect = [](const char* space, Rectangle bounds, float scaleX,
+                                float scaleY) {
+            std::cerr << space << '=' << bounds.x * scaleX << ',' << bounds.y * scaleY
+                      << ',' << bounds.width * scaleX << ',' << bounds.height * scaleY;
+        };
+        std::cerr << "[UI anchor] unit-id=" << static_cast<const void*>(unitId)
+                  << " name=" << character.getName()
+                  << " feet(canvas 1280x720)=" << anchor.feet.x << ',' << anchor.feet.y
+                  << " feet(canvas 1920x1080)=" << anchor.feet.x * 1.5f << ','
+                  << anchor.feet.y * 1.5f << " feet(window px)="
+                  << anchor.feet.x * windowX << ',' << anchor.feet.y * windowY
+                  << " slot(pre-layout canvas)=unavailable; estimated from core head API ";
+        logRect("sprite(canvas 1280x720)", anchor.spriteBounds, 1.0f, 1.0f);
+        std::cerr << ' ';
+        logRect("sprite(canvas 1920x1080)", anchor.spriteBounds, 1.5f, 1.5f);
+        std::cerr << ' ';
+        logRect("sprite(window px)", anchor.spriteBounds, windowX, windowY);
+        std::cerr << ' ';
+        logRect("bar(canvas 1280x720)", hpBounds, 1.0f, 1.0f);
+        std::cerr << ' ';
+        logRect("bar(canvas 1920x1080)", hpBounds, 1.5f, 1.5f);
+        std::cerr << ' ';
+        logRect("bar(window px)", hpBounds, windowX, windowY);
+        std::cerr << " source=head(canvas 1280x720)=" << head.x << ',' << head.y
+                  << " scale-multiplier=" << scaleMultiplier << '\n';
+    }
+    if (!valid && violations.insert(unitId).second)
+        std::cerr << "[UI anchor violation] unit-id=" << static_cast<const void*>(unitId)
+                  << " name=" << character.getName()
+                  << " center-error=" << std::abs(centerX - anchor.feet.x)
+                  << " feet-gap=" << barGap << '\n';
+    assert(valid && "field HP bar is not anchored to its combatant feet");
+#endif
     const std::string name = localized(&character);
     const char* elementName = Strings::elements[static_cast<int>(character.getElement())];
     UiWidgets::Tooltip(hoverBounds, TextFormat(u8"%s · %s · HP %d/%d · MP %d/%d",
@@ -192,17 +232,36 @@ void BattleUI::drawHpMpBar(const Character& character, Vector2 head) const {
 }
 
 void BattleUI::drawRoundChip(int stage, const Character* current, int gold) const {
-    const Rectangle bounds = roundChipBounds();
-    UiShapes::bladeStrip(bounds, COL_PANEL, COL_PANEL_EDGE, true);
-    const std::string round = TextFormat(u8"Màn %d · Lượt", stage);
-    const float textWidth = static_cast<float>(UiText::measure(round, 14));
-    UiText::draw(round, static_cast<int>(bounds.x + bounds.width - textWidth - 8.0f),
-                 static_cast<int>(bounds.y + 5.0f), 14, UiTheme::silver);
-    const Rectangle coin{ bounds.x + bounds.width - 100.0f, bounds.y + 27.0f, 88.0f, 18.0f };
-    UiShapes::bladeStrip(coin, UiTheme::ink, UiTheme::gold, true);
+    if (m_lastRoundStage != stage) {
+        m_lastRoundStage = stage;
+        m_lastRoundCharacter = nullptr;
+        m_turnNumber = 0;
+    }
+    if (current && current != m_lastRoundCharacter) {
+        m_lastRoundCharacter = current;
+        ++m_turnNumber;
+    }
+    const std::string round = TextFormat(Strings::roundTurn, stage,
+                                         std::max(1, m_turnNumber));
     const std::string coinText = TextFormat(Strings::gold, gold);
-    UiText::draw(coinText, static_cast<int>(coin.x + coin.width - UiText::measure(coinText, 11) - 7.0f),
-                 static_cast<int>(coin.y + 3.0f), 11, UiTheme::gold);
+    const float rowWidth = static_cast<float>(UiText::measure(round, 16));
+    const float coinWidth = static_cast<float>(UiText::measure(coinText, 16)) + 42.0f;
+    const float chipWidth = std::max(160.0f, std::max(rowWidth, coinWidth) + 24.0f);
+    const Rectangle bounds{ static_cast<float>(UiCanvas::width()) - chipWidth - 16.0f,
+                            12.0f, chipWidth, 52.0f };
+    UiShapes::bladeStrip(bounds, COL_PANEL, COL_PANEL_EDGE, true);
+    UiText::draw(round, static_cast<int>(bounds.x + bounds.width - rowWidth - 12.0f),
+                 static_cast<int>(bounds.y + 5.0f), 16, UiTheme::silver);
+    const float goldIconSize = 16.0f;
+    const float coinRowWidth = coinWidth;
+    const Rectangle coin{ bounds.x + bounds.width - coinRowWidth - 8.0f,
+                          bounds.y + 29.0f, coinRowWidth, 20.0f };
+    UiShapes::bladeStrip(coin, UiTheme::ink, UiTheme::gold, true);
+    UiIcons::draw("action:shop", Rectangle{ coin.x + 6.0f, coin.y + 2.0f,
+                                             goldIconSize, goldIconSize }, UiTheme::gold);
+    UiText::draw(coinText, static_cast<int>(coin.x + coin.width -
+                     UiText::measure(coinText, 16) - 7.0f),
+                 static_cast<int>(coin.y + 2.0f), 16, UiTheme::gold);
 }
 
 void BattleUI::drawPartyCards(const std::vector<Character*>& party, const Character* current,

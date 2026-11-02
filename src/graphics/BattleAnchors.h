@@ -9,4 +9,6 @@ struct BattleAnchor {
 
 namespace BattleAnchors {
 BattleAnchor forUnit(const BattleSlot& slot, int frameWidth, int frameHeight);
+BattleAnchor fromHead(Vector2 head, int frameWidth, int frameHeight,
+                      float unitScaleMultiplier);
 }
