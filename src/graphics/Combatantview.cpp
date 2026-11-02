@@ -58,4 +58,13 @@ void CombatantView::draw(const BattleMap& map, Color baseTint) const {
     m_sprite->drawFrame(Vector2{ bounds.x, bounds.y }, m_slot.m_flipX, m_slot.m_scale, tint);
 }
 
+bool CombatantView::drawPortrait(Rectangle bounds, Color tint) const {
+    if (!m_sprite || !m_sprite->isLoaded()) return false;
+    const Texture2D& texture = m_sprite->getTexture();
+    const Rectangle source{ 0.0f, 0.0f, static_cast<float>(m_frameWidth),
+                            static_cast<float>(m_frameHeight) };
+    DrawTexturePro(texture, source, bounds, Vector2{ 0.0f, 0.0f }, 0.0f, tint);
+    return true;
+}
+
 void CombatantView::unloadAll() { m_sprite->unload(); }

@@ -72,7 +72,7 @@ private:
     void renderCombatants();
 
     // ----- thiet lap tran dau -----
-    void startNewGame(int startStage = 1);
+    void startNewGame(int startStage = 1, bool preservePreparedRun = false);
     void loadStage(int stage);
     void createHero();
     void spawnEnemies(int stage);
@@ -104,6 +104,9 @@ private:
     void closeShop();
     void refreshShop();
     void handleShopInput();
+    bool handleDialogInput();
+    void drawDialog(const std::string& title, const std::string& body,
+                    const std::vector<std::string>& buttons) const;
     void buyShopItem(int stockIndex);
     void equipFromBag(int bagIndex, int memberIndex);
     void unequipMember(int memberIndex);
@@ -208,6 +211,9 @@ HeroConfig m_heroConfig;
     std::vector<std::string> m_gearIds;
     Character* m_selectedAlly = nullptr;
     bool m_isSelectingItem = false;
+    bool m_battleLogOpen = false;
+    bool m_paused = false;
+    int m_dialogSelected = 0;
     int m_selectedItemIndex = 0;
 
     // ----- Tien / Shop / Am thanh -----
@@ -219,6 +225,7 @@ HeroConfig m_heroConfig;
     ShopScreen m_shop;
     int m_gold = 0;
     bool m_shopOpen = false;
+    bool m_shopPreparedRun = false;
     bool m_resumeRun = false;                            // true = dang nghi giua 2 wave (Chuan bi + Shop), KHONG tao lai doi hinh
     ItemPtr m_equippedGear[Party::MAX_SIZE];             // trang bi dang deo cua tung hero (theo vi tri trong Party)
     std::unordered_set<const Character*> m_goldPaid;     // quai da tra tien (chong tra 2 lan)

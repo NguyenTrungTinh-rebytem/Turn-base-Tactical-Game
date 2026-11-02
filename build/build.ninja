@@ -57,8 +57,6 @@ build CMakeFiles/game.dir/src/audio/AudioManager.cpp.obj: CXX_COMPILER__game_uns
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\audio
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/core/AttackCommand.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core/AttackCommand.cpp || cmake_object_order_depends_target_game
@@ -69,8 +67,6 @@ build CMakeFiles/game.dir/src/core/AttackCommand.cpp.obj: CXX_COMPILER__game_uns
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\core
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/core/CommandStack.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core/CommandStack.cpp || cmake_object_order_depends_target_game
@@ -81,8 +77,6 @@ build CMakeFiles/game.dir/src/core/CommandStack.cpp.obj: CXX_COMPILER__game_unsc
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\core
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/core/GameEngine.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core/GameEngine.cpp || cmake_object_order_depends_target_game
@@ -93,8 +87,6 @@ build CMakeFiles/game.dir/src/core/GameEngine.cpp.obj: CXX_COMPILER__game_unscan
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\core
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/core/GameStateMachine.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core/GameStateMachine.cpp || cmake_object_order_depends_target_game
@@ -105,8 +97,6 @@ build CMakeFiles/game.dir/src/core/GameStateMachine.cpp.obj: CXX_COMPILER__game_
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\core
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/core/UseItemCommand.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core/UseItemCommand.cpp || cmake_object_order_depends_target_game
@@ -117,8 +107,6 @@ build CMakeFiles/game.dir/src/core/UseItemCommand.cpp.obj: CXX_COMPILER__game_un
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\core
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/core/UseSkillCommand.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core/UseSkillCommand.cpp || cmake_object_order_depends_target_game
@@ -129,8 +117,6 @@ build CMakeFiles/game.dir/src/core/UseSkillCommand.cpp.obj: CXX_COMPILER__game_u
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\core
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/data/CharacterRules.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/CharacterRules.cpp || cmake_object_order_depends_target_game
@@ -141,8 +127,6 @@ build CMakeFiles/game.dir/src/data/CharacterRules.cpp.obj: CXX_COMPILER__game_un
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\data
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/data/GameData.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/GameData.cpp || cmake_object_order_depends_target_game
@@ -153,8 +137,6 @@ build CMakeFiles/game.dir/src/data/GameData.cpp.obj: CXX_COMPILER__game_unscanne
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\data
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/data/HeroPresetConfig.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/HeroPresetConfig.cpp || cmake_object_order_depends_target_game
@@ -165,8 +147,6 @@ build CMakeFiles/game.dir/src/data/HeroPresetConfig.cpp.obj: CXX_COMPILER__game_
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\data
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/data/ShopConfig.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/ShopConfig.cpp || cmake_object_order_depends_target_game
@@ -177,8 +157,6 @@ build CMakeFiles/game.dir/src/data/ShopConfig.cpp.obj: CXX_COMPILER__game_unscan
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\data
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/data/SkillElementConfig.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/SkillElementConfig.cpp || cmake_object_order_depends_target_game
@@ -189,8 +167,6 @@ build CMakeFiles/game.dir/src/data/SkillElementConfig.cpp.obj: CXX_COMPILER__gam
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\data
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/dsa/CombatAI.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa/CombatAI.cpp || cmake_object_order_depends_target_game
@@ -201,8 +177,6 @@ build CMakeFiles/game.dir/src/dsa/CombatAI.cpp.obj: CXX_COMPILER__game_unscanned
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\dsa
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/dsa/CombatObserver.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa/CombatObserver.cpp || cmake_object_order_depends_target_game
@@ -213,8 +187,6 @@ build CMakeFiles/game.dir/src/dsa/CombatObserver.cpp.obj: CXX_COMPILER__game_uns
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\dsa
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/dsa/StatusEffect.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa/StatusEffect.cpp || cmake_object_order_depends_target_game
@@ -225,8 +197,6 @@ build CMakeFiles/game.dir/src/dsa/StatusEffect.cpp.obj: CXX_COMPILER__game_unsca
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\dsa
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/dsa/TurnManager.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa/TurnManager.cpp || cmake_object_order_depends_target_game
@@ -237,8 +207,6 @@ build CMakeFiles/game.dir/src/dsa/TurnManager.cpp.obj: CXX_COMPILER__game_unscan
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\dsa
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/dsa/WaveManager.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa/WaveManager.cpp || cmake_object_order_depends_target_game
@@ -249,8 +217,6 @@ build CMakeFiles/game.dir/src/dsa/WaveManager.cpp.obj: CXX_COMPILER__game_unscan
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\dsa
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/entities/Boss.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Boss.cpp || cmake_object_order_depends_target_game
@@ -261,8 +227,6 @@ build CMakeFiles/game.dir/src/entities/Boss.cpp.obj: CXX_COMPILER__game_unscanne
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/entities/Character.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Character.cpp || cmake_object_order_depends_target_game
@@ -273,8 +237,6 @@ build CMakeFiles/game.dir/src/entities/Character.cpp.obj: CXX_COMPILER__game_uns
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/entities/CharacterFactory.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/CharacterFactory.cpp || cmake_object_order_depends_target_game
@@ -285,8 +247,6 @@ build CMakeFiles/game.dir/src/entities/CharacterFactory.cpp.obj: CXX_COMPILER__g
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/entities/CombatModifiers.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/CombatModifiers.cpp || cmake_object_order_depends_target_game
@@ -297,8 +257,6 @@ build CMakeFiles/game.dir/src/entities/CombatModifiers.cpp.obj: CXX_COMPILER__ga
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/entities/Enemy.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Enemy.cpp || cmake_object_order_depends_target_game
@@ -309,8 +267,6 @@ build CMakeFiles/game.dir/src/entities/Enemy.cpp.obj: CXX_COMPILER__game_unscann
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/entities/Item.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Item.cpp || cmake_object_order_depends_target_game
@@ -321,8 +277,6 @@ build CMakeFiles/game.dir/src/entities/Item.cpp.obj: CXX_COMPILER__game_unscanne
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/entities/ItemDatabase.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/ItemDatabase.cpp || cmake_object_order_depends_target_game
@@ -333,8 +287,6 @@ build CMakeFiles/game.dir/src/entities/ItemDatabase.cpp.obj: CXX_COMPILER__game_
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/entities/ItemFactory.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/ItemFactory.cpp || cmake_object_order_depends_target_game
@@ -345,8 +297,6 @@ build CMakeFiles/game.dir/src/entities/ItemFactory.cpp.obj: CXX_COMPILER__game_u
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/entities/Party.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Party.cpp || cmake_object_order_depends_target_game
@@ -357,8 +307,6 @@ build CMakeFiles/game.dir/src/entities/Party.cpp.obj: CXX_COMPILER__game_unscann
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/entities/Player.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Player.cpp || cmake_object_order_depends_target_game
@@ -369,8 +317,6 @@ build CMakeFiles/game.dir/src/entities/Player.cpp.obj: CXX_COMPILER__game_unscan
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/BattleMap.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/BattleMap.cpp || cmake_object_order_depends_target_game
@@ -381,8 +327,6 @@ build CMakeFiles/game.dir/src/graphics/BattleMap.cpp.obj: CXX_COMPILER__game_uns
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/Battleui.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Battleui.cpp || cmake_object_order_depends_target_game
@@ -393,8 +337,6 @@ build CMakeFiles/game.dir/src/graphics/Battleui.cpp.obj: CXX_COMPILER__game_unsc
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/Combatantview.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Combatantview.cpp || cmake_object_order_depends_target_game
@@ -405,8 +347,6 @@ build CMakeFiles/game.dir/src/graphics/Combatantview.cpp.obj: CXX_COMPILER__game
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/FontManager.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/FontManager.cpp || cmake_object_order_depends_target_game
@@ -417,8 +357,6 @@ build CMakeFiles/game.dir/src/graphics/FontManager.cpp.obj: CXX_COMPILER__game_u
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/Herocreatescreen.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Herocreatescreen.cpp || cmake_object_order_depends_target_game
@@ -429,8 +367,6 @@ build CMakeFiles/game.dir/src/graphics/Herocreatescreen.cpp.obj: CXX_COMPILER__g
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/ItemIcons.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/ItemIcons.cpp || cmake_object_order_depends_target_game
@@ -441,8 +377,6 @@ build CMakeFiles/game.dir/src/graphics/ItemIcons.cpp.obj: CXX_COMPILER__game_uns
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/PrepMenuScreen.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/PrepMenuScreen.cpp || cmake_object_order_depends_target_game
@@ -453,8 +387,6 @@ build CMakeFiles/game.dir/src/graphics/PrepMenuScreen.cpp.obj: CXX_COMPILER__gam
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/SceneShader.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/SceneShader.cpp || cmake_object_order_depends_target_game
@@ -465,8 +397,6 @@ build CMakeFiles/game.dir/src/graphics/SceneShader.cpp.obj: CXX_COMPILER__game_u
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/ShopScreen.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/ShopScreen.cpp || cmake_object_order_depends_target_game
@@ -477,8 +407,6 @@ build CMakeFiles/game.dir/src/graphics/ShopScreen.cpp.obj: CXX_COMPILER__game_un
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/Skilltooltip.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Skilltooltip.cpp || cmake_object_order_depends_target_game
@@ -489,8 +417,6 @@ build CMakeFiles/game.dir/src/graphics/Skilltooltip.cpp.obj: CXX_COMPILER__game_
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/SpriteAnimation.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/SpriteAnimation.cpp || cmake_object_order_depends_target_game
@@ -501,8 +427,6 @@ build CMakeFiles/game.dir/src/graphics/SpriteAnimation.cpp.obj: CXX_COMPILER__ga
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/StartMenu.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/StartMenu.cpp || cmake_object_order_depends_target_game
@@ -513,8 +437,6 @@ build CMakeFiles/game.dir/src/graphics/StartMenu.cpp.obj: CXX_COMPILER__game_uns
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/Turnorderbar.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Turnorderbar.cpp || cmake_object_order_depends_target_game
@@ -525,8 +447,6 @@ build CMakeFiles/game.dir/src/graphics/Turnorderbar.cpp.obj: CXX_COMPILER__game_
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/UiBlur.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiBlur.cpp || cmake_object_order_depends_target_game
@@ -537,8 +457,6 @@ build CMakeFiles/game.dir/src/graphics/UiBlur.cpp.obj: CXX_COMPILER__game_unscan
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/UiCanvas.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiCanvas.cpp || cmake_object_order_depends_target_game
@@ -549,8 +467,6 @@ build CMakeFiles/game.dir/src/graphics/UiCanvas.cpp.obj: CXX_COMPILER__game_unsc
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/UiCursor.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiCursor.cpp || cmake_object_order_depends_target_game
@@ -561,8 +477,6 @@ build CMakeFiles/game.dir/src/graphics/UiCursor.cpp.obj: CXX_COMPILER__game_unsc
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/UiDevGallery.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiDevGallery.cpp || cmake_object_order_depends_target_game
@@ -573,8 +487,6 @@ build CMakeFiles/game.dir/src/graphics/UiDevGallery.cpp.obj: CXX_COMPILER__game_
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/UiIcons.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiIcons.cpp || cmake_object_order_depends_target_game
@@ -585,8 +497,6 @@ build CMakeFiles/game.dir/src/graphics/UiIcons.cpp.obj: CXX_COMPILER__game_unsca
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/UiInput.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiInput.cpp || cmake_object_order_depends_target_game
@@ -597,8 +507,6 @@ build CMakeFiles/game.dir/src/graphics/UiInput.cpp.obj: CXX_COMPILER__game_unsca
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/UiShapes.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiShapes.cpp || cmake_object_order_depends_target_game
@@ -609,8 +517,6 @@ build CMakeFiles/game.dir/src/graphics/UiShapes.cpp.obj: CXX_COMPILER__game_unsc
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/UiText.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiText.cpp || cmake_object_order_depends_target_game
@@ -621,8 +527,6 @@ build CMakeFiles/game.dir/src/graphics/UiText.cpp.obj: CXX_COMPILER__game_unscan
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/UiWidgets.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiWidgets.cpp || cmake_object_order_depends_target_game
@@ -633,8 +537,6 @@ build CMakeFiles/game.dir/src/graphics/UiWidgets.cpp.obj: CXX_COMPILER__game_uns
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/graphics/Waveselectscreen.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Waveselectscreen.cpp || cmake_object_order_depends_target_game
@@ -645,8 +547,6 @@ build CMakeFiles/game.dir/src/graphics/Waveselectscreen.cpp.obj: CXX_COMPILER__g
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 build CMakeFiles/game.dir/src/main.cpp.obj: CXX_COMPILER__game_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/main.cpp || cmake_object_order_depends_target_game
@@ -657,8 +557,6 @@ build CMakeFiles/game.dir/src/main.cpp.obj: CXX_COMPILER__game_unscanned_Debug D
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir\src
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
-  TARGET_PDB = game.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 
@@ -676,10 +574,9 @@ build game.exe: CXX_EXECUTABLE_LINKER__game_Debug CMakeFiles/game.dir/src/audio/
   OBJECT_DIR = CMakeFiles\game.dir
   POST_BUILD = C:\Windows\system32\cmd.exe /C "cd /D D:\KIET\devC\DSA\Turn-base-Tactical-Game\build && "C:\Program Files\CMake\bin\cmake.exe" -E copy_directory D:/KIET/devC/DSA/Turn-base-Tactical-Game/data D:/KIET/devC/DSA/Turn-base-Tactical-Game/build/data && "C:\Program Files\CMake\bin\cmake.exe" -E copy_directory D:/KIET/devC/DSA/Turn-base-Tactical-Game/assets D:/KIET/devC/DSA/Turn-base-Tactical-Game/build/assets"
   PRE_LINK = cd .
-  TARGET_COMPILE_PDB = CMakeFiles\game.dir\
   TARGET_FILE = game.exe
   TARGET_IMPLIB = libgame.dll.a
-  TARGET_PDB = game.pdb
+  TARGET_PDB = game.exe.dbg
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
 # =============================================================================
@@ -698,8 +595,6 @@ build CMakeFiles/test_entities.dir/tests/test_entities.cpp.obj: CXX_COMPILER__te
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_entities.dir
   OBJECT_FILE_DIR = CMakeFiles\test_entities.dir\tests
-  TARGET_COMPILE_PDB = CMakeFiles\test_entities.dir\
-  TARGET_PDB = test_entities.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_entities.dir
 
 build CMakeFiles/test_entities.dir/src/entities/Boss.cpp.obj: CXX_COMPILER__test_entities_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Boss.cpp || cmake_object_order_depends_target_test_entities
@@ -709,8 +604,6 @@ build CMakeFiles/test_entities.dir/src/entities/Boss.cpp.obj: CXX_COMPILER__test
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_entities.dir
   OBJECT_FILE_DIR = CMakeFiles\test_entities.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_entities.dir\
-  TARGET_PDB = test_entities.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_entities.dir
 
 build CMakeFiles/test_entities.dir/src/entities/Character.cpp.obj: CXX_COMPILER__test_entities_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Character.cpp || cmake_object_order_depends_target_test_entities
@@ -720,8 +613,6 @@ build CMakeFiles/test_entities.dir/src/entities/Character.cpp.obj: CXX_COMPILER_
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_entities.dir
   OBJECT_FILE_DIR = CMakeFiles\test_entities.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_entities.dir\
-  TARGET_PDB = test_entities.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_entities.dir
 
 build CMakeFiles/test_entities.dir/src/entities/CharacterFactory.cpp.obj: CXX_COMPILER__test_entities_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/CharacterFactory.cpp || cmake_object_order_depends_target_test_entities
@@ -731,8 +622,6 @@ build CMakeFiles/test_entities.dir/src/entities/CharacterFactory.cpp.obj: CXX_CO
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_entities.dir
   OBJECT_FILE_DIR = CMakeFiles\test_entities.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_entities.dir\
-  TARGET_PDB = test_entities.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_entities.dir
 
 build CMakeFiles/test_entities.dir/src/entities/CombatModifiers.cpp.obj: CXX_COMPILER__test_entities_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/CombatModifiers.cpp || cmake_object_order_depends_target_test_entities
@@ -742,8 +631,6 @@ build CMakeFiles/test_entities.dir/src/entities/CombatModifiers.cpp.obj: CXX_COM
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_entities.dir
   OBJECT_FILE_DIR = CMakeFiles\test_entities.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_entities.dir\
-  TARGET_PDB = test_entities.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_entities.dir
 
 build CMakeFiles/test_entities.dir/src/entities/Enemy.cpp.obj: CXX_COMPILER__test_entities_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Enemy.cpp || cmake_object_order_depends_target_test_entities
@@ -753,8 +640,6 @@ build CMakeFiles/test_entities.dir/src/entities/Enemy.cpp.obj: CXX_COMPILER__tes
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_entities.dir
   OBJECT_FILE_DIR = CMakeFiles\test_entities.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_entities.dir\
-  TARGET_PDB = test_entities.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_entities.dir
 
 build CMakeFiles/test_entities.dir/src/entities/Item.cpp.obj: CXX_COMPILER__test_entities_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Item.cpp || cmake_object_order_depends_target_test_entities
@@ -764,8 +649,6 @@ build CMakeFiles/test_entities.dir/src/entities/Item.cpp.obj: CXX_COMPILER__test
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_entities.dir
   OBJECT_FILE_DIR = CMakeFiles\test_entities.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_entities.dir\
-  TARGET_PDB = test_entities.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_entities.dir
 
 build CMakeFiles/test_entities.dir/src/entities/ItemDatabase.cpp.obj: CXX_COMPILER__test_entities_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/ItemDatabase.cpp || cmake_object_order_depends_target_test_entities
@@ -775,8 +658,6 @@ build CMakeFiles/test_entities.dir/src/entities/ItemDatabase.cpp.obj: CXX_COMPIL
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_entities.dir
   OBJECT_FILE_DIR = CMakeFiles\test_entities.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_entities.dir\
-  TARGET_PDB = test_entities.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_entities.dir
 
 build CMakeFiles/test_entities.dir/src/entities/ItemFactory.cpp.obj: CXX_COMPILER__test_entities_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/ItemFactory.cpp || cmake_object_order_depends_target_test_entities
@@ -786,8 +667,6 @@ build CMakeFiles/test_entities.dir/src/entities/ItemFactory.cpp.obj: CXX_COMPILE
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_entities.dir
   OBJECT_FILE_DIR = CMakeFiles\test_entities.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_entities.dir\
-  TARGET_PDB = test_entities.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_entities.dir
 
 build CMakeFiles/test_entities.dir/src/entities/Party.cpp.obj: CXX_COMPILER__test_entities_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Party.cpp || cmake_object_order_depends_target_test_entities
@@ -797,8 +676,6 @@ build CMakeFiles/test_entities.dir/src/entities/Party.cpp.obj: CXX_COMPILER__tes
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_entities.dir
   OBJECT_FILE_DIR = CMakeFiles\test_entities.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_entities.dir\
-  TARGET_PDB = test_entities.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_entities.dir
 
 build CMakeFiles/test_entities.dir/src/entities/Player.cpp.obj: CXX_COMPILER__test_entities_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Player.cpp || cmake_object_order_depends_target_test_entities
@@ -808,8 +685,6 @@ build CMakeFiles/test_entities.dir/src/entities/Player.cpp.obj: CXX_COMPILER__te
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_entities.dir
   OBJECT_FILE_DIR = CMakeFiles\test_entities.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_entities.dir\
-  TARGET_PDB = test_entities.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_entities.dir
 
 build CMakeFiles/test_entities.dir/src/data/GameData.cpp.obj: CXX_COMPILER__test_entities_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/GameData.cpp || cmake_object_order_depends_target_test_entities
@@ -819,8 +694,6 @@ build CMakeFiles/test_entities.dir/src/data/GameData.cpp.obj: CXX_COMPILER__test
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_entities.dir
   OBJECT_FILE_DIR = CMakeFiles\test_entities.dir\src\data
-  TARGET_COMPILE_PDB = CMakeFiles\test_entities.dir\
-  TARGET_PDB = test_entities.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_entities.dir
 
 build CMakeFiles/test_entities.dir/src/data/SkillElementConfig.cpp.obj: CXX_COMPILER__test_entities_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/SkillElementConfig.cpp || cmake_object_order_depends_target_test_entities
@@ -830,8 +703,6 @@ build CMakeFiles/test_entities.dir/src/data/SkillElementConfig.cpp.obj: CXX_COMP
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_entities.dir
   OBJECT_FILE_DIR = CMakeFiles\test_entities.dir\src\data
-  TARGET_COMPILE_PDB = CMakeFiles\test_entities.dir\
-  TARGET_PDB = test_entities.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_entities.dir
 
 
@@ -849,10 +720,9 @@ build test_entities.exe: CXX_EXECUTABLE_LINKER__test_entities_Debug CMakeFiles/t
   OBJECT_DIR = CMakeFiles\test_entities.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
-  TARGET_COMPILE_PDB = CMakeFiles\test_entities.dir\
   TARGET_FILE = test_entities.exe
   TARGET_IMPLIB = libtest_entities.dll.a
-  TARGET_PDB = test_entities.pdb
+  TARGET_PDB = test_entities.exe.dbg
   TARGET_SUPPORT_DIR = CMakeFiles\test_entities.dir
 
 # =============================================================================
@@ -871,8 +741,6 @@ build CMakeFiles/test_core_integration.dir/tests/test_core_integration.cpp.obj: 
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_core_integration.dir
   OBJECT_FILE_DIR = CMakeFiles\test_core_integration.dir\tests
-  TARGET_COMPILE_PDB = CMakeFiles\test_core_integration.dir\
-  TARGET_PDB = test_core_integration.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_core_integration.dir
 
 build CMakeFiles/test_core_integration.dir/src/core/AttackCommand.cpp.obj: CXX_COMPILER__test_core_integration_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core/AttackCommand.cpp || cmake_object_order_depends_target_test_core_integration
@@ -882,8 +750,6 @@ build CMakeFiles/test_core_integration.dir/src/core/AttackCommand.cpp.obj: CXX_C
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_core_integration.dir
   OBJECT_FILE_DIR = CMakeFiles\test_core_integration.dir\src\core
-  TARGET_COMPILE_PDB = CMakeFiles\test_core_integration.dir\
-  TARGET_PDB = test_core_integration.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_core_integration.dir
 
 build CMakeFiles/test_core_integration.dir/src/core/UseItemCommand.cpp.obj: CXX_COMPILER__test_core_integration_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core/UseItemCommand.cpp || cmake_object_order_depends_target_test_core_integration
@@ -893,8 +759,6 @@ build CMakeFiles/test_core_integration.dir/src/core/UseItemCommand.cpp.obj: CXX_
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_core_integration.dir
   OBJECT_FILE_DIR = CMakeFiles\test_core_integration.dir\src\core
-  TARGET_COMPILE_PDB = CMakeFiles\test_core_integration.dir\
-  TARGET_PDB = test_core_integration.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_core_integration.dir
 
 build CMakeFiles/test_core_integration.dir/src/entities/Boss.cpp.obj: CXX_COMPILER__test_core_integration_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Boss.cpp || cmake_object_order_depends_target_test_core_integration
@@ -904,8 +768,6 @@ build CMakeFiles/test_core_integration.dir/src/entities/Boss.cpp.obj: CXX_COMPIL
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_core_integration.dir
   OBJECT_FILE_DIR = CMakeFiles\test_core_integration.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_core_integration.dir\
-  TARGET_PDB = test_core_integration.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_core_integration.dir
 
 build CMakeFiles/test_core_integration.dir/src/entities/Character.cpp.obj: CXX_COMPILER__test_core_integration_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Character.cpp || cmake_object_order_depends_target_test_core_integration
@@ -915,8 +777,6 @@ build CMakeFiles/test_core_integration.dir/src/entities/Character.cpp.obj: CXX_C
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_core_integration.dir
   OBJECT_FILE_DIR = CMakeFiles\test_core_integration.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_core_integration.dir\
-  TARGET_PDB = test_core_integration.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_core_integration.dir
 
 build CMakeFiles/test_core_integration.dir/src/entities/CharacterFactory.cpp.obj: CXX_COMPILER__test_core_integration_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/CharacterFactory.cpp || cmake_object_order_depends_target_test_core_integration
@@ -926,8 +786,6 @@ build CMakeFiles/test_core_integration.dir/src/entities/CharacterFactory.cpp.obj
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_core_integration.dir
   OBJECT_FILE_DIR = CMakeFiles\test_core_integration.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_core_integration.dir\
-  TARGET_PDB = test_core_integration.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_core_integration.dir
 
 build CMakeFiles/test_core_integration.dir/src/entities/CombatModifiers.cpp.obj: CXX_COMPILER__test_core_integration_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/CombatModifiers.cpp || cmake_object_order_depends_target_test_core_integration
@@ -937,8 +795,6 @@ build CMakeFiles/test_core_integration.dir/src/entities/CombatModifiers.cpp.obj:
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_core_integration.dir
   OBJECT_FILE_DIR = CMakeFiles\test_core_integration.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_core_integration.dir\
-  TARGET_PDB = test_core_integration.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_core_integration.dir
 
 build CMakeFiles/test_core_integration.dir/src/entities/Enemy.cpp.obj: CXX_COMPILER__test_core_integration_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Enemy.cpp || cmake_object_order_depends_target_test_core_integration
@@ -948,8 +804,6 @@ build CMakeFiles/test_core_integration.dir/src/entities/Enemy.cpp.obj: CXX_COMPI
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_core_integration.dir
   OBJECT_FILE_DIR = CMakeFiles\test_core_integration.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_core_integration.dir\
-  TARGET_PDB = test_core_integration.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_core_integration.dir
 
 build CMakeFiles/test_core_integration.dir/src/entities/Item.cpp.obj: CXX_COMPILER__test_core_integration_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Item.cpp || cmake_object_order_depends_target_test_core_integration
@@ -959,8 +813,6 @@ build CMakeFiles/test_core_integration.dir/src/entities/Item.cpp.obj: CXX_COMPIL
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_core_integration.dir
   OBJECT_FILE_DIR = CMakeFiles\test_core_integration.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_core_integration.dir\
-  TARGET_PDB = test_core_integration.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_core_integration.dir
 
 build CMakeFiles/test_core_integration.dir/src/entities/ItemDatabase.cpp.obj: CXX_COMPILER__test_core_integration_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/ItemDatabase.cpp || cmake_object_order_depends_target_test_core_integration
@@ -970,8 +822,6 @@ build CMakeFiles/test_core_integration.dir/src/entities/ItemDatabase.cpp.obj: CX
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_core_integration.dir
   OBJECT_FILE_DIR = CMakeFiles\test_core_integration.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_core_integration.dir\
-  TARGET_PDB = test_core_integration.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_core_integration.dir
 
 build CMakeFiles/test_core_integration.dir/src/entities/ItemFactory.cpp.obj: CXX_COMPILER__test_core_integration_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/ItemFactory.cpp || cmake_object_order_depends_target_test_core_integration
@@ -981,8 +831,6 @@ build CMakeFiles/test_core_integration.dir/src/entities/ItemFactory.cpp.obj: CXX
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_core_integration.dir
   OBJECT_FILE_DIR = CMakeFiles\test_core_integration.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_core_integration.dir\
-  TARGET_PDB = test_core_integration.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_core_integration.dir
 
 build CMakeFiles/test_core_integration.dir/src/entities/Party.cpp.obj: CXX_COMPILER__test_core_integration_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Party.cpp || cmake_object_order_depends_target_test_core_integration
@@ -992,8 +840,6 @@ build CMakeFiles/test_core_integration.dir/src/entities/Party.cpp.obj: CXX_COMPI
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_core_integration.dir
   OBJECT_FILE_DIR = CMakeFiles\test_core_integration.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_core_integration.dir\
-  TARGET_PDB = test_core_integration.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_core_integration.dir
 
 build CMakeFiles/test_core_integration.dir/src/entities/Player.cpp.obj: CXX_COMPILER__test_core_integration_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Player.cpp || cmake_object_order_depends_target_test_core_integration
@@ -1003,8 +849,6 @@ build CMakeFiles/test_core_integration.dir/src/entities/Player.cpp.obj: CXX_COMP
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_core_integration.dir
   OBJECT_FILE_DIR = CMakeFiles\test_core_integration.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_core_integration.dir\
-  TARGET_PDB = test_core_integration.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_core_integration.dir
 
 build CMakeFiles/test_core_integration.dir/src/data/GameData.cpp.obj: CXX_COMPILER__test_core_integration_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/GameData.cpp || cmake_object_order_depends_target_test_core_integration
@@ -1014,8 +858,6 @@ build CMakeFiles/test_core_integration.dir/src/data/GameData.cpp.obj: CXX_COMPIL
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_core_integration.dir
   OBJECT_FILE_DIR = CMakeFiles\test_core_integration.dir\src\data
-  TARGET_COMPILE_PDB = CMakeFiles\test_core_integration.dir\
-  TARGET_PDB = test_core_integration.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_core_integration.dir
 
 build CMakeFiles/test_core_integration.dir/src/data/SkillElementConfig.cpp.obj: CXX_COMPILER__test_core_integration_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/SkillElementConfig.cpp || cmake_object_order_depends_target_test_core_integration
@@ -1025,8 +867,6 @@ build CMakeFiles/test_core_integration.dir/src/data/SkillElementConfig.cpp.obj: 
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_core_integration.dir
   OBJECT_FILE_DIR = CMakeFiles\test_core_integration.dir\src\data
-  TARGET_COMPILE_PDB = CMakeFiles\test_core_integration.dir\
-  TARGET_PDB = test_core_integration.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_core_integration.dir
 
 
@@ -1044,10 +884,9 @@ build test_core_integration.exe: CXX_EXECUTABLE_LINKER__test_core_integration_De
   OBJECT_DIR = CMakeFiles\test_core_integration.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
-  TARGET_COMPILE_PDB = CMakeFiles\test_core_integration.dir\
   TARGET_FILE = test_core_integration.exe
   TARGET_IMPLIB = libtest_core_integration.dll.a
-  TARGET_PDB = test_core_integration.pdb
+  TARGET_PDB = test_core_integration.exe.dbg
   TARGET_SUPPORT_DIR = CMakeFiles\test_core_integration.dir
 
 # =============================================================================
@@ -1067,8 +906,6 @@ build CMakeFiles/test_boss_mouse.dir/tests/test_boss_mouse.cpp.obj: CXX_COMPILER
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\tests
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/audio/AudioManager.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/audio/AudioManager.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1079,8 +916,6 @@ build CMakeFiles/test_boss_mouse.dir/src/audio/AudioManager.cpp.obj: CXX_COMPILE
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\audio
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/core/AttackCommand.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core/AttackCommand.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1091,8 +926,6 @@ build CMakeFiles/test_boss_mouse.dir/src/core/AttackCommand.cpp.obj: CXX_COMPILE
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\core
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/core/CommandStack.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core/CommandStack.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1103,8 +936,6 @@ build CMakeFiles/test_boss_mouse.dir/src/core/CommandStack.cpp.obj: CXX_COMPILER
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\core
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/core/GameEngine.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core/GameEngine.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1115,8 +946,6 @@ build CMakeFiles/test_boss_mouse.dir/src/core/GameEngine.cpp.obj: CXX_COMPILER__
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\core
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/core/GameStateMachine.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core/GameStateMachine.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1127,8 +956,6 @@ build CMakeFiles/test_boss_mouse.dir/src/core/GameStateMachine.cpp.obj: CXX_COMP
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\core
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/core/UseItemCommand.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core/UseItemCommand.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1139,8 +966,6 @@ build CMakeFiles/test_boss_mouse.dir/src/core/UseItemCommand.cpp.obj: CXX_COMPIL
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\core
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/core/UseSkillCommand.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core/UseSkillCommand.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1151,8 +976,6 @@ build CMakeFiles/test_boss_mouse.dir/src/core/UseSkillCommand.cpp.obj: CXX_COMPI
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\core
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/data/CharacterRules.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/CharacterRules.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1163,8 +986,6 @@ build CMakeFiles/test_boss_mouse.dir/src/data/CharacterRules.cpp.obj: CXX_COMPIL
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\data
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/data/GameData.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/GameData.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1175,8 +996,6 @@ build CMakeFiles/test_boss_mouse.dir/src/data/GameData.cpp.obj: CXX_COMPILER__te
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\data
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/data/HeroPresetConfig.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/HeroPresetConfig.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1187,8 +1006,6 @@ build CMakeFiles/test_boss_mouse.dir/src/data/HeroPresetConfig.cpp.obj: CXX_COMP
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\data
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/data/ShopConfig.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/ShopConfig.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1199,8 +1016,6 @@ build CMakeFiles/test_boss_mouse.dir/src/data/ShopConfig.cpp.obj: CXX_COMPILER__
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\data
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/data/SkillElementConfig.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/SkillElementConfig.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1211,8 +1026,6 @@ build CMakeFiles/test_boss_mouse.dir/src/data/SkillElementConfig.cpp.obj: CXX_CO
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\data
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/dsa/CombatAI.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa/CombatAI.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1223,8 +1036,6 @@ build CMakeFiles/test_boss_mouse.dir/src/dsa/CombatAI.cpp.obj: CXX_COMPILER__tes
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\dsa
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/dsa/CombatObserver.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa/CombatObserver.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1235,8 +1046,6 @@ build CMakeFiles/test_boss_mouse.dir/src/dsa/CombatObserver.cpp.obj: CXX_COMPILE
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\dsa
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/dsa/StatusEffect.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa/StatusEffect.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1247,8 +1056,6 @@ build CMakeFiles/test_boss_mouse.dir/src/dsa/StatusEffect.cpp.obj: CXX_COMPILER_
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\dsa
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/dsa/TurnManager.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa/TurnManager.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1259,8 +1066,6 @@ build CMakeFiles/test_boss_mouse.dir/src/dsa/TurnManager.cpp.obj: CXX_COMPILER__
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\dsa
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/dsa/WaveManager.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa/WaveManager.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1271,8 +1076,6 @@ build CMakeFiles/test_boss_mouse.dir/src/dsa/WaveManager.cpp.obj: CXX_COMPILER__
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\dsa
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/entities/Boss.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Boss.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1283,8 +1086,6 @@ build CMakeFiles/test_boss_mouse.dir/src/entities/Boss.cpp.obj: CXX_COMPILER__te
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/entities/Character.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Character.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1295,8 +1096,6 @@ build CMakeFiles/test_boss_mouse.dir/src/entities/Character.cpp.obj: CXX_COMPILE
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/entities/CharacterFactory.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/CharacterFactory.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1307,8 +1106,6 @@ build CMakeFiles/test_boss_mouse.dir/src/entities/CharacterFactory.cpp.obj: CXX_
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/entities/CombatModifiers.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/CombatModifiers.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1319,8 +1116,6 @@ build CMakeFiles/test_boss_mouse.dir/src/entities/CombatModifiers.cpp.obj: CXX_C
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/entities/Enemy.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Enemy.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1331,8 +1126,6 @@ build CMakeFiles/test_boss_mouse.dir/src/entities/Enemy.cpp.obj: CXX_COMPILER__t
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/entities/Item.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Item.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1343,8 +1136,6 @@ build CMakeFiles/test_boss_mouse.dir/src/entities/Item.cpp.obj: CXX_COMPILER__te
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/entities/ItemDatabase.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/ItemDatabase.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1355,8 +1146,6 @@ build CMakeFiles/test_boss_mouse.dir/src/entities/ItemDatabase.cpp.obj: CXX_COMP
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/entities/ItemFactory.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/ItemFactory.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1367,8 +1156,6 @@ build CMakeFiles/test_boss_mouse.dir/src/entities/ItemFactory.cpp.obj: CXX_COMPI
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/entities/Party.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Party.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1379,8 +1166,6 @@ build CMakeFiles/test_boss_mouse.dir/src/entities/Party.cpp.obj: CXX_COMPILER__t
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/entities/Player.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Player.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1391,8 +1176,6 @@ build CMakeFiles/test_boss_mouse.dir/src/entities/Player.cpp.obj: CXX_COMPILER__
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\entities
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/BattleMap.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/BattleMap.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1403,8 +1186,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/BattleMap.cpp.obj: CXX_COMPILE
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/Battleui.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Battleui.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1415,8 +1196,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/Battleui.cpp.obj: CXX_COMPILER
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/Combatantview.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Combatantview.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1427,8 +1206,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/Combatantview.cpp.obj: CXX_COM
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/FontManager.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/FontManager.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1439,8 +1216,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/FontManager.cpp.obj: CXX_COMPI
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/Herocreatescreen.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Herocreatescreen.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1451,8 +1226,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/Herocreatescreen.cpp.obj: CXX_
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/ItemIcons.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/ItemIcons.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1463,8 +1236,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/ItemIcons.cpp.obj: CXX_COMPILE
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/PrepMenuScreen.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/PrepMenuScreen.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1475,8 +1246,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/PrepMenuScreen.cpp.obj: CXX_CO
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/SceneShader.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/SceneShader.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1487,8 +1256,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/SceneShader.cpp.obj: CXX_COMPI
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/ShopScreen.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/ShopScreen.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1499,8 +1266,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/ShopScreen.cpp.obj: CXX_COMPIL
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/Skilltooltip.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Skilltooltip.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1511,8 +1276,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/Skilltooltip.cpp.obj: CXX_COMP
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/SpriteAnimation.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/SpriteAnimation.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1523,8 +1286,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/SpriteAnimation.cpp.obj: CXX_C
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/StartMenu.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/StartMenu.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1535,8 +1296,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/StartMenu.cpp.obj: CXX_COMPILE
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/Turnorderbar.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Turnorderbar.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1547,8 +1306,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/Turnorderbar.cpp.obj: CXX_COMP
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/UiBlur.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiBlur.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1559,8 +1316,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/UiBlur.cpp.obj: CXX_COMPILER__
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/UiCanvas.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiCanvas.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1571,8 +1326,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/UiCanvas.cpp.obj: CXX_COMPILER
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/UiCursor.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiCursor.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1583,8 +1336,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/UiCursor.cpp.obj: CXX_COMPILER
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/UiDevGallery.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiDevGallery.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1595,8 +1346,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/UiDevGallery.cpp.obj: CXX_COMP
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/UiIcons.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiIcons.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1607,8 +1356,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/UiIcons.cpp.obj: CXX_COMPILER_
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/UiInput.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiInput.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1619,8 +1366,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/UiInput.cpp.obj: CXX_COMPILER_
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/UiShapes.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiShapes.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1631,8 +1376,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/UiShapes.cpp.obj: CXX_COMPILER
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/UiText.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiText.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1643,8 +1386,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/UiText.cpp.obj: CXX_COMPILER__
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/UiWidgets.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiWidgets.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1655,8 +1396,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/UiWidgets.cpp.obj: CXX_COMPILE
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 build CMakeFiles/test_boss_mouse.dir/src/graphics/Waveselectscreen.cpp.obj: CXX_COMPILER__test_boss_mouse_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Waveselectscreen.cpp || cmake_object_order_depends_target_test_boss_mouse
@@ -1667,8 +1406,6 @@ build CMakeFiles/test_boss_mouse.dir/src/graphics/Waveselectscreen.cpp.obj: CXX_
   INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   OBJECT_FILE_DIR = CMakeFiles\test_boss_mouse.dir\src\graphics
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
-  TARGET_PDB = test_boss_mouse.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
 
 
@@ -1686,11 +1423,549 @@ build test_boss_mouse.exe: CXX_EXECUTABLE_LINKER__test_boss_mouse_Debug CMakeFil
   OBJECT_DIR = CMakeFiles\test_boss_mouse.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
-  TARGET_COMPILE_PDB = CMakeFiles\test_boss_mouse.dir\
   TARGET_FILE = test_boss_mouse.exe
   TARGET_IMPLIB = libtest_boss_mouse.dll.a
-  TARGET_PDB = test_boss_mouse.pdb
+  TARGET_PDB = test_boss_mouse.exe.dbg
   TARGET_SUPPORT_DIR = CMakeFiles\test_boss_mouse.dir
+
+# =============================================================================
+# Object build statements for EXECUTABLE target test_battle_hud
+
+
+#############################################
+# Order-only phony target for test_battle_hud
+
+build cmake_object_order_depends_target_test_battle_hud: phony || .
+
+build CMakeFiles/test_battle_hud.dir/tests/test_battle_hud.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/tests/test_battle_hud.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\tests\test_battle_hud.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\tests
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/audio/AudioManager.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/audio/AudioManager.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\audio\AudioManager.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\audio
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/core/AttackCommand.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core/AttackCommand.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\core\AttackCommand.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\core
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/core/CommandStack.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core/CommandStack.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\core\CommandStack.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\core
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/core/GameEngine.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core/GameEngine.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\core\GameEngine.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\core
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/core/GameStateMachine.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core/GameStateMachine.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\core\GameStateMachine.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\core
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/core/UseItemCommand.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core/UseItemCommand.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\core\UseItemCommand.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\core
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/core/UseSkillCommand.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core/UseSkillCommand.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\core\UseSkillCommand.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\core
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/data/CharacterRules.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/CharacterRules.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\data\CharacterRules.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\data
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/data/GameData.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/GameData.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\data\GameData.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\data
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/data/HeroPresetConfig.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/HeroPresetConfig.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\data\HeroPresetConfig.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\data
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/data/ShopConfig.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/ShopConfig.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\data\ShopConfig.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\data
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/data/SkillElementConfig.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/SkillElementConfig.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\data\SkillElementConfig.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\data
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/dsa/CombatAI.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa/CombatAI.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\dsa\CombatAI.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\dsa
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/dsa/CombatObserver.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa/CombatObserver.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\dsa\CombatObserver.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\dsa
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/dsa/StatusEffect.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa/StatusEffect.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\dsa\StatusEffect.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\dsa
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/dsa/TurnManager.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa/TurnManager.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\dsa\TurnManager.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\dsa
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/dsa/WaveManager.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa/WaveManager.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\dsa\WaveManager.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\dsa
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/entities/Boss.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Boss.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\entities\Boss.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\entities
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/entities/Character.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Character.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\entities\Character.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\entities
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/entities/CharacterFactory.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/CharacterFactory.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\entities\CharacterFactory.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\entities
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/entities/CombatModifiers.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/CombatModifiers.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\entities\CombatModifiers.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\entities
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/entities/Enemy.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Enemy.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\entities\Enemy.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\entities
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/entities/Item.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Item.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\entities\Item.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\entities
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/entities/ItemDatabase.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/ItemDatabase.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\entities\ItemDatabase.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\entities
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/entities/ItemFactory.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/ItemFactory.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\entities\ItemFactory.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\entities
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/entities/Party.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Party.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\entities\Party.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\entities
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/entities/Player.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities/Player.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\entities\Player.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\entities
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/BattleMap.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/BattleMap.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\BattleMap.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/Battleui.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Battleui.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\Battleui.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/Combatantview.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Combatantview.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\Combatantview.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/FontManager.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/FontManager.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\FontManager.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/Herocreatescreen.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Herocreatescreen.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\Herocreatescreen.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/ItemIcons.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/ItemIcons.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\ItemIcons.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/PrepMenuScreen.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/PrepMenuScreen.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\PrepMenuScreen.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/SceneShader.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/SceneShader.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\SceneShader.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/ShopScreen.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/ShopScreen.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\ShopScreen.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/Skilltooltip.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Skilltooltip.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\Skilltooltip.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/SpriteAnimation.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/SpriteAnimation.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\SpriteAnimation.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/StartMenu.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/StartMenu.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\StartMenu.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/Turnorderbar.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Turnorderbar.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\Turnorderbar.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/UiBlur.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiBlur.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\UiBlur.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/UiCanvas.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiCanvas.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\UiCanvas.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/UiCursor.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiCursor.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\UiCursor.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/UiDevGallery.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiDevGallery.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\UiDevGallery.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/UiIcons.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiIcons.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\UiIcons.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/UiInput.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiInput.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\UiInput.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/UiShapes.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiShapes.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\UiShapes.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/UiText.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiText.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\UiText.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/UiWidgets.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/UiWidgets.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\UiWidgets.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+build CMakeFiles/test_battle_hud.dir/src/graphics/Waveselectscreen.cpp.obj: CXX_COMPILER__test_battle_hud_unscanned_Debug D$:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Waveselectscreen.cpp || cmake_object_order_depends_target_test_battle_hud
+  CONFIG = Debug
+  DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -DUSE_LIBTYPE_SHARED
+  DEP_FILE = CMakeFiles\test_battle_hud.dir\src\graphics\Waveselectscreen.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -finput-charset=UTF-8 -fexec-charset=UTF-8
+  INCLUDES = -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/core -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/entities -ID:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  OBJECT_FILE_DIR = CMakeFiles\test_battle_hud.dir\src\graphics
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
+
+
+# =============================================================================
+# Link build statements for EXECUTABLE target test_battle_hud
+
+
+#############################################
+# Link the executable test_battle_hud.exe
+
+build test_battle_hud.exe: CXX_EXECUTABLE_LINKER__test_battle_hud_Debug CMakeFiles/test_battle_hud.dir/tests/test_battle_hud.cpp.obj CMakeFiles/test_battle_hud.dir/src/audio/AudioManager.cpp.obj CMakeFiles/test_battle_hud.dir/src/core/AttackCommand.cpp.obj CMakeFiles/test_battle_hud.dir/src/core/CommandStack.cpp.obj CMakeFiles/test_battle_hud.dir/src/core/GameEngine.cpp.obj CMakeFiles/test_battle_hud.dir/src/core/GameStateMachine.cpp.obj CMakeFiles/test_battle_hud.dir/src/core/UseItemCommand.cpp.obj CMakeFiles/test_battle_hud.dir/src/core/UseSkillCommand.cpp.obj CMakeFiles/test_battle_hud.dir/src/data/CharacterRules.cpp.obj CMakeFiles/test_battle_hud.dir/src/data/GameData.cpp.obj CMakeFiles/test_battle_hud.dir/src/data/HeroPresetConfig.cpp.obj CMakeFiles/test_battle_hud.dir/src/data/ShopConfig.cpp.obj CMakeFiles/test_battle_hud.dir/src/data/SkillElementConfig.cpp.obj CMakeFiles/test_battle_hud.dir/src/dsa/CombatAI.cpp.obj CMakeFiles/test_battle_hud.dir/src/dsa/CombatObserver.cpp.obj CMakeFiles/test_battle_hud.dir/src/dsa/StatusEffect.cpp.obj CMakeFiles/test_battle_hud.dir/src/dsa/TurnManager.cpp.obj CMakeFiles/test_battle_hud.dir/src/dsa/WaveManager.cpp.obj CMakeFiles/test_battle_hud.dir/src/entities/Boss.cpp.obj CMakeFiles/test_battle_hud.dir/src/entities/Character.cpp.obj CMakeFiles/test_battle_hud.dir/src/entities/CharacterFactory.cpp.obj CMakeFiles/test_battle_hud.dir/src/entities/CombatModifiers.cpp.obj CMakeFiles/test_battle_hud.dir/src/entities/Enemy.cpp.obj CMakeFiles/test_battle_hud.dir/src/entities/Item.cpp.obj CMakeFiles/test_battle_hud.dir/src/entities/ItemDatabase.cpp.obj CMakeFiles/test_battle_hud.dir/src/entities/ItemFactory.cpp.obj CMakeFiles/test_battle_hud.dir/src/entities/Party.cpp.obj CMakeFiles/test_battle_hud.dir/src/entities/Player.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/BattleMap.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/Battleui.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/Combatantview.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/FontManager.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/Herocreatescreen.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/ItemIcons.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/PrepMenuScreen.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/SceneShader.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/ShopScreen.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/Skilltooltip.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/SpriteAnimation.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/StartMenu.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/Turnorderbar.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/UiBlur.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/UiCanvas.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/UiCursor.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/UiDevGallery.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/UiIcons.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/UiInput.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/UiShapes.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/UiText.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/UiWidgets.cpp.obj CMakeFiles/test_battle_hud.dir/src/graphics/Waveselectscreen.cpp.obj | C$:/msys64/ucrt64/lib/libraylib.dll.a
+  CONFIG = Debug
+  FLAGS = -g
+  LINK_LIBRARIES = C:/msys64/ucrt64/lib/libraylib.dll.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
+  OBJECT_DIR = CMakeFiles\test_battle_hud.dir
+  POST_BUILD = cd .
+  PRE_LINK = cd .
+  TARGET_FILE = test_battle_hud.exe
+  TARGET_IMPLIB = libtest_battle_hud.dll.a
+  TARGET_PDB = test_battle_hud.exe.dbg
+  TARGET_SUPPORT_DIR = CMakeFiles\test_battle_hud.dir
 
 
 #############################################
@@ -1733,6 +2008,8 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 
 build game: phony game.exe
 
+build test_battle_hud: phony test_battle_hud.exe
+
 build test_boss_mouse: phony test_boss_mouse.exe
 
 build test_core_integration: phony test_core_integration.exe
@@ -1770,14 +2047,14 @@ build D$:/KIET/devC/DSA/Turn-base-Tactical-Game/build/CMakeFiles/cmake.verify_gl
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja D$:/KIET/devC/DSA/Turn-base-Tactical-Game/build/cmake_install.cmake D$:/KIET/devC/DSA/Turn-base-Tactical-Game/build/CTestTestfile.cmake: RERUN_CMAKE D$:/KIET/devC/DSA/Turn-base-Tactical-Game/build/CMakeFiles/cmake.verify_globs | C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeCXXCompiler.cmake.in C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeCXXCompilerABI.cpp C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeCompilerIdDetection.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeDetermineCXXCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeDetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeDetermineCompilerABI.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeDetermineCompilerSupport.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeDetermineRCCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeDetermineSystem.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeFindBinUtils.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeFindDependencyMacro.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeNinjaFindMake.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeParseImplicitIncludeInfo.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeParseImplicitLinkInfo.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeParseLibraryArchitecture.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeRCCompiler.cmake.in C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeRCInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeSystem.cmake.in C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeTestCXXCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeTestCompilerCommon.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeTestRCCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/ADSP-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/ARMCC-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/ARMClang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/AppleClang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Borland-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Clang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Clang-DetermineCompilerInternal.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Compaq-CXX-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Cray-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/CrayClang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Diab-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Embarcadero-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Fujitsu-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/FujitsuClang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/GHS-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/GNU-CXX-CXXImportStd.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/GNU-CXX-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/GNU-FindBinUtils.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/GNU.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/HP-CXX-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/IAR-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/IBMCPP-CXX-DetermineVersionInternal.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/IBMClang-CXX-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Intel-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/IntelLLVM-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/LCC-CXX-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/MSVC-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/NVHPC-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/NVIDIA-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/OpenWatcom-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/OrangeC-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/PGI-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/PathScale-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/PellesC-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Renesas-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/SCO-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/SunPro-CXX-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/TI-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/TIClang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Tasking-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/VisualAge-CXX-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Watcom-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/XL-CXX-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/XLClang-CXX-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/zOS-CXX-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Internal/CMakeCXXLinkerInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Internal/CMakeCommonLinkerInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Internal/CMakeDetermineLinkerId.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Internal/CMakeInspectCXXLinker.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Internal/FeatureTesting.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Linker/GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Linker/GNU.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Linker/GNU.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Linker/Windows-GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Linker/Windows-GNU.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-Determine-CXX.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-GNU-CXX-ABI.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-GNU.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-Initialize.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-windres.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/WindowsPaths.cmake C$:/msys64/ucrt64/lib/cmake/raylib/raylib-config-version.cmake C$:/msys64/ucrt64/lib/cmake/raylib/raylib-config.cmake C$:/msys64/ucrt64/lib/cmake/raylib/raylib-targets-release.cmake C$:/msys64/ucrt64/lib/cmake/raylib/raylib-targets.cmake CMakeCache.txt CMakeFiles/4.4.4/CMakeCXXCompiler.cmake CMakeFiles/4.4.4/CMakeRCCompiler.cmake CMakeFiles/4.4.4/CMakeSystem.cmake D$:/KIET/devC/DSA/Turn-base-Tactical-Game/build/CMakeFiles/VerifyGlobs.cmake D$:/KIET/devC/DSA/Turn-base-Tactical-Game/CMakeLists.txt
+build build.ninja D$:/KIET/devC/DSA/Turn-base-Tactical-Game/build/cmake_install.cmake D$:/KIET/devC/DSA/Turn-base-Tactical-Game/build/CTestTestfile.cmake: RERUN_CMAKE D$:/KIET/devC/DSA/Turn-base-Tactical-Game/build/CMakeFiles/cmake.verify_globs | C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeFindDependencyMacro.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeRCInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/GNU.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Internal/CMakeCXXLinkerInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Internal/CMakeCommonLinkerInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Linker/GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Linker/GNU.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Linker/GNU.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Linker/Windows-GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Linker/Windows-GNU.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-GNU-CXX-ABI.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-GNU.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-Initialize.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-windres.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/WindowsPaths.cmake C$:/msys64/ucrt64/lib/cmake/raylib/raylib-config-version.cmake C$:/msys64/ucrt64/lib/cmake/raylib/raylib-config.cmake C$:/msys64/ucrt64/lib/cmake/raylib/raylib-targets-release.cmake C$:/msys64/ucrt64/lib/cmake/raylib/raylib-targets.cmake CMakeCache.txt CMakeFiles/4.4.4/CMakeCXXCompiler.cmake CMakeFiles/4.4.4/CMakeRCCompiler.cmake CMakeFiles/4.4.4/CMakeSystem.cmake D$:/KIET/devC/DSA/Turn-base-Tactical-Game/build/CMakeFiles/VerifyGlobs.cmake D$:/KIET/devC/DSA/Turn-base-Tactical-Game/CMakeLists.txt
   pool = console
 
 
 #############################################
 # A missing CMake input file is not an error.
 
-build C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeCXXCompiler.cmake.in C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeCXXCompilerABI.cpp C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeCompilerIdDetection.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeDetermineCXXCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeDetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeDetermineCompilerABI.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeDetermineCompilerSupport.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeDetermineRCCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeDetermineSystem.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeFindBinUtils.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeFindDependencyMacro.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeNinjaFindMake.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeParseImplicitIncludeInfo.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeParseImplicitLinkInfo.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeParseLibraryArchitecture.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeRCCompiler.cmake.in C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeRCInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeSystem.cmake.in C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeTestCXXCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeTestCompilerCommon.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeTestRCCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/ADSP-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/ARMCC-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/ARMClang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/AppleClang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Borland-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Clang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Clang-DetermineCompilerInternal.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Compaq-CXX-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Cray-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/CrayClang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Diab-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Embarcadero-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Fujitsu-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/FujitsuClang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/GHS-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/GNU-CXX-CXXImportStd.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/GNU-CXX-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/GNU-FindBinUtils.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/GNU.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/HP-CXX-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/IAR-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/IBMCPP-CXX-DetermineVersionInternal.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/IBMClang-CXX-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Intel-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/IntelLLVM-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/LCC-CXX-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/MSVC-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/NVHPC-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/NVIDIA-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/OpenWatcom-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/OrangeC-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/PGI-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/PathScale-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/PellesC-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Renesas-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/SCO-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/SunPro-CXX-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/TI-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/TIClang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Tasking-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/VisualAge-CXX-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/Watcom-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/XL-CXX-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/XLClang-CXX-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/zOS-CXX-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Internal/CMakeCXXLinkerInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Internal/CMakeCommonLinkerInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Internal/CMakeDetermineLinkerId.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Internal/CMakeInspectCXXLinker.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Internal/FeatureTesting.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Linker/GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Linker/GNU.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Linker/GNU.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Linker/Windows-GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Linker/Windows-GNU.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-Determine-CXX.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-GNU-CXX-ABI.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-GNU.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-Initialize.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-windres.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/WindowsPaths.cmake C$:/msys64/ucrt64/lib/cmake/raylib/raylib-config-version.cmake C$:/msys64/ucrt64/lib/cmake/raylib/raylib-config.cmake C$:/msys64/ucrt64/lib/cmake/raylib/raylib-targets-release.cmake C$:/msys64/ucrt64/lib/cmake/raylib/raylib-targets.cmake CMakeCache.txt CMakeFiles/4.4.4/CMakeCXXCompiler.cmake CMakeFiles/4.4.4/CMakeRCCompiler.cmake CMakeFiles/4.4.4/CMakeSystem.cmake D$:/KIET/devC/DSA/Turn-base-Tactical-Game/build/CMakeFiles/VerifyGlobs.cmake D$:/KIET/devC/DSA/Turn-base-Tactical-Game/CMakeLists.txt: phony
+build C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeFindDependencyMacro.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeRCInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Compiler/GNU.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Internal/CMakeCXXLinkerInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Internal/CMakeCommonLinkerInformation.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Linker/GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Linker/GNU.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Linker/GNU.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Linker/Windows-GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Linker/Windows-GNU.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-GNU-CXX-ABI.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-GNU.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-Initialize.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows-windres.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/Windows.cmake C$:/Program$ Files/CMake/share/cmake-4.4/Modules/Platform/WindowsPaths.cmake C$:/msys64/ucrt64/lib/cmake/raylib/raylib-config-version.cmake C$:/msys64/ucrt64/lib/cmake/raylib/raylib-config.cmake C$:/msys64/ucrt64/lib/cmake/raylib/raylib-targets-release.cmake C$:/msys64/ucrt64/lib/cmake/raylib/raylib-targets.cmake CMakeCache.txt CMakeFiles/4.4.4/CMakeCXXCompiler.cmake CMakeFiles/4.4.4/CMakeRCCompiler.cmake CMakeFiles/4.4.4/CMakeSystem.cmake D$:/KIET/devC/DSA/Turn-base-Tactical-Game/build/CMakeFiles/VerifyGlobs.cmake D$:/KIET/devC/DSA/Turn-base-Tactical-Game/CMakeLists.txt: phony
 
 
 #############################################

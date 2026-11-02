@@ -1,4 +1,5 @@
-test_entities 2 0.0602737
-test_core_integration 2 0.0123193
-test_boss_mouse 3 0.00996057
+test_entities 12 0.00903322
+test_core_integration 12 0.00250202
+test_boss_mouse 13 0.0467548
+test_battle_hud 9 0.0769876
 ---

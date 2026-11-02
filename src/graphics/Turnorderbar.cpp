@@ -1,45 +1,55 @@
-// src/graphics/TurnOrderBar.cpp
 #include "TurnOrderBar.h"
-#include "graphics/UiCanvas.h"
-#include "graphics/UiText.h"
+#include "BattleUI.h"
+#include "CombatantView.h"
+#include "graphics/UiIcons.h"
+#include "graphics/UiWidgets.h"
+#include "graphics/UiShapes.h"
 #include "graphics/Strings.h"
 #include "entities/Character.h"
+#include "entities/Player.h"
+#include "data/Element.h"
 #include <algorithm>
 #include <cmath>
 
 namespace {
-constexpr float BOX_W = 170.0f, BOX_H = 30.0f, GAP = 4.0f, MARGIN = 10.0f;
-constexpr int   MAX_SHOWN = 8;
+constexpr int MAX_SHOWN = 7;
+constexpr float ACTIVE_SIZE = 64.0f / 1.5f;
+constexpr float NEXT_SIZE = 44.0f / 1.5f;
+constexpr float SLOT_GAP = 8.0f / 1.5f;
+constexpr float SLIDE_RATE = 12.0f;
+constexpr float ACTIVE_RATE = 10.0f;
+constexpr float FADE_IN_RATE = 5.0f;
+constexpr float FADE_OUT_RATE = 4.0f;
+constexpr float POP_OUT = 8.0f;
+constexpr float FLASH_DECAY = 3.0f;
 
-// ---- Chinh toc do / cam giac tai day ----
-constexpr float SLIDE_RATE   = 12.0f;   // truot len/xuong, cang lon cang nhanh
-constexpr float ACTIVE_RATE  = 10.0f;   // chuyen mau/vien khi doi luot
-constexpr float FADE_IN_RATE = 5.0f;    // hang moi hien ra
-constexpr float FADE_OUT_RATE = 4.0f;   // hang bien mat (nhan vat chet)
-constexpr float POP_OUT_PX   = 14.0f;   // nguoi dang di nhich ra ben trai bay nhieu px
-constexpr float FLASH_DECAY  = 3.0f;    // do nhanh tat cua tia sang khi doi luot
-constexpr float ENTER_OFFSET_Y = 16.0f; // hang moi truot tu duoi len
+float clamp01(float value) { return std::max(0.0f, std::min(1.0f, value)); }
 
-float clamp01(float v) { return std::max(0.0f, std::min(1.0f, v)); }
-
-// Tien dan toi muc tieu, khong phu thuoc FPS
-float approach(float current, float target, float rate, float dt) {
-    return current + (target - current) * (1.0f - std::exp(-rate * dt));
+float approach(float current, float target, float rate, float deltaTime) {
+    return current + (target - current) * (1.0f - std::exp(-rate * deltaTime));
 }
 
-Color lerpColor(Color a, Color b, float t) {
-    t = clamp01(t);
-    return Color{ static_cast<unsigned char>(a.r + (b.r - a.r) * t),
-                  static_cast<unsigned char>(a.g + (b.g - a.g) * t),
-                  static_cast<unsigned char>(a.b + (b.b - a.b) * t),
-                  static_cast<unsigned char>(a.a + (b.a - a.a) * t) };
+Color withAlpha(Color color, float alpha) {
+    color.a = static_cast<unsigned char>(color.a * clamp01(alpha));
+    return color;
 }
 
-Color withAlpha(Color c, float alpha) {
-    c.a = static_cast<unsigned char>(c.a * clamp01(alpha));
-    return c;
+float slotX(float start, int rank) {
+    if (rank == 0) return start;
+    return start + ACTIVE_SIZE + SLOT_GAP + (rank - 1) * (NEXT_SIZE + SLOT_GAP);
 }
-} // namespace
+
+std::string elementKey(Element element) {
+    switch (element) {
+        case Element::KIM: return "element:kim";
+        case Element::MOC: return "element:moc";
+        case Element::THUY: return "element:thuy";
+        case Element::HOA: return "element:hoa";
+        case Element::THO: return "element:tho";
+    }
+    return "element:kim";
+}
+}
 
 void TurnOrderBar::reset() {
     m_rows.clear();
@@ -47,81 +57,98 @@ void TurnOrderBar::reset() {
     m_flash = 0.0f;
 }
 
-void TurnOrderBar::draw(const std::vector<Character*>& upcoming, const Character* current) {
-    const float dt = std::min(GetFrameTime(), 0.05f);   // tranh nhay vot khi lag
+void TurnOrderBar::draw(const std::vector<Character*>& upcoming, const Character* current,
+                        const std::vector<std::unique_ptr<CombatantView>>& views) {
+    const float dt = std::min(GetFrameTime(), 0.05f);
     m_time += dt;
+    const Rectangle strip = BattleUI::turnStripBounds();
+    const float startX = strip.x + 8.0f;
+    const float startY = strip.y + strip.height * 0.5f;
+    UiShapes::roundedRect(Rectangle{ strip.x, strip.y, strip.width, strip.height },
+                          10.0f, Color{ 15, 15, 30, 225 },
+                          Color{ 200, 170, 80, 255 }, 1.0f);
 
-    const float x0 = UiCanvas::width() - BOX_W - MARGIN;
-    const float y0 = MARGIN + 22.0f;
-    const float step = BOX_H + GAP;
-
-    // ---- Doi luot -> tia sang ----
     if (current != m_lastCurrent) {
         if (current) m_flash = 1.0f;
         m_lastCurrent = current;
     }
     m_flash = std::max(0.0f, m_flash - FLASH_DECAY * dt);
 
-    // ---- Dong bo danh sach hien thi voi cac hang dang co ----
-    for (Row& r : m_rows) { r.m_present = false; r.m_isCurrent = false; }
+    for (Row& row : m_rows) {
+        row.m_present = false;
+        row.m_isCurrent = false;
+    }
 
     int rank = 0;
-    for (const Character* c : upcoming) {
-        if (!c || rank >= MAX_SHOWN) break;
+    for (const Character* character : upcoming) {
+        if (!character || rank >= MAX_SHOWN) break;
         auto it = std::find_if(m_rows.begin(), m_rows.end(),
-                               [c](const Row& r) { return r.m_character == c; });
+            [character](const Row& row) { return row.m_character == character; });
         if (it == m_rows.end()) {
             Row fresh;
-            fresh.m_character = c;
-            fresh.m_y = y0 + rank * step + ENTER_OFFSET_Y;   // truot tu duoi len
+            fresh.m_character = character;
+            fresh.m_y = slotX(startX, rank);
             m_rows.push_back(fresh);
             it = m_rows.end() - 1;
         }
         it->m_present = true;
-        it->m_isCurrent = (c == current);
-        it->m_targetY = y0 + rank * step;
+        it->m_isCurrent = character == current;
+        it->m_targetY = slotX(startX, rank);
         it->m_rank = rank + 1;
-        it->m_name = c->getName();
-        it->m_spd = c->getSpeed();
+        it->m_name = Strings::localizedName(character->getName());
+        it->m_hp = std::max(0, character->getCurrentHp());
+        it->m_maxHp = character->getStats().m_hp;
+        it->m_spd = character->getSpeed();
+        it->m_element = character->getElement();
+        it->m_isHero = dynamic_cast<const Player*>(character) != nullptr;
         ++rank;
     }
 
-    // ---- Animation ----
-    for (Row& r : m_rows) {
-        if (r.m_present) {
-            r.m_y = approach(r.m_y, r.m_targetY, SLIDE_RATE, dt);
-            r.m_alpha = std::min(1.0f, r.m_alpha + FADE_IN_RATE * dt);
+    for (Row& row : m_rows) {
+        if (row.m_present) {
+            row.m_y = approach(row.m_y, row.m_targetY, SLIDE_RATE, dt);
+            row.m_alpha = std::min(1.0f, row.m_alpha + FADE_IN_RATE * dt);
         } else {
-            r.m_alpha -= FADE_OUT_RATE * dt;                 // nhan vat het trong danh sach -> mo dan
+            row.m_alpha -= FADE_OUT_RATE * dt;
         }
-        r.m_active = approach(r.m_active, r.m_isCurrent ? 1.0f : 0.0f, ACTIVE_RATE, dt);
-        r.m_x = approach(r.m_x, r.m_isCurrent ? -POP_OUT_PX : 0.0f, SLIDE_RATE, dt);
+        row.m_active = approach(row.m_active, row.m_isCurrent ? 1.0f : 0.0f, ACTIVE_RATE, dt);
+        row.m_x = approach(row.m_x, row.m_isCurrent ? -POP_OUT : 0.0f, SLIDE_RATE, dt);
     }
     m_rows.erase(std::remove_if(m_rows.begin(), m_rows.end(),
-                                [](const Row& r) { return !r.m_present && r.m_alpha <= 0.0f; }),
-                 m_rows.end());
-
-    // ---- Ve ----
-    UiText::draw(Strings::turnOrder, static_cast<int>(x0), static_cast<int>(MARGIN), 16, GOLD);
+        [](const Row& row) { return !row.m_present && row.m_alpha <= 0.0f; }), m_rows.end());
 
     const float pulse = 0.5f + 0.5f * std::sin(m_time * 6.0f);
-    for (const Row& r : m_rows) {
-        const float act = r.m_active;
-        const Rectangle box = { x0 + r.m_x, r.m_y, BOX_W, BOX_H };
-
-        DrawRectangleRec(box, withAlpha(lerpColor(Color{ 25, 25, 40, 200 }, Color{ 90, 70, 20, 230 }, act), r.m_alpha));
-        if (r.m_isCurrent && m_flash > 0.0f)
-            DrawRectangleRec(box, withAlpha(WHITE, 0.45f * m_flash * r.m_alpha));   // tia sang khi vua doi luot
-        if (act > 0.01f)
-            DrawRectangleLinesEx(Rectangle{ box.x - 3.0f, box.y - 3.0f, box.width + 6.0f, box.height + 6.0f },
-                                 1.0f, withAlpha(GOLD, (0.15f + 0.30f * pulse) * act * r.m_alpha));   // quang nhap nhay
-        DrawRectangleLinesEx(box, 1.0f + 1.5f * act, withAlpha(lerpColor(GRAY, GOLD, act), r.m_alpha));
-
-        const std::string name = Strings::localizedName(r.m_name);
-        UiText::draw(TextFormat("%d. %s", r.m_rank, name.c_str()),
-                 static_cast<int>(box.x) + 8, static_cast<int>(box.y) + 8, 14, withAlpha(RAYWHITE, r.m_alpha));
-        const char* spd = TextFormat("SPD %d", r.m_spd);
-        UiText::draw(spd, static_cast<int>(box.x + BOX_W - UiText::measure(spd, 12) - 8), static_cast<int>(box.y) + 9, 12,
-                 withAlpha(SKYBLUE, r.m_alpha));
+    for (const Row& row : m_rows) {
+        const bool active = row.m_rank == 1;
+        const float baseSize = active ? ACTIVE_SIZE : NEXT_SIZE;
+        const float size = baseSize + (active ? pulse * 1.0f : 0.0f);
+        const Rectangle box{ row.m_y + row.m_x, startY - size * 0.5f, size, size };
+        const Vector2 center{ box.x + box.width * 0.5f, box.y + box.height * 0.5f };
+        const Color ring = active ? GOLD : row.m_isHero ? Color{ 94, 194, 149, 255 }
+                                                        : Color{ 224, 89, 92, 255 };
+        DrawPoly(center, 6, size * 0.5f, 30.0f,
+                 withAlpha(Color{ 22, 30, 44, 255 }, row.m_alpha));
+        const Rectangle portrait{ box.x + size * 0.17f, box.y + size * 0.12f,
+                                  size * 0.66f, size * 0.74f };
+        const auto view = std::find_if(views.begin(), views.end(),
+            [&row](const std::unique_ptr<CombatantView>& candidate) {
+                return candidate && candidate->getCharacter() == row.m_character;
+            });
+        if (view == views.end() || !(*view)->drawPortrait(portrait, withAlpha(WHITE, row.m_alpha)))
+            UiIcons::draw(elementKey(row.m_element), portrait,
+                          withAlpha(WHITE, row.m_alpha));
+        DrawPolyLines(center, 6, size * 0.5f, 30.0f,
+                      withAlpha(ring, row.m_alpha));
+        if (row.m_isCurrent && m_flash > 0.0f)
+            DrawPolyLines(center, 6, size * 0.5f + pulse * 2.0f, 30.0f,
+                          withAlpha(WHITE, 0.5f * m_flash * row.m_alpha));
+        const float badgeSize = active ? 12.0f : 9.0f;
+        const Rectangle badge{ box.x + size - badgeSize, box.y + size - badgeSize,
+                               badgeSize, badgeSize };
+        UiIcons::draw(elementKey(row.m_element), badge,
+                      withAlpha(WHITE, row.m_alpha));
+        const std::string tooltip = row.m_name +
+            TextFormat(u8" · HP %d/%d · Tốc độ %d", row.m_hp, row.m_maxHp, row.m_spd);
+        UiWidgets::Tooltip(box, tooltip);
     }
 }

@@ -26,6 +26,14 @@ inline constexpr float fadeDuration = 0.8f;
 inline constexpr float hoverDuration = 0.1f;
 inline constexpr float floatingTextDuration = 1.0f;
 
-inline constexpr Rectangle battleHud{ 20.0f, 560.0f, 1240.0f, 140.0f };
-inline constexpr Rectangle turnOrderHud{ 1100.0f, 10.0f, 170.0f, 270.0f };
+// HUD rectangles are specified in physical 1920x1080 canvas coordinates.
+inline constexpr Rectangle turnStripHud{ 24.0f, 20.0f, 420.0f, 76.0f };
+inline constexpr Rectangle roundChipHud{ 1688.0f, 20.0f, 208.0f, 76.0f };
+inline constexpr Rectangle partyCardsHud{ 24.0f, 112.0f, 660.0f, 112.0f };
+inline constexpr Rectangle battleHud{ 24.0f, 840.0f, 720.0f, 216.0f };
+inline constexpr Rectangle battleLogButtonHud{ 768.0f, 840.0f, 108.0f, 48.0f };
+inline constexpr Rectangle battleLogHud{ 900.0f, 832.0f, 496.0f, 224.0f };
+inline constexpr Rectangle battleListHud{ 1420.0f, 832.0f, 476.0f, 224.0f };
+inline constexpr Rectangle battlefieldSafeRegion{ 24.0f, 236.0f, 1872.0f, 588.0f };
+inline constexpr Rectangle turnOrderHud = turnStripHud;
 }

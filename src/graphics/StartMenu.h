@@ -47,6 +47,8 @@ private:
 
     std::vector<Button> m_buttons;
     int         m_selected = 0;
+    int         m_dialogSelected = 1;
+    bool        m_confirmExit = false;
     float       m_time = 0.0f;
     float       m_menuCenterX = 0.68f;
     Texture2D   m_background{};

@@ -10,3 +10,5 @@ add_test(test_core_integration "D:/KIET/devC/DSA/Turn-base-Tactical-Game/build/t
 set_tests_properties(test_core_integration PROPERTIES  _BACKTRACE_TRIPLES "D:/KIET/devC/DSA/Turn-base-Tactical-Game/CMakeLists.txt;69;add_test;D:/KIET/devC/DSA/Turn-base-Tactical-Game/CMakeLists.txt;0;")
 add_test(test_boss_mouse "D:/KIET/devC/DSA/Turn-base-Tactical-Game/build/test_boss_mouse.exe")
 set_tests_properties(test_boss_mouse PROPERTIES  _BACKTRACE_TRIPLES "D:/KIET/devC/DSA/Turn-base-Tactical-Game/CMakeLists.txt;79;add_test;D:/KIET/devC/DSA/Turn-base-Tactical-Game/CMakeLists.txt;0;")
+add_test(test_battle_hud "D:/KIET/devC/DSA/Turn-base-Tactical-Game/build/test_battle_hud.exe")
+set_tests_properties(test_battle_hud PROPERTIES  _BACKTRACE_TRIPLES "D:/KIET/devC/DSA/Turn-base-Tactical-Game/CMakeLists.txt;86;add_test;D:/KIET/devC/DSA/Turn-base-Tactical-Game/CMakeLists.txt;0;")

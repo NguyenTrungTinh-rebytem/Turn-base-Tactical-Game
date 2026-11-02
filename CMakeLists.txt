@@ -77,3 +77,10 @@ add_executable(test_boss_mouse EXCLUDE_FROM_ALL
 )
 target_link_libraries(test_boss_mouse PRIVATE raylib)
 add_test(NAME test_boss_mouse COMMAND test_boss_mouse)
+
+add_executable(test_battle_hud EXCLUDE_FROM_ALL
+    tests/test_battle_hud.cpp
+    ${BATTLE_TEST_SOURCES}
+)
+target_link_libraries(test_battle_hud PRIVATE raylib)
+add_test(NAME test_battle_hud COMMAND test_battle_hud)

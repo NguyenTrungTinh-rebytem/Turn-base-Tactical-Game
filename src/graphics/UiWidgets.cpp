@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cmath>
 #include <optional>
+#include <sstream>
 #include <utility>
 
 namespace {
@@ -30,9 +31,12 @@ bool hovered(Rectangle bounds) {
 
 void drawLabel(Rectangle bounds, const std::string& text, int size, Color color,
                float centerXOffset = 0.0f) {
-    const int width = UiText::measure(text, size);
+    int fittedSize = size;
+    while (fittedSize > 10 && UiText::measure(text, fittedSize) > bounds.width - 16.0f)
+        --fittedSize;
+    const int width = UiText::measure(text, fittedSize);
     UiText::draw(text, static_cast<int>(bounds.x + (bounds.width - width) * 0.5f + centerXOffset),
-                 static_cast<int>(bounds.y + (bounds.height - size) * 0.5f), size, color);
+                 static_cast<int>(bounds.y + (bounds.height - fittedSize) * 0.5f), fittedSize, color);
 }
 
 Rectangle inset(Rectangle bounds, float amount) {
@@ -130,32 +134,45 @@ bool UiWidgets::TabBar(Rectangle bounds, const std::vector<std::string>& labels,
 }
 
 bool UiWidgets::ListRow(Rectangle bounds, const std::string& title,
-                        const std::string& detail, bool selected, bool enabled) {
+                        const std::string& detail, bool selected, bool enabled, float textInset) {
     const bool over = hovered(bounds);
     const bool held = enabled && over && UiInput::down();
     UiShapes::roundedRect(bounds, UiTheme::radiusSmall,
         selected ? Color{ 44, 64, 91, 255 } : (over ? Color{ 31, 48, 72, 255 } : UiTheme::panel),
         held || selected ? UiTheme::accent : outline, held || selected ? 2.0f : borderWidth);
-    const float textX = bounds.x + 14.0f;
+    const float textX = bounds.x + textInset;
     const Color tint = enabled ? UiTheme::text : muted;
-    UiText::draw(title, static_cast<int>(textX), static_cast<int>(bounds.y + 7.0f), 16, tint);
-    if (!detail.empty())
-        UiText::draw(detail, static_cast<int>(textX), static_cast<int>(bounds.y + 29.0f), 13,
-                     selected ? label : muted);
+    if (bounds.height < 30.0f) {
+        UiText::draw(title, static_cast<int>(textX),
+                     static_cast<int>(bounds.y + (bounds.height - 11.0f) * 0.5f), 11, tint);
+    } else if (bounds.height < 45.0f) {
+        UiText::draw(title, static_cast<int>(textX),
+                     static_cast<int>(bounds.y + 2.0f), 14, tint);
+        if (!detail.empty())
+            UiText::draw(detail, static_cast<int>(textX), static_cast<int>(bounds.y + 22.0f),
+                         11, selected ? label : muted);
+    } else {
+        UiText::draw(title, static_cast<int>(textX), static_cast<int>(bounds.y + 7.0f), 16, tint);
+        if (!detail.empty())
+            UiText::draw(detail, static_cast<int>(textX), static_cast<int>(bounds.y + 29.0f), 13,
+                         selected ? label : muted);
+    }
     return enabled && over && UiInput::pressed();
 }
 
 bool UiWidgets::ItemTile(Rectangle bounds, const std::string& iconKey, const std::string& title,
-                         const std::string& quantity, bool enabled) {
+                         const std::string& quantity, bool enabled,
+                         const std::function<void(Rectangle)>& drawIcon) {
     const bool over = hovered(bounds);
     const bool held = enabled && over && UiInput::down();
     UiShapes::roundedRect(bounds, UiTheme::radiusMedium,
         over ? Color{ 31, 48, 72, 255 } : UiTheme::panel,
         held || over ? UiTheme::accent : outline, held ? 2.0f : borderWidth);
     const float iconSize = std::min(bounds.height - 34.0f, bounds.width - 20.0f);
-    UiIcons::draw(iconKey, Rectangle{ bounds.x + (bounds.width - iconSize) * 0.5f,
-                                      bounds.y + 8.0f, iconSize, iconSize },
-                  enabled ? WHITE : muted);
+    const Rectangle iconBounds{ bounds.x + (bounds.width - iconSize) * 0.5f,
+                                bounds.y + 8.0f, iconSize, iconSize };
+    if (drawIcon) drawIcon(iconBounds);
+    else UiIcons::draw(iconKey, iconBounds, enabled ? WHITE : muted);
     UiText::draw(title, static_cast<int>(bounds.x + 10.0f),
                  static_cast<int>(bounds.y + bounds.height - 23.0f), 13, enabled ? UiTheme::text : muted);
     if (!quantity.empty())
@@ -196,13 +213,32 @@ void UiWidgets::Tooltip(Rectangle anchor, const std::string& text) {
     if (tooltipClaimed || !hovered(anchor)) return;
     tooltipClaimed = true;
     const Vector2 mouse = UiInput::mousePosition();
-    const float width = std::min(340.0f, static_cast<float>(UiText::measure(text, 14) + 24));
-    Rectangle bounds{ mouse.x + 14.0f, mouse.y + 18.0f, width, 36.0f };
+    constexpr float maxWidth = 340.0f;
+    constexpr float lineHeight = 18.0f;
+    const float width = std::min(maxWidth, static_cast<float>(UiText::measure(text, 14) + 24));
+    std::vector<std::string> lines;
+    std::istringstream words(text);
+    std::string word;
+    std::string line;
+    while (words >> word) {
+        const std::string candidate = line.empty() ? word : line + " " + word;
+        if (!line.empty() && UiText::measure(candidate, 14) > width - 24.0f) {
+            lines.push_back(std::move(line));
+            line = word;
+        } else {
+            line = candidate;
+        }
+    }
+    if (!line.empty()) lines.push_back(std::move(line));
+    const float height = std::max(36.0f, static_cast<float>(lines.size()) * lineHeight + 16.0f);
+    Rectangle bounds{ mouse.x + 14.0f, mouse.y + 18.0f, width, height };
     if (bounds.x + bounds.width > UiCanvas::width() - 8.0f) bounds.x = mouse.x - width - 14.0f;
-    if (bounds.y + bounds.height > UiCanvas::height() - 8.0f) bounds.y = mouse.y - bounds.height - 12.0f;
+    if (bounds.y + bounds.height > UiCanvas::height() - 8.0f)
+        bounds.y = std::max(8.0f, mouse.y - bounds.height - 12.0f);
     UiShapes::roundedRect(bounds, UiTheme::radiusSmall, Color{ 16, 25, 42, 255 }, outline, borderWidth);
-    UiText::draw(text, static_cast<int>(bounds.x + 12.0f), static_cast<int>(bounds.y + 10.0f),
-                 14, UiTheme::text);
+    for (std::size_t index = 0; index < lines.size(); ++index)
+        UiText::draw(lines[index], static_cast<int>(bounds.x + 12.0f),
+                     static_cast<int>(bounds.y + 8.0f + index * lineHeight), 14, UiTheme::text);
 }
 
 void UiWidgets::Pill(Rectangle bounds, const std::string& text, Color fill) {

@@ -16,37 +16,49 @@ enum class BattleUIButton {
     ITEM,
     END_TURN,
     UNDO,
-    CANCEL_TARGET
+    CANCEL_TARGET,
+    PAUSE,
+    LOG_BUTTON
 };
 
 class BattleUI {
 public:
     BattleUI() = default;
 
+    static Rectangle turnStripBounds();
+    static Rectangle roundChipBounds();
+    static Rectangle partyCardBounds(int index);
     static Rectangle buttonBounds(BattleUIButton button);
     static Rectangle controlPanelBounds();
     static Rectangle itemMenuBounds();
+    static Rectangle listPanelBounds(int rowCount);
+    static Rectangle logButtonBounds();
+    static Rectangle logPanelBounds();
     static Rectangle skillRowBounds(int skillIndex, int skillCount, int selectedIndex);
-    static Rectangle itemRowBounds(int itemIndex);
+    static Rectangle itemRowBounds(int itemIndex, int itemCount, int selectedIndex);
 
     // ---- HUD tren dau nhan vat ----
     // anchor = vi tri tren dau nhan vat (BattleMap::getHeadPos). Chia 0 an toan.
     void drawHpMpBar(const Character& character, Vector2 anchor) const;
 
-    // ---- Turn order (goc phai tren). upcoming = thu tu sap toi, current = dang di (co the nullptr) ----
-    void drawTurnOrder(const std::vector<Character*>& upcoming, const Character* current) const;
+    void drawRoundChip(int stage, const Character* current, int gold) const;
+    void drawPartyCards(const std::vector<Character*>& party, const Character* current,
+                        const Character* selectedAlly) const;
 
     // ---- Khung dieu khien phia duoi (thu tu ve: Panel -> Banner -> Help -> Log) ----
     void drawControlPanel() const;                                    // nen khung
     // "MAN n" + "DEN LUOT: <ten>". isPlayerTurn chi quyet dinh mau/chu, BattleUI khong biet logic game.
     void drawTurnBanner(int stage, const Character* current, bool isPlayerTurn, bool waitingConfirm) const;
     void drawCommandHelp(const std::string& helpText = "") const;     // rong = dung chu mac dinh
-    void drawBattleControls(bool waitingConfirm, bool selectingTarget, bool canUndo) const;
+    void drawBattleControls(bool waitingConfirm, bool selectingTarget, bool selectingList,
+                            bool canUndo) const;
+    void drawLogButton(bool open) const;
+    void drawListPanel(const std::string& title, int rowCount, int selectedIndex) const;
     void drawBattleLog(const std::string& message) const;
 
     // Popup chon ky nang o giua man hinh (nam tren khung dieu khien). Skill thieu MP thi mo.
     void drawSkillMenu(const std::vector<Skill>& skills, int selectedIndex, int currentMp) const;
-    void drawTargetCursor(const BattleSlot& slot) const;
+    void drawTargetCursor(Rectangle targetBounds) const;
 
     // ---- Chu bay (damage / heal) ----
     // value: so luong (dau am duoc bo qua). isHeal=true -> "+N" xanh, false -> "-N" do.

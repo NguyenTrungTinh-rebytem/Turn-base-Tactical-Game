@@ -3,15 +3,17 @@
 #include "graphics/UiCanvas.h"
 #include "graphics/UiText.h"
 #include "graphics/Strings.h"
+#include "graphics/UiIcons.h"
+#include "graphics/UiShapes.h"
 #include <algorithm>
 #include <cmath>
 
 namespace {
 // ---- Bo cuc (thiet ke cho 1280x720) ----
-constexpr float CARD_W = 340.0f, CARD_H = 410.0f, CARD_GAP = 40.0f, CARD_Y = 125.0f, SIDE_MARGIN = 40.0f;
-constexpr float HEADER_H = 64.0f, SELECT_LIFT = 8.0f;
-constexpr float BTN_W = 220.0f, BTN_H = 52.0f, BTN_GAP = 30.0f, BTN_Y = 640.0f;
-constexpr size_t MAX_ENEMY_LINES = 6;
+constexpr float CARD_W = 560.0f, CARD_H = 452.0f, CARD_GAP = 32.0f, CARD_Y = 142.0f;
+constexpr float HEADER_H = 64.0f, SELECT_LIFT = 6.0f;
+constexpr float BTN_W = 220.0f, BTN_H = 48.0f, BTN_GAP = 30.0f, BTN_Y = 642.0f;
+constexpr size_t MAX_ENEMY_LINES = 7;
 
 // ---- Mau ----
 constexpr Color COL_TITLE      { 255, 214, 96, 255 };
@@ -97,6 +99,7 @@ void WaveSelectScreen::setWaves(const std::vector<WaveInfo>& waves) {
 void WaveSelectScreen::reset(size_t selectedIndex) {
     m_selected = std::min(selectedIndex, m_waves.empty() ? size_t{ 0 } : m_waves.size() - 1);
     m_hoverButton = -1;
+    m_hoverCard = -1;
     m_message.clear();
     m_messageTimer = 0.0f;
 }
@@ -111,13 +114,12 @@ bool WaveSelectScreen::selectedLocked() const {
 
 // ============ Bo cuc ============
 Rectangle WaveSelectScreen::cardRect(size_t index) const {
-    const float W = static_cast<float>(UiCanvas::width());
-    const float n = static_cast<float>(std::max<size_t>(1, m_waves.size()));
-    float w = CARD_W;
-    if (n * w + (n - 1.0f) * CARD_GAP > W - 2.0f * SIDE_MARGIN)      // nhieu wave -> the hep lai
-        w = (W - 2.0f * SIDE_MARGIN - (n - 1.0f) * CARD_GAP) / n;
-    const float total = n * w + (n - 1.0f) * CARD_GAP;
-    return { (W - total) / 2.0f + static_cast<float>(index) * (w + CARD_GAP), CARD_Y, w, CARD_H };
+    const float x0 = (static_cast<float>(UiCanvas::width()) -
+                      (CARD_W * 2.0f + CARD_GAP)) * 0.5f;
+    if (index == m_selected) return { x0, CARD_Y, CARD_W, CARD_H };
+    if (index == m_selected + 1)
+        return { x0 + CARD_W + CARD_GAP, CARD_Y, CARD_W, CARD_H };
+    return { -CARD_W * 2.0f, CARD_Y, CARD_W, CARD_H };
 }
 
 Rectangle WaveSelectScreen::buttonRect(int index) const {
@@ -159,27 +161,17 @@ WaveSelectAction WaveSelectScreen::handleInput() {
 
     // ---- Chuot ----
     const Vector2 mouse = UiCanvas::mousePosition();
-    const Vector2 moved = UiCanvas::mouseDelta();
-    const bool mouseMoved = (moved.x != 0.0f || moved.y != 0.0f);
-
     m_hoverButton = -1;
     for (int i = 0; i < BTN_COUNT; ++i)
         if (CheckCollisionPointRec(mouse, buttonRect(i))) m_hoverButton = i;
 
-    int cardUnderMouse = -1;
-    for (size_t i = 0; i < m_waves.size(); ++i)
-        if (CheckCollisionPointRec(mouse, cardRect(i))) cardUnderMouse = static_cast<int>(i);
-    if (cardUnderMouse >= 0 && mouseMoved) m_selected = static_cast<size_t>(cardUnderMouse);
+    m_hoverCard = -1;
+    for (size_t i = m_selected; i < m_waves.size() && i <= m_selected + 1; ++i)
+        if (CheckCollisionPointRec(mouse, cardRect(i))) m_hoverCard = static_cast<int>(i);
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        if (cardUnderMouse >= 0) {
-            const bool alreadySelected = (static_cast<size_t>(cardUnderMouse) == m_selected);
-            m_selected = static_cast<size_t>(cardUnderMouse);
-            if (alreadySelected) {                       // bam lan 2 vao the dang chon = bat dau
-                const WaveSelectAction a = tryStart();
-                if (a != WaveSelectAction::NONE) return a;
-            }
-        }
+        if (m_hoverCard == static_cast<int>(m_selected + 1))
+            m_selected = static_cast<size_t>(m_hoverCard);
         if (m_hoverButton == BTN_BACK) return WaveSelectAction::BACK;
         if (m_hoverButton == BTN_START) {
             const WaveSelectAction a = tryStart();
@@ -200,19 +192,29 @@ void WaveSelectScreen::draw() const {
     const float cx = UiCanvas::width() / 2.0f;
     drawCenteredText(Strings::selectWave, cx, 30.0f, 44, COL_TITLE);
     if (!m_heroSummary.empty())
-        drawCenteredText(TextFormat(u8"Anh hùng: %s", m_heroSummary.c_str()), cx, 86.0f, 18, COL_LABEL);
+        drawCenteredText(TextFormat(u8"Anh hùng: %s", m_heroSummary.c_str()), cx, 92.0f, 18, COL_LABEL);
 
     if (m_waves.empty()) {
         drawCenteredText(Strings::waveDataMissing, cx, 320.0f, 22, COL_ERR);
     } else {
-        for (size_t i = 0; i < m_waves.size(); ++i)
-            if (i != m_selected) drawCard(i);
-        drawCard(m_selected);   // ve the dang chon sau cung de nam tren
+        drawCard(m_selected);
+        if (m_selected + 1 < m_waves.size()) drawCard(m_selected + 1);
+        else {
+            const Rectangle next = cardRect(m_selected + 1);
+            UiShapes::roundedRect(next, 16.0f, Color{ 18, 16, 36, 210 },
+                                  Color{ 110, 102, 132, 180 }, 2.0f);
+            UiIcons::draw("action:close",
+                Rectangle{ next.x + next.width * 0.5f - 28.0f, next.y + 92.0f, 56.0f, 56.0f },
+                Color{ 120, 116, 132, 200 });
+            drawCenteredText(u8"Chưa có màn tiếp theo",
+                next.x + next.width * 0.5f, next.y + 176.0f, 24, COL_DIM);
+            drawCenteredText(u8"Hoàn thành hành trình hiện tại",
+                next.x + next.width * 0.5f, next.y + 218.0f, 18, COL_DIM);
+        }
     }
 
     drawButtons();
-    if (m_messageTimer > 0.0f) drawCenteredText(m_message.c_str(), cx, 612.0f, 20, COL_ERR);
-    drawCenteredText(Strings::waveChooseHelp, cx, 702.0f, 16, Color{ 200, 195, 225, 220 });
+    if (m_messageTimer > 0.0f) drawCenteredText(m_message.c_str(), cx, 604.0f, 18, COL_ERR);
 }
 
 void WaveSelectScreen::drawBackground() const {
@@ -223,7 +225,7 @@ void WaveSelectScreen::drawBackground() const {
     } else {
         DrawRectangleGradientV(0, 0, W, H, Color{ 10, 8, 36, 255 }, Color{ 60, 30, 70, 255 });
     }
-    DrawRectangle(0, 0, W, H, Color{ 0, 0, 0, 160 });
+    DrawRectangle(0, 0, W, H, Color{ 0, 0, 0, 125 });
 }
 
 void WaveSelectScreen::drawCard(size_t index) const {
@@ -231,18 +233,22 @@ void WaveSelectScreen::drawCard(size_t index) const {
     const bool selected = (index == m_selected);
     Rectangle r = cardRect(index);
     if (selected) r.y -= SELECT_LIFT;
-
-    DrawRectangleRec(Rectangle{ r.x + 5, r.y + 6, r.width, r.height }, Color{ 0, 0, 0, 120 });   // bong
-    DrawRectangleRec(r, COL_PANEL);
+    const bool hovered = static_cast<int>(index) == m_hoverCard;
+    UiShapes::roundedRect(Rectangle{ r.x + 5.0f, r.y + 6.0f, r.width, r.height },
+                          16.0f, Color{ 0, 0, 0, 120 });
+    UiShapes::roundedRect(r, 16.0f, w.m_locked ? Color{ 34, 34, 46, 220 } : COL_PANEL,
+                          selected ? COL_EDGE_SEL : (hovered ? COL_TITLE : COL_EDGE),
+                          selected ? 3.0f : 2.0f);
 
     // ---- Dai tieu de ----
-    DrawRectangleRec(Rectangle{ r.x, r.y, r.width, HEADER_H }, w.m_isBoss ? COL_HEAD_BOSS : COL_HEAD_NORMAL);
+    DrawRectangleRounded(Rectangle{ r.x, r.y, r.width, HEADER_H }, 0.15f, 8,
+                         w.m_isBoss ? COL_HEAD_BOSS : COL_HEAD_NORMAL);
     drawCenteredText(w.m_title.c_str(), r.x + r.width / 2.0f, r.y + 16.0f, 32, COL_TEXT);
     if (w.m_isBoss) {
-        const Rectangle tag = { r.x + r.width / 2.0f - 34.0f, r.y + HEADER_H - 11.0f, 68.0f, 22.0f };
+        const Rectangle tag = { r.x + r.width - 92.0f, r.y + 16.0f, 70.0f, 28.0f };
         DrawRectangleRec(tag, Color{ 200, 50, 60, 255 });
         DrawRectangleLinesEx(tag, 1.0f, Color{ 255, 150, 150, 255 });
-        drawCenteredText(u8"TRÙM", tag.x + tag.width / 2.0f, tag.y + 3.0f, 16, WHITE);
+        drawCenteredText(u8"BOSS", tag.x + tag.width / 2.0f, tag.y + 5.0f, 16, WHITE);
     }
 
     // ---- Mo ta ----
@@ -258,12 +264,26 @@ void WaveSelectScreen::drawCard(size_t index) const {
     y += 28.0f;
     for (size_t i = 0; i < w.m_enemies.size() && i < MAX_ENEMY_LINES; ++i) {
         const WaveEnemy& e = w.m_enemies[i];
-        DrawCircle(static_cast<int>(r.x + 30), static_cast<int>(y + 10), 6.0f, elementColor(e.m_element));
+        const Rectangle row{ r.x + 18.0f, y - 3.0f, r.width - 36.0f, 26.0f };
+        const bool enemyHover = CheckCollisionPointRec(UiCanvas::mousePosition(), row);
+        UiShapes::roundedRect(row, 6.0f,
+            enemyHover ? Color{ 48, 42, 75, 245 } : Color{ 27, 24, 50, 230 });
+        UiIcons::draw(std::string("element:") + (static_cast<int>(e.m_element) == 0 ? "kim" :
+            static_cast<int>(e.m_element) == 1 ? "moc" : static_cast<int>(e.m_element) == 2 ? "thuy" :
+            static_cast<int>(e.m_element) == 3 ? "hoa" : "tho"),
+            Rectangle{ r.x + 24.0f, y + 1.0f, 20.0f, 20.0f }, elementColor(e.m_element));
         const std::string name = Strings::localizedName(e.m_name);
-        UiText::draw(name.c_str(), static_cast<int>(r.x + 46), static_cast<int>(y), 18, COL_TEXT);
+        UiText::draw(name.c_str(), static_cast<int>(r.x + 54), static_cast<int>(y), 18, COL_TEXT);
         const char* el = elementName(e.m_element);
-        UiText::draw(el, static_cast<int>(r.x + r.width - 20 - UiText::measure(el, 14)), static_cast<int>(y + 3), 14, elementColor(e.m_element));
-        y += 28.0f;
+        if (e.m_isBoss) {
+            UiText::draw(TextFormat(u8"BOSS · HP %d", e.m_hp),
+                static_cast<int>(r.x + r.width - 160.0f), static_cast<int>(y + 3.0f), 14,
+                Color{ 255, 145, 145, 255 });
+        } else {
+            UiText::draw(el, static_cast<int>(r.x + r.width - 20 - UiText::measure(el, 14)),
+                         static_cast<int>(y + 3), 14, elementColor(e.m_element));
+        }
+        y += 31.0f;
     }
     if (w.m_enemies.size() > MAX_ENEMY_LINES)
         UiText::draw(TextFormat(u8"+%d quái khác", static_cast<int>(w.m_enemies.size() - MAX_ENEMY_LINES)),
@@ -273,12 +293,9 @@ void WaveSelectScreen::drawCard(size_t index) const {
     if (w.m_cleared && !w.m_locked)
         drawCenteredText(Strings::waveCleared, r.x + r.width / 2.0f, r.y + r.height - 38.0f, 18, COL_OK);
 
-    // ---- Vien (vang khi duoc chon) ----
-    DrawRectangleLinesEx(r, selected ? 4.0f : 2.0f, selected ? COL_EDGE_SEL : COL_EDGE);
-
     // ---- Khoa: phu toi + o khoa ----
     if (w.m_locked) {
-        DrawRectangleRec(r, Color{ 0, 0, 0, 175 });
+        DrawRectangleRounded(r, 0.1f, 10, Color{ 0, 0, 0, 130 });
         const float cx = r.x + r.width / 2.0f, cy = r.y + r.height / 2.0f - 10.0f;
         DrawRectangleLinesEx(Rectangle{ cx - 14, cy - 34, 28, 30 }, 5.0f, Color{ 200, 170, 80, 255 });   // quai khoa
         DrawRectangleRec(Rectangle{ cx - 24, cy - 8, 48, 36 }, Color{ 200, 170, 80, 255 });              // than khoa
@@ -291,7 +308,8 @@ void WaveSelectScreen::drawCard(size_t index) const {
             drawCenteredText(line.c_str(), cx, hy, 16, COL_TEXT);
             hy += 22.0f;
         }
-        DrawRectangleLinesEx(r, selected ? 4.0f : 2.0f, selected ? COL_EDGE_SEL : COL_EDGE);
+        DrawRectangleRoundedLinesEx(r, 0.1f, 10, selected ? 3.0f : 2.0f,
+                                    selected ? COL_EDGE_SEL : COL_EDGE);
     }
 }
 
@@ -302,9 +320,13 @@ void WaveSelectScreen::drawButtons() const {
         const bool hover = (m_hoverButton == i);
         const bool primary = (i == BTN_START);
         const bool disabled = primary && selectedLocked();
-        DrawRectangleRec(Rectangle{ r.x + 4, r.y + 5, r.width, r.height }, Color{ 0, 0, 0, 110 });
-        DrawRectangleRec(r, disabled ? Color{ 24, 22, 34, 220 } : (hover ? Color{ 90, 60, 20, 235 } : (primary ? Color{ 50, 40, 14, 230 } : COL_PANEL)));
-        DrawRectangleLinesEx(r, hover && !disabled ? 3.0f : 2.0f, disabled ? Color{ 80, 76, 100, 255 } : ((hover || primary) ? COL_EDGE_SEL : COL_EDGE));
+        UiShapes::roundedRect(Rectangle{ r.x + 4, r.y + 5, r.width, r.height }, 10.0f,
+                              Color{ 0, 0, 0, 110 });
+        UiShapes::roundedRect(r, 10.0f,
+            disabled ? Color{ 24, 22, 34, 220 } :
+            (hover ? Color{ 90, 60, 20, 235 } : (primary ? Color{ 50, 40, 14, 230 } : COL_PANEL)),
+            disabled ? Color{ 80, 76, 100, 255 } :
+            ((hover || primary) ? COL_EDGE_SEL : COL_EDGE), hover && !disabled ? 3.0f : 2.0f);
         drawCenteredText(labels[i], r.x + r.width / 2.0f, r.y + (r.height - 24.0f) / 2.0f, 24,
                          disabled ? COL_DIM : (hover ? Color{ 255, 240, 170, 255 } : COL_TEXT));
     }

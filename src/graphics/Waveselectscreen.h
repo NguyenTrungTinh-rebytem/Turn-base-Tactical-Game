@@ -10,6 +10,8 @@
 struct WaveEnemy {
     std::string m_name;
     Element     m_element = Element::KIM;
+    int         m_hp = 0;
+    bool        m_isBoss = false;
 };
 
 struct WaveInfo {
@@ -64,6 +66,7 @@ private:
     std::vector<WaveInfo> m_waves;
     size_t       m_selected = 0;
     int          m_hoverButton = -1;
+    int          m_hoverCard = -1;
     float        m_time = 0.0f;
     std::string  m_heroSummary;
     std::string  m_message;
