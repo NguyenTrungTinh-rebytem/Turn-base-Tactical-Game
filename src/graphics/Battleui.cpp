@@ -29,7 +29,13 @@ constexpr Rectangle COMMAND_PANEL = UiTheme::battleHud;
 constexpr Rectangle LOG_BUTTON = UiTheme::battleLogButtonHud;
 constexpr Rectangle LOG_PANEL = UiTheme::battleLogHud;
 constexpr Rectangle LIST_PANEL = UiTheme::battleListHud;
-constexpr float LIST_BOTTOM = 810.0f;
+constexpr float MENU_X = 1000.0f, MENU_Y = 48.0f, MENU_W = 264.0f;
+constexpr float ROW_H = 34.0f, ROW_GAP = 4.0f, MENU_PAD = 8.0f;
+Rectangle menuRow(int i) {
+    return { MENU_X + MENU_PAD, MENU_Y + MENU_PAD + i * (ROW_H + ROW_GAP),
+             MENU_W - MENU_PAD * 2.0f, ROW_H };
+}
+constexpr float LIST_BOTTOM = 930.0f;
 constexpr float LIST_HEADER = 64.0f;
 constexpr float LIST_ROW_HEIGHT = 32.0f;
 constexpr int SKILL_MAX_VISIBLE = 7;
@@ -37,8 +43,8 @@ constexpr int ITEM_MAX_VISIBLE = 7;
 constexpr float FLOAT_SPEED = 45.0f;
 constexpr float FLOAT_LIFE = 1.0f;
 
-constexpr Color COL_PANEL = UiTheme::panel;
-constexpr Color COL_PANEL_EDGE = UiTheme::ash;
+constexpr Color COL_PANEL = UiTheme::navyPanel;
+constexpr Color COL_PANEL_EDGE = UiTheme::cyanEdge;
 constexpr Color COL_BAR_BG{ 14, 12, 20, 230 };
 constexpr Color COL_HP_HIGH = UiTheme::hpHigh;
 constexpr Color COL_HP_MID = UiTheme::hpHigh;
@@ -97,8 +103,8 @@ std::string elementKey(Element element) {
 }
 
 float fieldBarWidth(const Character& character, float spriteWidth) {
-    const float maximum = dynamic_cast<const Boss*>(&character) ? 240.0f : 180.0f;
-    return std::clamp(spriteWidth * 0.8f, 96.0f, maximum);
+    (void)character;
+    return std::max(40.0f, spriteWidth * 0.7f);   // 70% chiều rộng sprite
 }
 
 std::string localized(const Character* character) {
@@ -110,42 +116,43 @@ Rectangle BattleUI::turnStripBounds() { return toDesign(TURN_STRIP); }
 Rectangle BattleUI::roundChipBounds() { return toDesign(ROUND_CHIP); }
 Rectangle BattleUI::partyCardBounds(int index) {
     if (index < 0 || index >= 3) return {};
-    return toDesign(Rectangle{ PARTY_CARDS.x + index * 224.0f, PARTY_CARDS.y,
-                               212.0f, PARTY_CARDS.height });
+    constexpr float w = 120.0f, h = 76.0f, gap = 6.0f;
+    const float x0 = 1280.0f - 16.0f - (3.0f * w + 2.0f * gap);
+    return { x0 + index * (w + gap), 720.0f - 16.0f - h, w, h };
 }
 
 Rectangle BattleUI::fieldHpBounds(const Character& character, Vector2 feet) {
     const float width = fieldBarWidth(character, 128.0f);
-    return { feet.x - width * 0.5f, feet.y + 12.0f, width, 8.0f };
+    return { feet.x - width * 0.5f, feet.y + 8.0f, width, 6.0f };
 }
 
 Rectangle BattleUI::fieldHpBounds(const Character& character, const BattleAnchor& anchor) {
     const float width = fieldBarWidth(character, anchor.spriteBounds.width);
-    return { anchor.feet.x - width * 0.5f, anchor.feet.y + 12.0f, width, 8.0f };
+    return { anchor.feet.x - width * 0.5f, anchor.feet.y + 8.0f, width, 6.0f };
 }
 
 Rectangle BattleUI::buttonBounds(BattleUIButton button) {
     switch (button) {
-        case BattleUIButton::ATTACK:        return toDesign(Rectangle{ 1440, 858, 440, 48 });
-        case BattleUIButton::SKILL:         return toDesign(Rectangle{ 1440, 918, 440, 48 });
-        case BattleUIButton::ITEM:          return toDesign(Rectangle{ 1440, 978, 440, 48 });
-        case BattleUIButton::END_TURN:      return toDesign(Rectangle{ 1440, 978, 210, 48 });
-        case BattleUIButton::UNDO:           return toDesign(Rectangle{ 1660, 978, 220, 48 });
-        case BattleUIButton::CANCEL_TARGET: return toDesign(Rectangle{ 1660, 858, 220, 48 });
-        case BattleUIButton::PAUSE:         return toDesign(Rectangle{ 1848, 820, 40, 40 });
+        case BattleUIButton::ATTACK:        return menuRow(0);
+        case BattleUIButton::SKILL:         return menuRow(1);
+        case BattleUIButton::ITEM:          return menuRow(2);
+        case BattleUIButton::PAUSE:         return menuRow(3);   // nút "THOÁT"
+        case BattleUIButton::END_TURN:      return menuRow(0);
+        case BattleUIButton::UNDO:          return menuRow(1);
+        case BattleUIButton::CANCEL_TARGET: return menuRow(0);
         case BattleUIButton::LOG_BUTTON:    return logButtonBounds();
     }
     return {};
 }
 
-Rectangle BattleUI::controlPanelBounds() { return toDesign(COMMAND_PANEL); }
+Rectangle BattleUI::controlPanelBounds() { return { MENU_X, MENU_Y, MENU_W, MENU_PAD * 2.0f + 4.0f * ROW_H + 3.0f * ROW_GAP }; }
 Rectangle BattleUI::itemMenuBounds() { return listPanelBounds(ITEM_MAX_VISIBLE); }
 Rectangle BattleUI::listPanelBounds(int rowCount) {
     const int rows = visibleRows(rowCount, ITEM_MAX_VISIBLE);
     const float height = std::min(LIST_PANEL.height, LIST_HEADER + rows * LIST_ROW_HEIGHT);
     return toDesign(Rectangle{ LIST_PANEL.x, LIST_BOTTOM - height, LIST_PANEL.width, height });
 }
-Rectangle BattleUI::logButtonBounds() { return toDesign(LOG_BUTTON); }
+Rectangle BattleUI::logButtonBounds() { return {}; }
 Rectangle BattleUI::logPanelBounds() { return toDesign(LOG_PANEL); }
 
 Rectangle BattleUI::skillRowBounds(int skillIndex, int skillCount, int selectedIndex) {
@@ -156,8 +163,7 @@ Rectangle BattleUI::itemRowBounds(int itemIndex, int itemCount, int selectedInde
     return rowBounds(itemIndex, itemCount, selectedIndex, ITEM_MAX_VISIBLE);
 }
 
-void BattleUI::drawHpMpBar(const Character& character, Vector2 head) const {
-    const int maxHp = character.getStats().m_hp;
+void BattleUI::drawHpMpBar(const Character& character, Vector2 head, int enemyIndex) const {    const int maxHp = character.getStats().m_hp;
     const float hpRatio = ratioOf(character.getCurrentHp(), maxHp);
     const bool boss = dynamic_cast<const Boss*>(&character) != nullptr;
     const bool player = dynamic_cast<const Player*>(&character) != nullptr;
@@ -169,13 +175,19 @@ void BattleUI::drawHpMpBar(const Character& character, Vector2 head) const {
     const float x = hpBounds.x;
     const float y = hpBounds.y;
     const float barWidth = hpBounds.width;
-    const Color hpColor = hpRatio > 0.5f ? COL_HP_HIGH :
-        (hpRatio > 0.25f ? COL_HP_MID : COL_HP_LOW);
+    const Color base = player ? UiTheme::hpHigh : UiTheme::hpEnemy;
+    const Color hpColor = hpRatio > 0.25f ? base : UiTheme::danger;
     UiShapes::runeBar(hpBounds, hpRatio, hpColor);
-    const Rectangle sealBounds{ x - 13.0f, y - 5.0f, 16.0f, 16.0f };
-    UiShapes::seal(sealBounds, UiTheme::ash);
-    UiIcons::draw(elementKey(character.getElement()),
-                  Rectangle{ sealBounds.x + 3.0f, sealBounds.y + 3.0f, 10.0f, 10.0f });
+    if (enemyIndex >= 0) {
+        const char label[2] = { static_cast<char>('A' + enemyIndex % 26), '\0' };
+        UiText::draw(label, static_cast<int>(x - 14.0f), static_cast<int>(y - 4.0f), 13,
+                     UiTheme::hpEnemy);
+    } else {
+        const Rectangle sealBounds{ x - 13.0f, y - 5.0f, 16.0f, 16.0f };
+        UiShapes::seal(sealBounds, UiTheme::ash);
+        UiIcons::draw(elementKey(character.getElement()),
+                      Rectangle{ sealBounds.x + 3.0f, sealBounds.y + 3.0f, 10.0f, 10.0f });
+    }
 
     const Rectangle hoverBounds = anchor.spriteBounds;
 #if defined(UI_DEV_TOOLS) && UI_DEV_TOOLS
@@ -226,7 +238,7 @@ void BattleUI::drawHpMpBar(const Character& character, Vector2 head) const {
 #endif
     const std::string name = localized(&character);
     const char* elementName = Strings::elements[static_cast<int>(character.getElement())];
-    UiWidgets::Tooltip(hoverBounds, TextFormat(u8"%s · %s · HP %d/%d · MP %d/%d",
+    UiWidgets::Tooltip(hoverBounds, TextFormat("%s · %s · HP %d/%d · MP %d/%d",
         name.c_str(), elementName, std::max(0, character.getCurrentHp()), maxHp,
         std::max(0, character.getCurrentMp()), character.getStats().m_mp));
 }
@@ -247,8 +259,7 @@ void BattleUI::drawRoundChip(int stage, const Character* current, int gold) cons
     const float rowWidth = static_cast<float>(UiText::measure(round, 16));
     const float coinWidth = static_cast<float>(UiText::measure(coinText, 16)) + 42.0f;
     const float chipWidth = std::max(160.0f, std::max(rowWidth, coinWidth) + 24.0f);
-    const Rectangle bounds{ static_cast<float>(UiCanvas::width()) - chipWidth - 16.0f,
-                            12.0f, chipWidth, 52.0f };
+    const Rectangle bounds{ 16.0f, 46.0f, chipWidth, 52.0f };
     UiShapes::bladeStrip(bounds, COL_PANEL, COL_PANEL_EDGE, true);
     UiText::draw(round, static_cast<int>(bounds.x + bounds.width - rowWidth - 12.0f),
                  static_cast<int>(bounds.y + 5.0f), 16, UiTheme::silver);
@@ -270,40 +281,26 @@ void BattleUI::drawPartyCards(const std::vector<Character*>& party, const Charac
     for (int index = 0; index < shown; ++index) {
         const Character* character = party[static_cast<std::size_t>(index)];
         if (!character) continue;
-        const Rectangle bounds = partyCardBounds(index);
-        const bool active = character == current;
-        const bool selected = character == selectedAlly;
-        UiShapes::roundedRect(bounds, 8.0f,
-            active ? UiTheme::panelRaised : COL_PANEL,
-            selected || active ? UiTheme::crimson : UiTheme::ash,
-            selected || active ? 2.0f : 1.0f);
+        const Rectangle b = partyCardBounds(index);
+        const bool hot = character == current || character == selectedAlly;
+        UiShapes::plate(b, COL_PANEL, hot ? UiTheme::cyan : COL_PANEL_EDGE, hot ? 2.0f : 1.0f);
 
-        const std::string name = localized(character);
-        UiShapes::seal(Rectangle{ bounds.x + 7.0f, bounds.y + 7.0f, 30.0f, 30.0f },
-                       active ? UiTheme::crimson : UiTheme::ash, active);
-        if (active)
-            UiShapes::diamond(Vector2{ bounds.x + 3.0f, bounds.y + 4.0f },
-                              7.0f, UiTheme::crimsonGlow);
-        UiIcons::draw(elementKey(character->getElement()),
-                      Rectangle{ bounds.x + 11.0f, bounds.y + 11.0f, 22.0f, 22.0f });
-        UiText::draw(name, static_cast<int>(bounds.x + 42.0f),
-                     static_cast<int>(bounds.y + 8.0f), 13,
+        const int hp = std::max(0, character->getCurrentHp());
+        const int mp = std::max(0, character->getCurrentMp());
+        const int maxHp = character->getStats().m_hp;
+        const int maxMp = character->getStats().m_mp;
+        UiText::draw(localized(character), static_cast<int>(b.x + 8.0f),
+                     static_cast<int>(b.y + 6.0f), 12,
                      character->isAlive() ? UiTheme::silver : UiTheme::ashText);
-        const char* hp = TextFormat(u8"HP %d/%d", std::max(0, character->getCurrentHp()),
-                                    character->getStats().m_hp);
-        UiText::draw(hp, static_cast<int>(bounds.x + 8.0f),
-                     static_cast<int>(bounds.y + 39.0f), 10, UiTheme::silver);
-        const float hpRatio = ratioOf(character->getCurrentHp(), character->getStats().m_hp);
-        drawBar(Rectangle{ bounds.x * HUD_SCALE + 10.0f, bounds.y * HUD_SCALE + 82.0f,
-                           192.0f, 8.0f }, hpRatio, COL_HP_HIGH);
-        const char* mp = TextFormat("MP %d/%d", std::max(0, character->getCurrentMp()),
-                                    character->getStats().m_mp);
-        UiText::draw(mp, static_cast<int>(bounds.x + 8.0f),
-                     static_cast<int>(bounds.y + 68.0f), 10, UiTheme::mpHigh);
-        drawBar(Rectangle{ bounds.x * HUD_SCALE + 10.0f, bounds.y * HUD_SCALE + 128.0f,
-                           192.0f, 6.0f },
-                ratioOf(character->getCurrentMp(), character->getStats().m_mp), UiTheme::mpLow);
-        UiWidgets::Tooltip(bounds, u8"Chọn đồng đội làm mục tiêu của vật phẩm");
+        UiText::draw(TextFormat("HP %d/%d", hp, maxHp), static_cast<int>(b.x + 8.0f),
+                     static_cast<int>(b.y + 22.0f), 10, UiTheme::silver);
+        UiShapes::runeBar(Rectangle{ b.x + 8.0f, b.y + 36.0f, b.width - 16.0f, 6.0f },
+                          ratioOf(hp, maxHp), UiTheme::hpHigh);
+        UiText::draw(TextFormat("MP %d/%d", mp, maxMp), static_cast<int>(b.x + 8.0f),
+                     static_cast<int>(b.y + 46.0f), 10, UiTheme::mpHigh);
+        UiShapes::runeBar(Rectangle{ b.x + 8.0f, b.y + 60.0f, b.width - 16.0f, 5.0f },
+                          ratioOf(mp, maxMp), UiTheme::mpLow);
+        UiWidgets::Tooltip(b, "Chọn đồng đội làm mục tiêu của vật phẩm");
     }
 }
 
@@ -311,83 +308,74 @@ void BattleUI::drawControlPanel() const {
     UiShapes::plate(controlPanelBounds(), COL_PANEL, COL_PANEL_EDGE, 1.0f);
 }
 
-void BattleUI::drawTurnBanner(int stage, const Character* current, bool isPlayerTurn,
-                              bool waitingConfirm) const {
-    (void)stage;
-    const Rectangle panel = controlPanelBounds();
-    const std::string name = localized(current);
-    const Rectangle portrait{ panel.x + 12.0f, panel.y + 8.0f, 28.0f, 28.0f };
-    UiShapes::seal(portrait, isPlayerTurn ? UiTheme::crimson : UiTheme::ash, isPlayerTurn);
-    if (current)
-        UiIcons::draw(elementKey(current->getElement()),
-                      Rectangle{ portrait.x + 6.0f, portrait.y + 6.0f, 16.0f, 16.0f });
-    UiText::draw(name.empty() ? u8"Đang chờ lượt" : name,
-                 static_cast<int>(panel.x + 48.0f),
-                 static_cast<int>(panel.y + 10.0f), 15,
-                 isPlayerTurn ? UiTheme::silver : UiTheme::ashText);
-    const Rectangle pauseBounds = buttonBounds(BattleUIButton::PAUSE);
-    UiWidgets::IconButton(pauseBounds, "action:pause");
-    UiWidgets::Tooltip(pauseBounds, u8"Tạm dừng trận đấu");
-    if (waitingConfirm)
-        UiText::draw(u8"Chờ xác nhận", static_cast<int>(panel.x + 14.0f),
-                     static_cast<int>(panel.y + 32.0f), 11, UiTheme::ashText);
-}
+void BattleUI::drawTurnBanner(int, const Character*, bool, bool) const {}   // thông tin đã nằm ở bảng đội
+
 
 void BattleUI::drawCommandHelp(const std::string& helpText) const {
-    const std::string text = helpText.empty()
-        ? std::string(u8"Chọn một hành động.")
-        : helpText;
-    const Rectangle panel = controlPanelBounds();
-    UiText::draw(text, static_cast<int>(panel.x + 12.0f),
-                 static_cast<int>(panel.y + panel.height - 18.0f), 11, UiTheme::ashText);
-    UiShapes::diamond(Vector2{ panel.x + 8.0f, panel.y + panel.height - 11.0f },
-                      6.0f, UiTheme::crimson);
-    DrawLineEx(Vector2{ panel.x + 8.0f, panel.y + panel.height - 16.0f },
-               Vector2{ panel.x + 8.0f, panel.y + panel.height - 5.0f },
-               1.0f, UiTheme::ash);
+    const Rectangle menu = controlPanelBounds();
+    const Rectangle box{ menu.x, menu.y + menu.height + 6.0f, menu.width, 64.0f };
+    UiShapes::plate(box, COL_PANEL, COL_PANEL_EDGE, 1.0f);
+    const std::string text = helpText.empty() ? std::string("Chọn một hành động.") : helpText;
+    const int maxWidth = static_cast<int>(box.width - 20.0f);
+    std::istringstream words(text);
+    std::string word, line;
+    int lineNumber = 0;
+    const auto flush = [&](const std::string& value) {
+        UiText::draw(value, static_cast<int>(box.x + 10.0f),
+                     static_cast<int>(box.y + 8.0f + lineNumber * 18.0f), 12, UiTheme::ashText);
+        ++lineNumber;
+    };
+    while (words >> word && lineNumber < 3) {
+        const std::string candidate = line.empty() ? word : line + " " + word;
+        if (!line.empty() && UiText::measure(candidate, 12) > maxWidth) {
+            flush(line);
+            line = word;
+        } else {
+            line = candidate;
+        }
+    }
+    if (!line.empty() && lineNumber < 3) flush(line);
 }
-
 void BattleUI::drawBattleControls(bool waitingConfirm, bool selectingTarget,
                                   bool selectingList, bool canUndo) const {
+    const Vector2 mouse = UiInput::mousePosition();
+    std::string help;
+    const auto row = [&](BattleUIButton id, const char* label, const char* action,
+                         bool enabled, const char* hint) {
+        const Rectangle b = buttonBounds(id);
+        const bool hot = enabled && CheckCollisionPointRec(mouse, b);
+        UiWidgets::BladeButton(b, label, true, hot, enabled, action);
+        if (hot) {
+            DrawPoly(Vector2{ b.x + 12.0f, b.y + b.height * 0.5f }, 3, 6.0f, 0.0f,
+                     UiTheme::cyan);                       // mũi tên chỉ dòng đang chọn
+            help = hint;
+        }
+    };
+
     if (waitingConfirm) {
-        UiWidgets::BladeButton(buttonBounds(BattleUIButton::END_TURN), Strings::endTurn,
-                               true, false, true, "action:end_turn");
-        UiWidgets::BladeButton(buttonBounds(BattleUIButton::UNDO), Strings::undo,
-                               true, false, canUndo, "action:undo");
-        drawCommandHelp(u8"Hoàn tác chỉ khả dụng trước khi kết thúc lượt.");
+        row(BattleUIButton::END_TURN, Strings::endTurn, "action:end_turn", true,
+            "Kết thúc lượt của nhân vật này.");
+        row(BattleUIButton::UNDO, Strings::undo, "action:undo", canUndo,
+            "Hoàn tác chỉ khả dụng trước khi kết thúc lượt.");
     } else if (selectingTarget || selectingList) {
-        UiWidgets::BladeButton(buttonBounds(BattleUIButton::CANCEL_TARGET), Strings::cancelTarget,
-                               true, false, true, "action:close");
-        drawCommandHelp(selectingTarget ? Strings::targetPrompt : u8"Chọn một mục trong danh sách.");
+        row(BattleUIButton::CANCEL_TARGET, Strings::cancelTarget, "action:close", true,
+            "Quay lại menu lệnh.");
+        if (help.empty())
+            help = selectingTarget ? Strings::targetPrompt : "Chọn một mục trong danh sách.";
     } else {
-        const Rectangle attackBounds = buttonBounds(BattleUIButton::ATTACK);
-        const Rectangle skillBounds = buttonBounds(BattleUIButton::SKILL);
-        const Rectangle itemBounds = buttonBounds(BattleUIButton::ITEM);
-        UiWidgets::BladeButton(attackBounds, Strings::attack, true, false, true,
-                               "action:attack");
-        UiWidgets::BladeButton(skillBounds, Strings::skill, true, false, true,
-                               "action:skill");
-        UiWidgets::BladeButton(itemBounds, Strings::item, true, false, true,
-                               "action:item");
-        const Vector2 mouse = UiInput::mousePosition();
-        if (CheckCollisionPointRec(mouse, attackBounds))
-            drawCommandHelp(u8"Chọn kẻ địch rồi tấn công.");
-        else if (CheckCollisionPointRec(mouse, skillBounds))
-            drawCommandHelp(u8"Mở danh sách kỹ năng.");
-        else if (CheckCollisionPointRec(mouse, itemBounds))
-            drawCommandHelp(u8"Mở túi vật phẩm.");
-        else
-            drawCommandHelp();
+        row(BattleUIButton::ATTACK, Strings::attack, "action:attack", true,
+            "Chọn kẻ địch rồi tấn công.");
+        row(BattleUIButton::SKILL, Strings::skill, "action:skill", true,
+            "Mở danh sách kỹ năng.");
+        row(BattleUIButton::ITEM, Strings::item, "action:item", true,
+            "Mở túi vật phẩm.");
+        row(BattleUIButton::PAUSE, "THOÁT", "action:pause", true,
+            "Tạm dừng và thoát trận đấu.");
     }
+    drawCommandHelp(help);
 }
 
-void BattleUI::drawLogButton(bool open) const {
-    const Rectangle bounds = logButtonBounds();
-    const bool clicked = UiWidgets::BladeButton(bounds, open ? u8"ĐÓNG" : u8"NHẬT KÝ",
-                                                false, open, true, "action:log");
-    (void)clicked;
-    UiWidgets::Tooltip(bounds, u8"Bật hoặc tắt nhật ký trận đấu");
-}
+void BattleUI::drawLogButton(bool) const {}
 
 void BattleUI::drawListPanel(const std::string& title, int rowCount, int selectedIndex) const {
     const Rectangle bounds = listPanelBounds(rowCount);
@@ -457,7 +445,7 @@ void BattleUI::drawSkillMenu(const std::vector<Skill>& skills, int selectedIndex
         UiWidgets::ListRow(row, TextFormat("%s  ·  %s", name.c_str(), detail), {},
                            index == selectedIndex, enabled, 42.0f, true);
         UiWidgets::Tooltip(row,
-                           TextFormat(u8"%s · tiêu hao %d MP", name.c_str(), skill.m_mpCost));
+                           TextFormat("%s · tiêu hao %d MP", name.c_str(), skill.m_mpCost));
     }
 }
 

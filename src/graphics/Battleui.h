@@ -42,8 +42,7 @@ public:
 
     // ---- HUD tren dau nhan vat ----
     // anchor is the existing core-facing head point; bars use the sprite anchor reconstructed by BattleAnchors.
-    void drawHpMpBar(const Character& character, Vector2 anchor) const;
-
+    void drawHpMpBar(const Character& character, Vector2 anchor, int enemyIndex = -1) const;
     void drawRoundChip(int stage, const Character* current, int gold) const;
     void drawPartyCards(const std::vector<Character*>& party, const Character* current,
                         const Character* selectedAlly) const;

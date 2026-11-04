@@ -22,8 +22,8 @@ inline constexpr Color silver{ 251, 247, 238, 255 };
 inline constexpr Color ashText{ 224, 218, 231, 255 };
 inline constexpr Color crimson{ 196, 22, 31, 255 };
 inline constexpr Color crimsonGlow{ 255, 59, 59, 255 };
-inline constexpr Color selectedGlassTop{ 163, 20, 30, 209 };
-inline constexpr Color selectedGlassBottom{ 217, 39, 46, 209 };
+inline constexpr Color selectedGlassTop{ 0, 140, 180, 209 };
+inline constexpr Color selectedGlassBottom{ 0, 195, 225, 209 };
 inline constexpr Color gold{ 227, 182, 92, 255 };
 inline constexpr Color hpHigh{ 107, 224, 124, 255 };
 inline constexpr Color hpLow{ 47, 168, 90, 255 };
@@ -31,6 +31,10 @@ inline constexpr Color mpHigh{ 56, 200, 224, 255 };
 inline constexpr Color mpLow{ 43, 127, 209, 255 };
 inline constexpr Color danger{ 239, 75, 75, 255 };
 inline constexpr Color heal{ 125, 240, 165, 255 };
+inline constexpr Color navyPanel{ 16, 14, 48, 204 };     // tím navy, trong suốt 80%
+inline constexpr Color cyanEdge{ 70, 225, 255, 200 };    // viền cyan mảnh
+inline constexpr Color cyan{ 70, 225, 255, 255 };
+inline constexpr Color hpEnemy{ 255, 150, 40, 255 };     // thanh HP kẻ địch (cam)
 inline constexpr float plateChamferMax = 18.0f;
 inline constexpr float bladeFadeFraction = 0.30f;
 inline constexpr float bladePointRatio = 0.38f;
@@ -52,7 +56,7 @@ inline constexpr float fadeDuration = 0.8f;
 inline constexpr float hoverDuration = 0.1f;
 inline constexpr float floatingTextDuration = 1.0f;
 
-inline constexpr Rectangle turnStripHud{ 0.0f, 20.0f, 820.0f, 76.0f };
+inline constexpr Rectangle turnStripHud{ 0.0f, 0.0f, 1920.0f, 60.0f };
 inline constexpr Rectangle roundChipHud{ 1420.0f, 20.0f, 476.0f, 76.0f };
 inline constexpr Rectangle partyCardsHud{ 24.0f, 900.0f, 660.0f, 156.0f };
 inline constexpr Rectangle battleHud{ 1420.0f, 810.0f, 476.0f, 246.0f };
