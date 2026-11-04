@@ -38,6 +38,8 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <cmath>
+#include <algorithm>
 
 // GameEngine (Core) la noi NOI tat ca module:
 //   Data     -> GameData (CSV: hero, quai, skill)
@@ -69,7 +71,10 @@ private:
     void update(float deltaTime);
     void render();
     void renderBattleUI();
+    void drawActiveMarker() const;
+    void drawFieldStats() const;
     void renderCombatants();
+    
 
     // ----- thiet lap tran dau -----
     void startNewGame(int startStage = 1, bool preservePreparedRun = false);
@@ -233,6 +238,7 @@ HeroConfig m_heroConfig;
 
     // ----- Tracking State -----
     Character* m_currentCharacter = nullptr;
+    std::vector<const Character*> m_actedThisRound;   // ai đã đi trong vòng hiện tại (cho thanh lượt)
     Character* m_selectedTarget = nullptr;
     BattlePhase m_battlePhase = BattlePhase::PLAYER_TURN;
     int m_stage = 1;
@@ -249,4 +255,6 @@ HeroConfig m_heroConfig;
     std::mt19937 m_rng{ std::random_device{}() };
     bool m_isRunning = false;
     bool m_isInitialized = false;
+
+    
 };

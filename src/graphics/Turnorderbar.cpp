@@ -14,9 +14,9 @@
 
 namespace {
 constexpr std::size_t MAX_SHOWN = 12;
-constexpr float ACTIVE_R = 17.0f;     // nua duong cheo cua kim cuong (nguoi dang di)
-constexpr float NEXT_R = 11.0f;       // ban kinh chan dung tron (cac luot sau)
-constexpr float GAP = 10.0f;
+constexpr float ACTIVE_R = 22.0f;   // kim cương người đang đi (trước là 17)
+constexpr float NEXT_R = 16.0f;     // chân dung các lượt sau (trước là 11)
+constexpr float GAP = 12.0f;
 constexpr float SLIDE_RATE = 12.0f;
 constexpr float FADE_IN_RATE = 5.0f;
 constexpr float FADE_OUT_RATE = 4.0f;
@@ -161,7 +161,7 @@ void TurnOrderBar::draw(const std::vector<Character*>& upcoming, const Character
 
         const Rectangle hit{ center.x - radius, center.y - radius, radius * 2.0f, radius * 2.0f };
         const std::string tooltip = row.m_name +
-            TextFormat(u8" · HP %d/%d · Tốc độ %d", row.m_hp, row.m_maxHp, row.m_spd);
+            TextFormat(" · HP %d/%d · Tốc độ %d", row.m_hp, row.m_maxHp, row.m_spd);
         UiWidgets::Tooltip(hit, tooltip);
     }
 }

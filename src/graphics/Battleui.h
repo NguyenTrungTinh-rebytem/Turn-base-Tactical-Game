@@ -60,6 +60,7 @@ public:
 
     // Popup chon ky nang o giua man hinh (nam tren khung dieu khien). Skill thieu MP thi mo.
     void drawSkillMenu(const std::vector<Skill>& skills, int selectedIndex, int currentMp) const;
+    void drawItemMenu(const std::vector<std::string>& labels, int selectedIndex) const;
     void drawTargetCursor(Rectangle targetBounds) const;
 
     // ---- Chu bay (damage / heal) ----
@@ -83,4 +84,5 @@ private:
     mutable const Character* m_lastRoundCharacter = nullptr;
     mutable int m_lastRoundStage = -1;
     mutable int m_turnNumber = 0;
+    mutable float m_highlightY = -1.0f;   // vị trí thanh chọn đang trượt (-1 = chưa có)
 };

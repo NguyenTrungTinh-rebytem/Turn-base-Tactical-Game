@@ -112,10 +112,10 @@ namespace
     const char* const POTION_NAME = "ITM_HP_MINOR";
     const char* skillTypeText(SkillType t) {
     switch (t) {
-        case SkillType::DAMAGE: return u8"Sát thương";
-        case SkillType::HEAL:   return u8"Hồi máu";
-        case SkillType::BUFF:   return u8"Tăng cường";
-        case SkillType::DEBUFF: return u8"Giảm sức mạnh";
+        case SkillType::DAMAGE: return "Sát thương";
+        case SkillType::HEAL:   return "Hồi máu";
+        case SkillType::BUFF:   return "Tăng cường";
+        case SkillType::DEBUFF: return "Giảm sức mạnh";
     }
     return "";
 }
@@ -123,16 +123,16 @@ namespace
 std::string effectText(EffectType e, int turns) {
     const char* name = "";
     switch (e) {
-        case EffectType::ATK_BOOST: name = u8"Tăng công";  break;
-        case EffectType::DEF_BOOST: name = u8"Tăng thủ";   break;
-        case EffectType::REGEN:     name = u8"Hồi máu";    break;
-        case EffectType::STUN:      name = u8"Choáng";     break;
-        case EffectType::BURN:      name = u8"Bỏng";       break;
-        case EffectType::SLOW:      name = u8"Chậm";       break;
-        case EffectType::WEAKNESS:  name = u8"Suy yếu";    break;
+        case EffectType::ATK_BOOST: name = "Tăng công";  break;
+        case EffectType::DEF_BOOST: name = "Tăng thủ";   break;
+        case EffectType::REGEN:     name = "Hồi máu";    break;
+        case EffectType::STUN:      name = "Choáng";     break;
+        case EffectType::BURN:      name = "Bỏng";       break;
+        case EffectType::SLOW:      name = "Chậm";       break;
+        case EffectType::WEAKNESS:  name = "Suy yếu";    break;
         case EffectType::NONE:      return "";
     }
-    return std::string(name) + " " + std::to_string(turns) + u8" lượt";
+    return std::string(name) + " " + std::to_string(turns) + " lượt";
 }
 
 int deadlineTurnsForStage(int /*stage*/) {
@@ -151,13 +151,13 @@ int deadlineTurnsForStage(int /*stage*/) {
     {
         switch (type)
         {
-        case StatusType::ATK_BOOST: return u8"CÔNG+";
-        case StatusType::DEF_BOOST: return u8"THỦ+";
-        case StatusType::REGEN:     return u8"HỒI";
-        case StatusType::STUN:      return u8"CHOÁNG";
-        case StatusType::BURN:      return u8"BỎNG";
-        case StatusType::SLOW:      return u8"CHẬM";
-        case StatusType::WEAKNESS:  return u8"YẾU";
+        case StatusType::ATK_BOOST: return "CÔNG+";
+        case StatusType::DEF_BOOST: return "THỦ+";
+        case StatusType::REGEN:     return "HỒI";
+        case StatusType::STUN:      return "CHOÁNG";
+        case StatusType::BURN:      return "BỎNG";
+        case StatusType::SLOW:      return "CHẬM";
+        case StatusType::WEAKNESS:  return "YẾU";
         }
         return "?";
     }
@@ -254,11 +254,11 @@ void GameEngine::initialize()
     try {
         m_gameData.loadAll(resolvePath("data"));
         m_dataLoaded = true;
-        m_battleLog = u8"Dữ liệu CSV đã tải thành công!";
+        m_battleLog = "Dữ liệu CSV đã tải thành công!";
     }
     catch (const std::exception& e) {
         m_dataLoaded = false;
-        m_battleLog = std::string(u8"Lỗi tải dữ liệu: ") + e.what();
+        m_battleLog = std::string("Lỗi tải dữ liệu: ") + e.what();
         std::cerr << m_battleLog << std::endl;
     }
     {
@@ -317,6 +317,7 @@ void GameEngine::shutdown()
     m_views.clear();
     m_ui.unloadAll();
     m_turnOrderBar.reset();
+    m_actedThisRound.clear();
     m_startMenu.unloadAll();
     m_heroCreate.unloadAll();
     m_waveSelect.unloadAll();
@@ -371,7 +372,7 @@ bool GameEngine::cancelLastAction()
         for (auto& c : m_combatants) syncHealth(c.get());
         m_isSelectingTarget = false;
         m_battlePhase = BattlePhase::PLAYER_TURN;
-        m_battleLog = u8"Đã hoàn tác hành động vừa rồi! Hãy chọn lệnh khác.";
+        m_battleLog = "Đã hoàn tác hành động vừa rồi! Hãy chọn lệnh khác.";
     }
     return result;
 }
@@ -532,14 +533,26 @@ void GameEngine::layoutViews()
 }
 std::vector<Character*> GameEngine::upcomingOrder() const
 {
-    std::vector<Character*> order;
+    std::vector<Character*> alive;
     for (Character* c : m_turnManager.getCharacters())
-        if (c && c->isAlive()) order.push_back(c);
+        if (c && c->isAlive()) alive.push_back(c);
 
-    // Cung quy tac voi priority_queue: toc do cao di truoc
-    std::stable_sort(order.begin(), order.end(), [](const Character* a, const Character* b) {
+    // Cùng quy tắc với priority_queue: tốc độ cao đi trước
+    std::stable_sort(alive.begin(), alive.end(), [](const Character* a, const Character* b) {
         return a->getStats().m_spd > b->getStats().m_spd;
     });
+
+    const auto acted = [this](const Character* c) {
+        return std::find(m_actedThisRound.begin(), m_actedThisRound.end(), c) !=
+               m_actedThisRound.end();
+    };
+
+    std::vector<Character*> order;
+    if (m_currentCharacter && m_currentCharacter->isAlive()) order.push_back(m_currentCharacter);
+    for (Character* c : alive)                       // chưa đi trong vòng này
+        if (c != m_currentCharacter && !acted(c)) order.push_back(c);
+    for (Character* c : alive)                       // đã đi => xếp sang vòng sau
+        if (c != m_currentCharacter && acted(c)) order.push_back(c);
     return order;
 }
 void GameEngine::markWaveCleared(int stage)
@@ -573,9 +586,9 @@ void GameEngine::openWaveSelect()
         // Wave thuong chi xuat hien ngau nhien STAGE1_ENEMY_COUNT quai trong so quai co the gap (xem spawnEnemies)
         const int appear = (!w.m_isBoss) ? std::min(static_cast<int>(monsters.size()), STAGE1_ENEMY_COUNT)
                                         : static_cast<int>(monsters.size());
-        w.m_description = w.m_isBoss ? std::string(u8"Trận chiến với trùm")
-                                     : std::string(u8"Xuất hiện ngẫu nhiên ") +
-                                           std::to_string(appear) + u8" quái";
+        w.m_description = w.m_isBoss ? std::string("Trận chiến với trùm")
+                                     : std::string("Xuất hiện ngẫu nhiên ") +
+                                           std::to_string(appear) + " quái";
         w.m_locked = !m_waveManager.isWaveUnlocked(stage);
         w.m_cleared = static_cast<size_t>(stage) < m_wavesCleared.size() && m_wavesCleared[static_cast<size_t>(stage)];
         waves.push_back(std::move(w));
@@ -583,7 +596,7 @@ void GameEngine::openWaveSelect()
 
     m_waveSelect.setWaves(waves);
     m_waveSelect.setHeroSummary(Strings::localizedName(m_heroConfig.m_name) + " - " +
-        Strings::localizedName(m_heroConfig.m_race) + u8" · " +
+        Strings::localizedName(m_heroConfig.m_race) + " · " +
         Strings::localizedName(m_heroConfig.m_class));
     m_waveSelect.reset(0);
     m_stateMachine.changeState(GameStateMachine::State::WAVE_SELECT);
@@ -644,10 +657,10 @@ void GameEngine::openPrepMenu(int wave)
                 info.m_items.push_back({ item->getNameVi(), static_cast<int>(m_party.countItem(item->getId())), item->getId() });
             }
             for (const ItemPtr& gear : m_equippedGear)
-                if (gear) info.m_items.push_back({ gear->getNameVi() + u8" (đang đeo)", 1, gear->getId() });
+                if (gear) info.m_items.push_back({ gear->getNameVi() + " (đang đeo)", 1, gear->getId() });
         } else {
-            info.m_items.push_back({ u8"Bình hồi máu nhỏ", STARTER_POTIONS, "ITM_HP_MINOR" });
-            info.m_items.push_back({ u8"Năng lượng", STARTER_ENERGY, "ITM_ENERGY" });
+            info.m_items.push_back({ "Bình hồi máu nhỏ", STARTER_POTIONS, "ITM_HP_MINOR" });
+            info.m_items.push_back({ "Năng lượng", STARTER_ENERGY, "ITM_ENERGY" });
         }
     }
 
@@ -666,8 +679,8 @@ void GameEngine::openPrepMenu(int wave)
         }
     }
     info.m_gate.m_description = info.m_gate.m_hasBoss
-        ? std::string(u8"Trận chiến với trùm\nHạ gác cổng để tiến lên")
-        : std::string(u8"Quét sạch quái canh cổng\nXuất hiện ngẫu nhiên");
+        ? std::string("Trận chiến với trùm\nHạ gác cổng để tiến lên")
+        : std::string("Quét sạch quái canh cổng\nXuất hiện ngẫu nhiên");
 
     m_prepMenu.setInfo(info);
     m_prepMenu.reset(0);
@@ -767,7 +780,7 @@ void GameEngine::openPartyMemberSelection(int slot)
     m_heroCreate.reset();
     m_heroCreate.setSlotLabel(m_editingPartySlot == 0
         ? std::string(Strings::heroLead)
-        : std::string(u8"CHỌN ĐỒNG ĐỘI ") + std::to_string(m_editingPartySlot + 1) + "/3");
+        : std::string("CHỌN ĐỒNG ĐỘI ") + std::to_string(m_editingPartySlot + 1) + "/3");
     m_stateMachine.changeState(GameStateMachine::State::CREATE_HERO);
 }
 
@@ -916,7 +929,7 @@ void GameEngine::loadStage(int stage)
 
     m_currentCharacter = nullptr;   // update() se goi advanceTurn() de lay luot dau tien
     m_battlePhase = BattlePhase::AI_THINKING;
-    m_battleLog = std::string(u8"MÀN ") + std::to_string(stage) + u8" bắt đầu!";
+    m_battleLog = std::string("MÀN ") + std::to_string(stage) + " bắt đầu!";
 }
 
 void GameEngine::beginRun(int startStage)
@@ -952,7 +965,7 @@ void GameEngine::startNewGame(int startStage, bool preservePreparedRun)
     loadStage(startStage);
     advanceTurn();
 
-    m_battleLog = std::string(u8"Trận đấu bắt đầu! Đến lượt: ") +
+    m_battleLog = std::string("Trận đấu bắt đầu! Đến lượt: ") +
         Strings::localizedName(m_currentCharacter ? m_currentCharacter->getName() : std::string{});
 }
 
@@ -984,8 +997,8 @@ void GameEngine::recoverPartyAfterWave()
         if (mpAdd > 0) h->consumeMp(-mpAdd);     // tieu hao am = hoi MP (da gioi han khong vuot toi da)
         mpTotal += mpAdd;
     }
-    m_battleLog += std::string(u8"  [Hồi sau màn: +") + std::to_string(hpTotal) +
-        u8" HP, +" + std::to_string(mpTotal) + " MP (20%)]";
+    m_battleLog += std::string("  [Hồi sau màn: +") + std::to_string(hpTotal) +
+        " HP, +" + std::to_string(mpTotal) + " MP (20%)]";
 }
 
 void GameEngine::enterBossBreak(int nextWave)
@@ -997,7 +1010,7 @@ void GameEngine::enterBossBreak(int nextWave)
     m_isSelectingItem = false;
     m_commandStack.clear();
     openPrepMenu(nextWave);
-    m_battleLog = u8"Chuẩn bị cho màn trùm! Mở cửa hàng để mua đồ và trang bị.";
+    m_battleLog = "Chuẩn bị cho màn trùm! Mở cửa hàng để mua đồ và trang bị.";
 }
 
 void GameEngine::beginBattleAfterBreak()
@@ -1007,7 +1020,7 @@ void GameEngine::beginBattleAfterBreak()
     m_stateMachine.changeState(GameStateMachine::State::IN_BATTLE);
     loadStage(m_pendingWave);
     advanceTurn();
-    m_battleLog = std::string(u8"Trận đấu bắt đầu! Đến lượt: ") +
+    m_battleLog = std::string("Trận đấu bắt đầu! Đến lượt: ") +
         Strings::localizedName(m_currentCharacter ? m_currentCharacter->getName() : std::string{});
 }
 
@@ -1054,7 +1067,7 @@ void GameEngine::settleGold()
     }
     if (total > 0) {
         m_gold += total;
-        m_battleLog += std::string(u8"  [+") + std::to_string(total) + u8" vàng]";
+        m_battleLog += std::string("  [+") + std::to_string(total) + " vàng]";
     }
 }
 
@@ -1158,21 +1171,21 @@ void GameEngine::buyShopItem(int stockIndex)
     const ItemData& data = m_itemDatabase.getItem(entry.m_id);
 
     if (data.m_maxCarry > 0 && ownedCount(entry.m_id) >= data.m_maxCarry) {
-        m_shop.setMessage(u8"Bạn đã mang đủ số lượng " + data.m_nameVi + "!", false);
+        m_shop.setMessage("Bạn đã mang đủ số lượng " + data.m_nameVi + "!", false);
         return;
     }
     if (m_gold < entry.m_price) {
-        m_shop.setMessage(u8"Không đủ vàng để mua " + data.m_nameVi + "!", false);
+        m_shop.setMessage("Không đủ vàng để mua " + data.m_nameVi + "!", false);
         return;
     }
     if (!m_party.addItem(ItemFactory::createItem(data))) {
-        m_shop.setMessage(u8"Túi đồ đã đầy, không thể mua thêm " + data.m_nameVi + "!", false);
+        m_shop.setMessage("Túi đồ đã đầy, không thể mua thêm " + data.m_nameVi + "!", false);
         return;
     }
     m_gold -= entry.m_price;
     m_audio.playSfx(SfxId::CLICK);
-    m_shop.setMessage(u8"Đã mua " + data.m_nameVi + u8" (-" +
-                      std::to_string(entry.m_price) + u8" vàng)", true);
+    m_shop.setMessage("Đã mua " + data.m_nameVi + " (-" +
+                      std::to_string(entry.m_price) + " vàng)", true);
     refreshShop();
 }
 
@@ -1183,7 +1196,7 @@ void GameEngine::equipFromBag(int bagIndex, int memberIndex)
     for (const ItemPtr& item : m_party.getInventory().getItems())
         if (item && std::find(ids.begin(), ids.end(), item->getId()) == ids.end()) ids.push_back(item->getId());
     if (bagIndex < 0 || static_cast<std::size_t>(bagIndex) >= ids.size()) {
-        m_shop.setMessage(u8"Chưa chọn vật phẩm để trang bị.", false);
+        m_shop.setMessage("Chưa chọn vật phẩm để trang bị.", false);
         return;
     }
     if (memberIndex < 0 || static_cast<std::size_t>(memberIndex) >= m_party.size() ||
@@ -1194,20 +1207,20 @@ void GameEngine::equipFromBag(int bagIndex, int memberIndex)
     for (const ItemPtr& item : m_party.getInventory().getItems())
         if (item && item->getId() == id) { gear = item; break; }
     if (!gear || gear->getCategory() != ItemCategory::HELD) {
-        m_shop.setMessage(u8"Chỉ trang bị mới đeo được cho tướng.", false);
+        m_shop.setMessage("Chỉ trang bị mới đeo được cho tướng.", false);
         return;
     }
     const ItemPtr previous = m_equippedGear[memberIndex];
     if (!m_party.equipGear(static_cast<std::size_t>(memberIndex), gear)) {
-        m_shop.setMessage(u8"Không thể trang bị vật phẩm này.", false);
+        m_shop.setMessage("Không thể trang bị vật phẩm này.", false);
         return;
     }
     m_equippedGear[memberIndex] = gear;
     m_audio.playSfx(SfxId::CLICK);
     m_shop.setMessage(Strings::localizedName(
                           m_party.getMember(static_cast<std::size_t>(memberIndex))->getName()) +
-                      u8" đã đeo " + gear->getNameVi() +
-                      (previous ? u8" (cất " + previous->getNameVi() + u8" vào túi)" : ""), true);
+                      " đã đeo " + gear->getNameVi() +
+                      (previous ? " (cất " + previous->getNameVi() + " vào túi)" : ""), true);
     refreshShop();
 }
 
@@ -1217,12 +1230,12 @@ void GameEngine::unequipMember(int memberIndex)
         static_cast<std::size_t>(memberIndex) >= Party::MAX_SIZE) return;
     const ItemPtr gear = m_equippedGear[memberIndex];
     if (!gear || !m_party.unequipGear(static_cast<std::size_t>(memberIndex))) {
-        m_shop.setMessage(u8"Tướng này chưa đeo trang bị.", false);
+        m_shop.setMessage("Tướng này chưa đeo trang bị.", false);
         return;
     }
     m_equippedGear[memberIndex].reset();
     m_audio.playSfx(SfxId::CLICK);
-    m_shop.setMessage(u8"Đã tháo " + gear->getNameVi() + u8" vào túi.", true);
+    m_shop.setMessage("Đã tháo " + gear->getNameVi() + " vào túi.", true);
     refreshShop();
 }
 
@@ -1676,7 +1689,8 @@ void GameEngine::handleBattleClick(Vector2 position)
         return;
     }
 
-    if (CheckCollisionPointRec(position, BattleUI::buttonBounds(BattleUIButton::PAUSE))) {
+    const bool listOpen = m_isSelectingSkill || m_isSelectingItem || m_isSelectingTarget;
+    if (!listOpen && CheckCollisionPointRec(position, BattleUI::buttonBounds(BattleUIButton::PAUSE))) {
         m_paused = true;
         m_dialogSelected = 0;
         return;
@@ -1779,6 +1793,38 @@ void GameEngine::handleBattleClick(Vector2 position)
         return;
     }
 
+    if (m_isSelectingSkill) {
+            for (std::size_t i = 0; i < m_heroSkills.size(); ++i) {
+                if (!CheckCollisionPointRec(position, BattleUI::skillRowBounds(
+                        static_cast<int>(i), static_cast<int>(m_heroSkills.size()), m_selectedSkillIndex)))
+                    continue;
+                m_selectedSkillIndex = static_cast<int>(i);
+                const Skill& skill = m_heroSkills[i];
+                const bool offensive = skill.m_type == SkillType::DAMAGE ||
+                    (skill.m_type == SkillType::DEBUFF && skill.m_power > 0);
+                if (offensive) {
+                    m_isSelectingSkill = false;
+                    m_targetAction = TargetAction::SKILL;
+                    m_isSelectingTarget = true;
+                    m_battleLogOpen = false;
+                    const bool hasTarget = std::any_of(m_combatants.begin() + static_cast<std::ptrdiff_t>(
+                            std::min(m_party.size(), m_combatants.size())), m_combatants.end(),
+                        [this](const std::shared_ptr<Character>& character) {
+                            return character && character->isAlive() && !isHero(character.get());
+                        });
+                    if (!hasTarget) {
+                        m_isSelectingTarget = false;
+                        rejectTargetClick("skill has no living non-hero targets", position);
+                    }
+                } else if (castSkill(i)) {
+                    m_isSelectingSkill = false;
+                    m_battlePhase = BattlePhase::PLAYER_CONFIRM;
+                }
+                return;
+            }
+            rejectTargetClick("skill menu is active; click a visible skill row", position);
+            return;
+        }
     if (CheckCollisionPointRec(position, BattleUI::buttonBounds(BattleUIButton::ATTACK))) {
         m_battleLogOpen = false;
         m_isSelectingSkill = false;
@@ -1814,38 +1860,7 @@ void GameEngine::handleBattleClick(Vector2 position)
         return;
     }
 
-    if (m_isSelectingSkill) {
-        for (std::size_t i = 0; i < m_heroSkills.size(); ++i) {
-            if (!CheckCollisionPointRec(position, BattleUI::skillRowBounds(
-                    static_cast<int>(i), static_cast<int>(m_heroSkills.size()), m_selectedSkillIndex)))
-                continue;
-            m_selectedSkillIndex = static_cast<int>(i);
-            const Skill& skill = m_heroSkills[i];
-            const bool offensive = skill.m_type == SkillType::DAMAGE ||
-                (skill.m_type == SkillType::DEBUFF && skill.m_power > 0);
-            if (offensive) {
-                m_isSelectingSkill = false;
-                m_targetAction = TargetAction::SKILL;
-                m_isSelectingTarget = true;
-                m_battleLogOpen = false;
-                const bool hasTarget = std::any_of(m_combatants.begin() + static_cast<std::ptrdiff_t>(
-                        std::min(m_party.size(), m_combatants.size())), m_combatants.end(),
-                    [this](const std::shared_ptr<Character>& character) {
-                        return character && character->isAlive() && !isHero(character.get());
-                    });
-                if (!hasTarget) {
-                    m_isSelectingTarget = false;
-                    rejectTargetClick("skill has no living non-hero targets", position);
-                }
-            } else if (castSkill(i)) {
-                m_isSelectingSkill = false;
-                m_battlePhase = BattlePhase::PLAYER_CONFIRM;
-            }
-            return;
-        }
-        rejectTargetClick("skill menu is active; click a visible skill row", position);
-        return;
-    }
+    
 
     rejectTargetClick("target mode is inactive; choose attack or an offensive skill first", position);
 }
@@ -1890,7 +1905,21 @@ void GameEngine::processPlayerInput()
         if (IsKeyPressed(KEY_F1)) selectAlly(0);
         if (IsKeyPressed(KEY_F2)) selectAlly(1);
         if (IsKeyPressed(KEY_F3)) selectAlly(2);
-        if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE)) doUseItem();
+        if (IsKeyPressed(KEY_DOWN))
+            m_selectedItemIndex = std::max(0, std::min(static_cast<int>(items.size()) - 1, m_selectedItemIndex + 1));
+        if (IsKeyPressed(KEY_UP))
+            m_selectedItemIndex = std::max(0, m_selectedItemIndex - 1);
+        const Vector2 hoverMouse = UiCanvas::mousePosition();
+        for (std::size_t i = 0; i < items.size(); ++i)
+        {
+            if (CheckCollisionPointRec(hoverMouse, BattleUI::itemRowBounds(
+                    static_cast<int>(i), static_cast<int>(items.size()), m_selectedItemIndex)))
+            {
+                m_selectedItemIndex = static_cast<int>(i);
+                break;
+            }
+        }
+            if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE)) doUseItem();
         return;
     }
 
@@ -1902,7 +1931,20 @@ void GameEngine::processPlayerInput()
             if (IsKeyPressed(keys[i]))
                 m_selectedSkillIndex = static_cast<int>(i);
         }
-
+        if (IsKeyPressed(KEY_DOWN))
+            m_selectedSkillIndex = std::max(0, std::min(static_cast<int>(m_heroSkills.size()) - 1, m_selectedSkillIndex + 1));
+        if (IsKeyPressed(KEY_UP))
+            m_selectedSkillIndex = std::max(0, m_selectedSkillIndex - 1);
+        const Vector2 hoverMouse = UiCanvas::mousePosition();
+        for (std::size_t i = 0; i < m_heroSkills.size(); ++i)
+        {
+            if (CheckCollisionPointRec(hoverMouse, BattleUI::skillRowBounds(
+                    static_cast<int>(i), static_cast<int>(m_heroSkills.size()), m_selectedSkillIndex)))
+            {
+                m_selectedSkillIndex = static_cast<int>(i);
+                break;
+            }
+        }
         if (IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER))
         {
             if (castSkill(static_cast<size_t>(m_selectedSkillIndex)))
@@ -1937,9 +1979,9 @@ void GameEngine::doBasicAttack()
     playAnimation(attacker, AnimState::ATTACK);
     syncHealth(target);
 
-    m_battleLog = Strings::localizedName(attacker->getName()) + u8" tấn công " +
-        Strings::localizedName(target->getName()) + u8" gây " + std::to_string(dealt) +
-        u8" sát thương!";
+    m_battleLog = Strings::localizedName(attacker->getName()) + " tấn công " +
+        Strings::localizedName(target->getName()) + " gây " + std::to_string(dealt) +
+        " sát thương!";
     m_battlePhase = BattlePhase::PLAYER_CONFIRM;
 }
 
@@ -1951,7 +1993,7 @@ void GameEngine::doUseItem()
     Character* target = m_selectedAlly ? m_selectedAlly : hero();
     if (!item || !target) return;
     if (!item->canUse(*target)) {
-        m_battleLog = u8"Không thể dùng " + item->getNameVi() + u8" cho " +
+        m_battleLog = "Không thể dùng " + item->getNameVi() + " cho " +
             Strings::localizedName(target->getName());
         return;
     }
@@ -1967,9 +2009,9 @@ void GameEngine::doUseItem()
         syncHealth(target);
     };
     if (!queuePlayerCommand(std::make_unique<UseItemCommand>(executeAction, undoAction))) return;
-    m_battleLog = Strings::localizedName(hero()->getName()) + u8" dùng " +
-        item->getNameVi() + u8" cho " + Strings::localizedName(target->getName()) +
-        u8" (+" + std::to_string(*amount) + u8")";
+    m_battleLog = Strings::localizedName(hero()->getName()) + " dùng " +
+        item->getNameVi() + " cho " + Strings::localizedName(target->getName()) +
+        " (+" + std::to_string(*amount) + ")";
     m_isSelectingItem = false;
     m_battlePhase = BattlePhase::PLAYER_CONFIRM;
 }
@@ -1982,7 +2024,7 @@ bool GameEngine::castSkill(size_t skillIndex)
     const Skill skill = m_heroSkills[skillIndex];   // ban sao: thao tac an toan trong lambda
 
     if (h->getCurrentMp() < skill.m_mpCost) {
-        m_battleLog = u8"Không đủ MP để dùng " + Strings::localizedName(skill.m_name) + "!";
+        m_battleLog = "Không đủ MP để dùng " + Strings::localizedName(skill.m_name) + "!";
         return false;
     }
 
@@ -2027,16 +2069,16 @@ bool GameEngine::castSkill(size_t skillIndex)
         applySkillEffect(skill, target);
 
         if (offensive)
-            m_battleLog = Strings::localizedName(h->getName()) + u8" dùng " +
-                Strings::localizedName(skill.m_name) + u8" lên " +
-                Strings::localizedName(target->getName()) + u8" gây " +
-                std::to_string(hpBefore - target->getCurrentHp()) + u8" sát thương!";
+            m_battleLog = Strings::localizedName(h->getName()) + " dùng " +
+                Strings::localizedName(skill.m_name) + " lên " +
+                Strings::localizedName(target->getName()) + " gây " +
+                std::to_string(hpBefore - target->getCurrentHp()) + " sát thương!";
         else if (skill.m_type == SkillType::HEAL)
-            m_battleLog = Strings::localizedName(h->getName()) + u8" dùng " +
-                Strings::localizedName(skill.m_name) + u8" hồi " +
+            m_battleLog = Strings::localizedName(h->getName()) + " dùng " +
+                Strings::localizedName(skill.m_name) + " hồi " +
                 std::to_string(target->getCurrentHp() - hpBefore) + " HP!";
         else
-            m_battleLog = Strings::localizedName(h->getName()) + u8" dùng " +
+            m_battleLog = Strings::localizedName(h->getName()) + " dùng " +
                 Strings::localizedName(skill.m_name) + "!";
     };
 
@@ -2061,7 +2103,7 @@ void GameEngine::confirmTurn()
         actor->onTurnEnd();
         syncHealth(actor);
         if (actor->isAlive() && actor->modifiers().consumeExtraTurn()) {
-            m_battleLog = Strings::localizedName(actor->getName()) + u8" được thêm một lượt!";
+            m_battleLog = Strings::localizedName(actor->getName()) + " được thêm một lượt!";
             m_battlePhase = BattlePhase::PLAYER_TURN;
             return;
         }
@@ -2089,17 +2131,17 @@ bool GameEngine::beginTurn(Character* c)
     syncHealth(c);
 
     if (!c->isAlive()) {
-        m_battleLog = Strings::localizedName(c->getName()) + u8" gục ngã do hiệu ứng bỏng!";
+        m_battleLog = Strings::localizedName(c->getName()) + " gục ngã do hiệu ứng bỏng!";
         return false;
     }
 
     if (wasStunned) {
-        m_battleLog = Strings::localizedName(c->getName()) + u8" bị choáng, mất lượt!";
+        m_battleLog = Strings::localizedName(c->getName()) + " bị choáng, mất lượt!";
         return false;
     }
 
     if (c->getCurrentHp() < hpBefore)
-        m_battleLog = Strings::localizedName(c->getName()) + u8" chịu sát thương từ hiệu ứng!";
+        m_battleLog = Strings::localizedName(c->getName()) + " chịu sát thương từ hiệu ứng!";
     return true;
 }
 
@@ -2120,7 +2162,11 @@ void GameEngine::advanceTurn()
         m_currentCharacter = m_turnManager.getNextTurn();
         if (!m_currentCharacter)
             continue;
-
+            // Ghi nhớ ai đã đi; gặp lại người đã đi nghĩa là bắt đầu vòng mới
+        if (std::find(m_actedThisRound.begin(), m_actedThisRound.end(), m_currentCharacter) !=
+            m_actedThisRound.end())
+            m_actedThisRound.clear();
+        m_actedThisRound.push_back(m_currentCharacter);
         if (!beginTurn(m_currentCharacter)) {
             if (m_currentCharacter->isAlive()) {
                 m_currentCharacter->onTurnEnd();
@@ -2167,9 +2213,9 @@ void GameEngine::executeAiTurn(Character* aiChar)
 
     aiChar->onTurnEnd();
     syncHealth(aiChar);
-    m_battleLog = Strings::localizedName(aiChar->getName()) + u8" tấn công " +
-        Strings::localizedName(h->getName()) + u8" gây " + std::to_string(dealt) +
-        u8" sát thương!";
+    m_battleLog = Strings::localizedName(aiChar->getName()) + " tấn công " +
+        Strings::localizedName(h->getName()) + " gây " + std::to_string(dealt) +
+        " sát thương!";
 }
 
 void GameEngine::update(float deltaTime)
@@ -2266,7 +2312,7 @@ void GameEngine::checkBattleCondition()
     const int clearBonus = m_shopConfig.getEconomy().m_waveClearBonus;
     if (clearBonus > 0) {
         m_gold += clearBonus;
-        m_battleLog += std::string(u8"  [Qua màn: +") + std::to_string(clearBonus) + u8" vàng]";
+        m_battleLog += std::string("  [Qua màn: +") + std::to_string(clearBonus) + " vàng]";
     }
     if (m_stage < finalStage())
     {
@@ -2383,8 +2429,8 @@ void GameEngine::onHealthChanged(Character* character, int newHealth)
 void GameEngine::onCharacterDied(Character* character)
 {
     if (character) {
-        m_battleLog += std::string(u8"  >> ") + Strings::localizedName(character->getName()) +
-            u8" gục ngã!";
+        m_battleLog += std::string("  >> ") + Strings::localizedName(character->getName()) +
+            " gục ngã!";
         playDeathSfx(character);
     }
 }
@@ -2431,7 +2477,7 @@ void GameEngine::render()
     if (!canvasFrame) {
         ClearBackground(Color{ 244, 244, 244, 255 });
         DrawRectangleRounded(Rectangle{ 28, 28, 1224, 110 }, 0.05f, 8, Color{ 15, 15, 30, 245 });
-        UiText::draw(u8"Không thể mở khung giao diện", 56, 58, 24, WHITE);
+        UiText::draw("Không thể mở khung giao diện", 56, 58, 24, WHITE);
         std::cerr << "[BattleUI] render fallback: UiCanvas frame could not start\n";
         return;
     }
@@ -2496,14 +2542,14 @@ void GameEngine::render()
 
     const GameStateMachine::State state = m_stateMachine.getState();
     if (m_paused) {
-        drawDialog(u8"Tạm dừng", u8"Trận đấu đang được tạm dừng.",
-                   { u8"Tiếp tục", u8"Thử lại", u8"Về menu" });
+        drawDialog("Tạm dừng", "Trận đấu đang được tạm dừng.",
+                   { "Tiếp tục", "Thử lại", "Về menu" });
     } else if (state == GameStateMachine::State::VICTORY) {
-        drawDialog(Strings::victory, u8"Bạn đã hoàn thành toàn bộ hành trình.",
-                   { u8"Tiếp tục", u8"Thử lại", u8"Về menu" });
+        drawDialog(Strings::victory, "Bạn đã hoàn thành toàn bộ hành trình.",
+                   { "Tiếp tục", "Thử lại", "Về menu" });
     } else if (state == GameStateMachine::State::GAME_OVER) {
-        drawDialog(Strings::gameOver, u8"Đội hình đã gục ngã. Hãy thử lại!",
-                   { u8"Thử lại", u8"Về menu" });
+        drawDialog(Strings::gameOver, "Đội hình đã gục ngã. Hãy thử lại!",
+                   { "Thử lại", "Về menu" });
     }
 
     UiWidgets::Toast();
@@ -2581,9 +2627,10 @@ void GameEngine::renderBattleUI()
         if (!c->isAlive()) continue;
 
         const Vector2 head = m_views[i]->getHeadPos();
-        m_ui.drawHpMpBar(*c, head);
+        m_ui.drawHpMpBar(*c, head,
+            i >= m_party.size() ? static_cast<int>(i - m_party.size()) : -1);
         UiWidgets::Tooltip(m_views[i]->getDrawBounds(),
-            Strings::localizedName(c->getName()) + TextFormat(u8" · HP %d/%d",
+            Strings::localizedName(c->getName()) + TextFormat(" · HP %d/%d",
                 std::max(0, c->getCurrentHp()), c->getStats().m_hp));
 
         if (c == m_selectedTarget && m_isSelectingTarget)
@@ -2603,7 +2650,8 @@ void GameEngine::renderBattleUI()
             }
         }
     }
-
+    drawFieldStats();
+    drawActiveMarker();
     if (count == 0)
         std::cerr << "[BattleUI] placeholder HUD: no matched combatants/views\n";
 
@@ -2611,7 +2659,7 @@ void GameEngine::renderBattleUI()
     for (const GoldPopup& p : m_goldPopups) {
         const float t = std::max(0.0f, std::min(1.0f, p.m_life / GOLD_POPUP_LIFE));
         const unsigned char a = static_cast<unsigned char>(255.0f * t);
-        const char* text = TextFormat(u8"+%d vàng", p.m_amount);
+        const char* text = TextFormat("+%d vàng", p.m_amount);
         const int w = UiText::measure(text, 22);
         UiText::draw(text, static_cast<int>(p.m_pos.x - w / 2.0f) + 2, static_cast<int>(p.m_pos.y) + 2, 22, Color{ 0, 0, 0, a });
         UiText::draw(text, static_cast<int>(p.m_pos.x - w / 2.0f), static_cast<int>(p.m_pos.y), 22, Color{ 255, 215, 70, a });
@@ -2634,28 +2682,60 @@ void GameEngine::renderBattleUI()
 
     m_ui.drawLogButton(m_battleLogOpen);
     if (m_battleLogOpen)
-        m_ui.drawBattleLog(m_battleLog.empty() ? u8"Chưa có sự kiện nào." : m_battleLog);
+        m_ui.drawBattleLog(m_battleLog.empty() ? "Chưa có sự kiện nào." : m_battleLog);
 
     if (m_isSelectingSkill)
         m_ui.drawSkillMenu(m_heroSkills, m_selectedSkillIndex, hero() ? hero()->getCurrentMp() : 0);
     if (m_isSelectingItem) {
         const auto items = availableItems();
-        m_ui.drawListPanel(Strings::itemPrompt, static_cast<int>(items.size()), m_selectedItemIndex);
-        const int visible = std::min(static_cast<int>(items.size()), 5);
-        const int first = std::max(0, std::min(m_selectedItemIndex - visible + 1,
-                                                static_cast<int>(items.size()) - visible));
-        for (int index = first; index < first + visible; ++index) {
-            const ItemPtr& item = items[static_cast<std::size_t>(index)];
-            const Rectangle row = BattleUI::itemRowBounds(index, static_cast<int>(items.size()),
-                                                           m_selectedItemIndex);
-            const std::string itemName = Strings::localizedName(item->getName());
-            const char* itemLabel = TextFormat("%d. %s  ×%d", index + 1, itemName.c_str(),
-                static_cast<int>(m_party.countItem(item->getId())));
-            UiWidgets::ListRow(row, itemLabel, {}, index == m_selectedItemIndex, true);
-            m_itemIcons.draw(item->getId(),
-                Rectangle{ row.x + 2.0f, row.y + (row.height - 12.0f) * 0.5f, 12.0f, 12.0f },
-                WHITE);
-            UiWidgets::Tooltip(row, item->getDescription());
+        std::vector<std::string> labels;
+        labels.reserve(items.size());
+        for (std::size_t index = 0; index < items.size(); ++index) {
+            const ItemPtr& item = items[index];
+            labels.push_back(std::to_string(index + 1) + ". " +
+                Strings::localizedName(item->getName()) + "  ×" +
+                std::to_string(m_party.countItem(item->getId())));
         }
+        m_ui.drawItemMenu(labels, m_selectedItemIndex);
+        for (std::size_t index = 0; index < items.size(); ++index) {
+            const Rectangle row = BattleUI::itemRowBounds(static_cast<int>(index),
+                static_cast<int>(items.size()), m_selectedItemIndex);
+            if (row.width > 0.0f)
+                UiWidgets::Tooltip(row, items[index]->getDescription());
+        }
+    }
+}
+void GameEngine::drawActiveMarker() const
+{
+    if (!m_currentCharacter || !m_currentCharacter->isAlive()) return;
+    for (std::size_t i = 0; i < m_views.size() && i < m_combatants.size(); ++i)
+    {
+        if (!m_views[i] || m_combatants[i].get() != m_currentCharacter) continue;
+        const Vector2 head = m_views[i]->getHeadPos();
+        const float bob = std::sin(static_cast<float>(GetTime()) * 6.0f) * 4.0f;
+        const float r = 10.0f;
+        const Vector2 center{ head.x, head.y - 14.0f + bob };
+        DrawPoly(center, 3, r, 90.0f, Color{ 0, 0, 0, 160 });
+        DrawPoly(Vector2{ center.x, center.y - 1.0f }, 3, r - 2.0f, 90.0f, UiTheme::cyan);
+        return;
+    }
+}
+
+void GameEngine::drawFieldStats() const
+{
+    for (std::size_t i = 0; i < m_combatants.size() && i < m_views.size(); ++i)
+    {
+        if (i < m_party.size()) continue;          // hero: đã có bảng thông tin ở góc dưới
+        const Character* c = m_combatants[i].get();
+        if (!c || !m_views[i] || !c->isAlive()) continue;
+        const Vector2 f = m_views[i]->getSlot().m_feetPos;
+        const char* text = TextFormat("HP %d/%d   MP %d/%d",
+            std::max(0, c->getCurrentHp()), c->getStats().m_hp,
+            std::max(0, c->getCurrentMp()), c->getStats().m_mp);
+        const int w = UiText::measure(text, 13);
+        const int x = static_cast<int>(f.x - w * 0.5f);
+        const int y = static_cast<int>(f.y + UiTheme::fieldBarOffsetY + 9.0f);
+        UiText::draw(text, x + 1, y + 1, 13, Color{ 0, 0, 0, 200 });
+        UiText::draw(text, x, y, 13, UiTheme::silver);
     }
 }

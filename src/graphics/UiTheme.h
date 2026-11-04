@@ -56,13 +56,14 @@ inline constexpr float fadeDuration = 0.8f;
 inline constexpr float hoverDuration = 0.1f;
 inline constexpr float floatingTextDuration = 1.0f;
 
-inline constexpr Rectangle turnStripHud{ 0.0f, 0.0f, 1920.0f, 60.0f };
+inline constexpr Rectangle turnStripHud{ 1436.0f, 12.0f, 460.0f, 68.0f };
 inline constexpr Rectangle roundChipHud{ 1420.0f, 20.0f, 476.0f, 76.0f };
-inline constexpr Rectangle partyCardsHud{ 24.0f, 900.0f, 660.0f, 156.0f };
+inline constexpr Rectangle partyCardsHud{ 16.0f, 628.0f, 372.0f, 76.0f };
 inline constexpr Rectangle battleHud{ 1420.0f, 810.0f, 476.0f, 246.0f };
 inline constexpr Rectangle battleLogButtonHud{ 710.0f, 900.0f, 108.0f, 48.0f };
 inline constexpr Rectangle battleLogHud{ 840.0f, 840.0f, 460.0f, 216.0f };
 inline constexpr Rectangle battleListHud{ 1420.0f, 300.0f, 476.0f, 510.0f };
 inline constexpr Rectangle battlefieldSafeRegion{ 24.0f, 112.0f, 1872.0f, 660.0f };
 inline constexpr Rectangle turnOrderHud = turnStripHud;
+inline constexpr float fieldBarOffsetY = -20.0f;   
 }

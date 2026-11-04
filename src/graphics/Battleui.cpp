@@ -29,7 +29,7 @@ constexpr Rectangle COMMAND_PANEL = UiTheme::battleHud;
 constexpr Rectangle LOG_BUTTON = UiTheme::battleLogButtonHud;
 constexpr Rectangle LOG_PANEL = UiTheme::battleLogHud;
 constexpr Rectangle LIST_PANEL = UiTheme::battleListHud;
-constexpr float MENU_X = 1000.0f, MENU_Y = 48.0f, MENU_W = 264.0f;
+constexpr float MENU_X = 16.0f, MENU_Y = 16.0f, MENU_W = 264.0f;
 constexpr float ROW_H = 34.0f, ROW_GAP = 4.0f, MENU_PAD = 8.0f;
 Rectangle menuRow(int i) {
     return { MENU_X + MENU_PAD, MENU_Y + MENU_PAD + i * (ROW_H + ROW_GAP),
@@ -40,6 +40,24 @@ constexpr float LIST_HEADER = 64.0f;
 constexpr float LIST_ROW_HEIGHT = 32.0f;
 constexpr int SKILL_MAX_VISIBLE = 7;
 constexpr int ITEM_MAX_VISIBLE = 7;
+Rectangle listPlate(int visible) {
+    return { MENU_X, menuRow(1).y - ROW_GAP, MENU_W,
+             visible * (ROW_H + ROW_GAP) + ROW_GAP };
+}
+
+void drawRowHighlight(Rectangle row) {
+    DrawRectangleRec(row, Color{ 0, 150, 190, 120 });
+    DrawRectangle(static_cast<int>(row.x), static_cast<int>(row.y),
+                  3, static_cast<int>(row.height), UiTheme::cyan);
+    DrawPoly(Vector2{ row.x + row.width - 12.0f, row.y + row.height * 0.5f },
+             3, 5.0f, 0.0f, UiTheme::cyan);
+}
+Rectangle animatedRow(float& highlightY, Rectangle target) {
+    if (highlightY < 0.0f) highlightY = target.y;
+    const float k = std::min(1.0f, GetFrameTime() * 18.0f);
+    highlightY += (target.y - highlightY) * k;
+    return Rectangle{ target.x, highlightY, target.width, target.height };
+}
 constexpr float FLOAT_SPEED = 45.0f;
 constexpr float FLOAT_LIFE = 1.0f;
 
@@ -117,18 +135,18 @@ Rectangle BattleUI::roundChipBounds() { return toDesign(ROUND_CHIP); }
 Rectangle BattleUI::partyCardBounds(int index) {
     if (index < 0 || index >= 3) return {};
     constexpr float w = 120.0f, h = 76.0f, gap = 6.0f;
-    const float x0 = 1280.0f - 16.0f - (3.0f * w + 2.0f * gap);
+    const float x0 = 16.0f;
     return { x0 + index * (w + gap), 720.0f - 16.0f - h, w, h };
 }
 
 Rectangle BattleUI::fieldHpBounds(const Character& character, Vector2 feet) {
     const float width = fieldBarWidth(character, 128.0f);
-    return { feet.x - width * 0.5f, feet.y + 8.0f, width, 6.0f };
+    return { feet.x - width * 0.5f, feet.y + UiTheme::fieldBarOffsetY, width, 6.0f };
 }
 
 Rectangle BattleUI::fieldHpBounds(const Character& character, const BattleAnchor& anchor) {
     const float width = fieldBarWidth(character, anchor.spriteBounds.width);
-    return { anchor.feet.x - width * 0.5f, anchor.feet.y + 8.0f, width, 6.0f };
+    return { anchor.feet.x - width * 0.5f, anchor.feet.y + UiTheme::fieldBarOffsetY, width, 6.0f };
 }
 
 Rectangle BattleUI::buttonBounds(BattleUIButton button) {
@@ -146,7 +164,7 @@ Rectangle BattleUI::buttonBounds(BattleUIButton button) {
 }
 
 Rectangle BattleUI::controlPanelBounds() { return { MENU_X, MENU_Y, MENU_W, MENU_PAD * 2.0f + 4.0f * ROW_H + 3.0f * ROW_GAP }; }
-Rectangle BattleUI::itemMenuBounds() { return listPanelBounds(ITEM_MAX_VISIBLE); }
+Rectangle BattleUI::itemMenuBounds() { return listPlate(ITEM_MAX_VISIBLE); }
 Rectangle BattleUI::listPanelBounds(int rowCount) {
     const int rows = visibleRows(rowCount, ITEM_MAX_VISIBLE);
     const float height = std::min(LIST_PANEL.height, LIST_HEADER + rows * LIST_ROW_HEIGHT);
@@ -156,14 +174,22 @@ Rectangle BattleUI::logButtonBounds() { return {}; }
 Rectangle BattleUI::logPanelBounds() { return toDesign(LOG_PANEL); }
 
 Rectangle BattleUI::skillRowBounds(int skillIndex, int skillCount, int selectedIndex) {
-    return rowBounds(skillIndex, skillCount, selectedIndex, SKILL_MAX_VISIBLE);
+    const int visible = visibleRows(skillCount, SKILL_MAX_VISIBLE);
+    const int first = firstVisibleRow(selectedIndex, skillCount, visible);
+    if (skillIndex < first || skillIndex >= first + visible) return {};
+    return menuRow(skillIndex - first + 1);       // hàng 0 là nút HỦY
 }
 
 Rectangle BattleUI::itemRowBounds(int itemIndex, int itemCount, int selectedIndex) {
-    return rowBounds(itemIndex, itemCount, selectedIndex, ITEM_MAX_VISIBLE);
+    const int visible = visibleRows(itemCount, ITEM_MAX_VISIBLE);
+    const int first = firstVisibleRow(selectedIndex, itemCount, visible);
+    if (itemIndex < first || itemIndex >= first + visible) return {};
+    return menuRow(itemIndex - first + 1);
 }
 
-void BattleUI::drawHpMpBar(const Character& character, Vector2 head, int enemyIndex) const {    const int maxHp = character.getStats().m_hp;
+void BattleUI::drawHpMpBar(const Character& character, Vector2 head, int enemyIndex) const {    
+    if (dynamic_cast<const Player*>(&character)) return;   // hero: không vẽ thanh máu trên sân
+    const int maxHp = character.getStats().m_hp;
     const float hpRatio = ratioOf(character.getCurrentHp(), maxHp);
     const bool boss = dynamic_cast<const Boss*>(&character) != nullptr;
     const bool player = dynamic_cast<const Player*>(&character) != nullptr;
@@ -259,7 +285,7 @@ void BattleUI::drawRoundChip(int stage, const Character* current, int gold) cons
     const float rowWidth = static_cast<float>(UiText::measure(round, 16));
     const float coinWidth = static_cast<float>(UiText::measure(coinText, 16)) + 42.0f;
     const float chipWidth = std::max(160.0f, std::max(rowWidth, coinWidth) + 24.0f);
-    const Rectangle bounds{ 16.0f, 46.0f, chipWidth, 52.0f };
+    const Rectangle bounds{ 1280.0f - 16.0f - chipWidth, 84.0f, chipWidth, 52.0f };
     UiShapes::bladeStrip(bounds, COL_PANEL, COL_PANEL_EDGE, true);
     UiText::draw(round, static_cast<int>(bounds.x + bounds.width - rowWidth - 12.0f),
                  static_cast<int>(bounds.y + 5.0f), 16, UiTheme::silver);
@@ -338,6 +364,7 @@ void BattleUI::drawCommandHelp(const std::string& helpText) const {
 }
 void BattleUI::drawBattleControls(bool waitingConfirm, bool selectingTarget,
                                   bool selectingList, bool canUndo) const {
+    if (!selectingList) m_highlightY = -1.0f;
     const Vector2 mouse = UiInput::mousePosition();
     std::string help;
     const auto row = [&](BattleUIButton id, const char* label, const char* action,
@@ -345,11 +372,7 @@ void BattleUI::drawBattleControls(bool waitingConfirm, bool selectingTarget,
         const Rectangle b = buttonBounds(id);
         const bool hot = enabled && CheckCollisionPointRec(mouse, b);
         UiWidgets::BladeButton(b, label, true, hot, enabled, action);
-        if (hot) {
-            DrawPoly(Vector2{ b.x + 12.0f, b.y + b.height * 0.5f }, 3, 6.0f, 0.0f,
-                     UiTheme::cyan);                       // mũi tên chỉ dòng đang chọn
-            help = hint;
-        }
+        if (hot) help = hint;
     };
 
     if (waitingConfirm) {
@@ -372,25 +395,12 @@ void BattleUI::drawBattleControls(bool waitingConfirm, bool selectingTarget,
         row(BattleUIButton::PAUSE, "THOÁT", "action:pause", true,
             "Tạm dừng và thoát trận đấu.");
     }
-    drawCommandHelp(help);
+    if (!selectingList) drawCommandHelp(help);
 }
 
 void BattleUI::drawLogButton(bool) const {}
 
-void BattleUI::drawListPanel(const std::string& title, int rowCount, int selectedIndex) const {
-    const Rectangle bounds = listPanelBounds(rowCount);
-    UiShapes::plate(bounds, COL_PANEL, COL_PANEL_EDGE, 1.0f);
-    UiShapes::bladeStrip(Rectangle{ bounds.x, bounds.y, bounds.width, 32.0f },
-                         UiTheme::panelRaised, UiTheme::ash, true);
-    const int titleWidth = UiText::measure(title, 14);
-    UiText::draw(title, static_cast<int>(bounds.x + bounds.width - titleWidth - 68.0f),
-                 static_cast<int>(bounds.y + 9.0f), 14, UiTheme::silver);
-    if (rowCount > 0) {
-        UiText::draw(TextFormat("%d/%d", selectedIndex + 1, rowCount),
-                     static_cast<int>(bounds.x + bounds.width - 48.0f),
-                     static_cast<int>(bounds.y + 10.0f), 12, LIGHTGRAY);
-    }
-}
+void BattleUI::drawListPanel(const std::string&, int, int) const {}
 
 void BattleUI::drawBattleLog(const std::string& message) const {
     const Rectangle bounds = logPanelBounds();
@@ -422,33 +432,57 @@ void BattleUI::drawBattleLog(const std::string& message) const {
 
 void BattleUI::drawSkillMenu(const std::vector<Skill>& skills, int selectedIndex, int currentMp) const {
     if (skills.empty()) {
-        drawListPanel(Strings::skillPrompt, 0, 0);
-        const Rectangle panel = listPanelBounds(0);
-        UiText::draw(Strings::noSkill, static_cast<int>(panel.x + 12.0f),
-                     static_cast<int>(panel.y + 25.0f), 12, LIGHTGRAY);
+        const Rectangle box = listPlate(1);
+        UiShapes::plate(box, COL_PANEL, COL_PANEL_EDGE, 1.0f);
+        UiText::draw(Strings::noSkill, static_cast<int>(box.x + 12.0f),
+                     static_cast<int>(box.y + 12.0f), 13, UiTheme::ashText);
         return;
     }
-    selectedIndex = std::max(0, std::min(selectedIndex, static_cast<int>(skills.size()) - 1));
-    drawListPanel(Strings::skillPrompt, static_cast<int>(skills.size()), selectedIndex);
 
-    const int visible = visibleRows(static_cast<int>(skills.size()), SKILL_MAX_VISIBLE);
-    const int first = firstVisibleRow(selectedIndex, static_cast<int>(skills.size()), visible);
+    const int count = static_cast<int>(skills.size());
+    selectedIndex = std::max(0, std::min(selectedIndex, count - 1));
+    const int visible = visibleRows(count, SKILL_MAX_VISIBLE);
+    const int first = firstVisibleRow(selectedIndex, count, visible);
+    UiShapes::plate(listPlate(visible), COL_PANEL, COL_PANEL_EDGE, 1.0f);
+
     for (int index = first; index < first + visible; ++index) {
         const Skill& skill = skills[static_cast<std::size_t>(index)];
-        const std::string name = Strings::localizedName(skill.m_name);
-        const char* detail = TextFormat("MP %d  ·  %d%s", skill.m_mpCost, skill.m_power,
-            skill.m_type == SkillType::HEAL ? " HP" : "%");
+        const Rectangle row = skillRowBounds(index, count, selectedIndex);
+        const bool selected = (index == selectedIndex);
         const bool enabled = currentMp >= skill.m_mpCost;
-        const Rectangle row = skillRowBounds(index, static_cast<int>(skills.size()), selectedIndex);
+
+        if (selected) drawRowHighlight(animatedRow(m_highlightY, row));
+
         UiIcons::drawSkill(skill.m_element, skill.m_type, skill.m_isMagic,
-            Rectangle{ row.x + 4.0f, row.y + 4.0f, 24.0f, 24.0f });
-        UiWidgets::ListRow(row, TextFormat("%s  ·  %s", name.c_str(), detail), {},
-                           index == selectedIndex, enabled, 42.0f, true);
-        UiWidgets::Tooltip(row,
-                           TextFormat("%s · tiêu hao %d MP", name.c_str(), skill.m_mpCost));
+                           Rectangle{ row.x + 8.0f, row.y + 6.0f, 22.0f, 22.0f });
+        UiText::draw(Strings::localizedName(skill.m_name), static_cast<int>(row.x + 38.0f),
+                     static_cast<int>(row.y + 3.0f), 13,
+                     enabled ? UiTheme::silver : UiTheme::ashText);
+
+        const std::string detail = (skill.m_type == SkillType::HEAL)
+            ? "MP " + std::to_string(skill.m_mpCost) + "  ·  +" + std::to_string(skill.m_power) + " HP"
+            : "MP " + std::to_string(skill.m_mpCost) + "  ·  " + std::to_string(skill.m_power) + "%";
+        UiText::draw(detail, static_cast<int>(row.x + 38.0f), static_cast<int>(row.y + 18.0f), 11,
+                     enabled ? UiTheme::mpHigh : UiTheme::danger);
     }
 }
+void BattleUI::drawItemMenu(const std::vector<std::string>& labels, int selectedIndex) const {
+    if (labels.empty()) return;
+    const int count = static_cast<int>(labels.size());
+    selectedIndex = std::max(0, std::min(selectedIndex, count - 1));
+    const int visible = visibleRows(count, ITEM_MAX_VISIBLE);
+    const int first = firstVisibleRow(selectedIndex, count, visible);
+    UiShapes::plate(listPlate(visible), COL_PANEL, COL_PANEL_EDGE, 1.0f);
 
+    for (int index = first; index < first + visible; ++index) {
+        const Rectangle row = itemRowBounds(index, count, selectedIndex);
+        const bool selected = (index == selectedIndex);
+        if (selected) drawRowHighlight(animatedRow(m_highlightY, row));       
+        UiText::draw(labels[static_cast<std::size_t>(index)], static_cast<int>(row.x + 12.0f),
+                     static_cast<int>(row.y + 9.0f), 13,
+                     selected ? UiTheme::silver : UiTheme::ashText);
+    }
+}
 void BattleUI::drawTargetCursor(Rectangle targetBounds) const {
     const float pulse = 0.5f + 0.5f * std::sin(static_cast<float>(GetTime()) * 5.0f);
     const float centerX = targetBounds.x + targetBounds.width * 0.5f;
