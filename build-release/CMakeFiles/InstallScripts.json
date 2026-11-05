@@ -1,7 +1,7 @@
 {
 	"InstallScripts" : 
 	[
-		"D:/CODE/Turn-base-Tactical-Game/build-release/cmake_install.cmake"
+		"D:/KIET/devC/DSA/Turn-base-Tactical-Game/build-release/cmake_install.cmake"
 	],
 	"Parallel" : false
 }

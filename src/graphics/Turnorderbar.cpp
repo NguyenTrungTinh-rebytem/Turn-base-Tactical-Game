@@ -1,42 +1,55 @@
-// src/graphics/TurnOrderBar.cpp
 #include "TurnOrderBar.h"
+#include "BattleUI.h"
+#include "CombatantView.h"
+#include "graphics/UiIcons.h"
+#include "graphics/UiWidgets.h"
+#include "graphics/UiShapes.h"
+#include "graphics/UiTheme.h"
+#include "graphics/Strings.h"
 #include "entities/Character.h"
+#include "entities/Player.h"
+#include "data/Element.h"
 #include <algorithm>
 #include <cmath>
 
 namespace {
-constexpr float BOX_W = 170.0f, BOX_H = 30.0f, GAP = 4.0f, MARGIN = 10.0f;
-constexpr int   MAX_SHOWN = 8;
+constexpr std::size_t MAX_SHOWN = 12;
+constexpr float ACTIVE_R = 22.0f;   // kim cương người đang đi (trước là 17)
+constexpr float NEXT_R = 16.0f;     // chân dung các lượt sau (trước là 11)
+constexpr float GAP = 12.0f;
+constexpr float SLIDE_RATE = 12.0f;
+constexpr float FADE_IN_RATE = 5.0f;
+constexpr float FADE_OUT_RATE = 4.0f;
+constexpr float FLASH_DECAY = 3.0f;
 
-// ---- Chinh toc do / cam giac tai day ----
-constexpr float SLIDE_RATE   = 12.0f;   // truot len/xuong, cang lon cang nhanh
-constexpr float ACTIVE_RATE  = 10.0f;   // chuyen mau/vien khi doi luot
-constexpr float FADE_IN_RATE = 5.0f;    // hang moi hien ra
-constexpr float FADE_OUT_RATE = 4.0f;   // hang bien mat (nhan vat chet)
-constexpr float POP_OUT_PX   = 14.0f;   // nguoi dang di nhich ra ben trai bay nhieu px
-constexpr float FLASH_DECAY  = 3.0f;    // do nhanh tat cua tia sang khi doi luot
-constexpr float ENTER_OFFSET_Y = 16.0f; // hang moi truot tu duoi len
+float clamp01(float value) { return std::max(0.0f, std::min(1.0f, value)); }
 
-float clamp01(float v) { return std::max(0.0f, std::min(1.0f, v)); }
-
-// Tien dan toi muc tieu, khong phu thuoc FPS
-float approach(float current, float target, float rate, float dt) {
-    return current + (target - current) * (1.0f - std::exp(-rate * dt));
+float approach(float current, float target, float rate, float deltaTime) {
+    return current + (target - current) * (1.0f - std::exp(-rate * deltaTime));
 }
 
-Color lerpColor(Color a, Color b, float t) {
-    t = clamp01(t);
-    return Color{ static_cast<unsigned char>(a.r + (b.r - a.r) * t),
-                  static_cast<unsigned char>(a.g + (b.g - a.g) * t),
-                  static_cast<unsigned char>(a.b + (b.b - a.b) * t),
-                  static_cast<unsigned char>(a.a + (b.a - a.a) * t) };
+Color withAlpha(Color color, float alpha) {
+    color.a = static_cast<unsigned char>(color.a * clamp01(alpha));
+    return color;
 }
 
-Color withAlpha(Color c, float alpha) {
-    c.a = static_cast<unsigned char>(c.a * clamp01(alpha));
-    return c;
+// Toa do X tam cua o thu `rank` (0 = nguoi dang di)
+float centerX(float start, int rank) {
+    if (rank == 0) return start + ACTIVE_R;
+    return start + ACTIVE_R * 2.0f + GAP + NEXT_R + (rank - 1) * (NEXT_R * 2.0f + GAP);
 }
-} // namespace
+
+std::string elementKey(Element element) {
+    switch (element) {
+        case Element::KIM: return "element:kim";
+        case Element::MOC: return "element:moc";
+        case Element::THUY: return "element:thuy";
+        case Element::HOA: return "element:hoa";
+        case Element::THO: return "element:tho";
+    }
+    return "element:kim";
+}
+}
 
 void TurnOrderBar::reset() {
     m_rows.clear();
@@ -44,80 +57,111 @@ void TurnOrderBar::reset() {
     m_flash = 0.0f;
 }
 
-void TurnOrderBar::draw(const std::vector<Character*>& upcoming, const Character* current) {
-    const float dt = std::min(GetFrameTime(), 0.05f);   // tranh nhay vot khi lag
+void TurnOrderBar::draw(const std::vector<Character*>& upcoming, const Character* current,
+                        const std::vector<std::unique_ptr<CombatantView>>& views) {
+    const float dt = std::min(GetFrameTime(), 0.05f);
     m_time += dt;
 
-    const float x0 = GetScreenWidth() - BOX_W - MARGIN;
-    const float y0 = MARGIN + 22.0f;
-    const float step = BOX_H + GAP;
+    // ---- Nen dai mong toan chieu ngang ----
+    const Rectangle strip = BattleUI::turnStripBounds();
+    const float midY = strip.y + strip.height * 0.5f;
+    const float startX = strip.x + 14.0f;
+    UiShapes::plate(strip, UiTheme::navyPanel, UiTheme::cyanEdge, 1.0f);
 
-    // ---- Doi luot -> tia sang ----
-    if (current != m_lastCurrent) {
-        if (current) m_flash = 1.0f;
-        m_lastCurrent = current;
+    // ---- Thu tu hien thi: nguoi dang di luon dung dau, bo nguoi da chet / trung lap ----
+    std::vector<const Character*> order;
+    if (current && current->isAlive()) order.push_back(current);
+    for (const Character* character : upcoming) {
+        if (order.size() >= MAX_SHOWN) break;
+        if (!character || !character->isAlive() || character == current) continue;
+        order.push_back(character);
+    }
+
+    const Character* first = order.empty() ? nullptr : order.front();
+    if (first != m_lastCurrent) {
+        if (first) m_flash = 1.0f;
+        m_lastCurrent = first;
     }
     m_flash = std::max(0.0f, m_flash - FLASH_DECAY * dt);
 
-    // ---- Dong bo danh sach hien thi voi cac hang dang co ----
-    for (Row& r : m_rows) { r.m_present = false; r.m_isCurrent = false; }
+    for (Row& row : m_rows) {
+        row.m_present = false;
+        row.m_isCurrent = false;
+    }
 
     int rank = 0;
-    for (const Character* c : upcoming) {
-        if (!c || rank >= MAX_SHOWN) break;
+    for (const Character* character : order) {
         auto it = std::find_if(m_rows.begin(), m_rows.end(),
-                               [c](const Row& r) { return r.m_character == c; });
+            [character](const Row& row) { return row.m_character == character; });
         if (it == m_rows.end()) {
             Row fresh;
-            fresh.m_character = c;
-            fresh.m_y = y0 + rank * step + ENTER_OFFSET_Y;   // truot tu duoi len
+            fresh.m_character = character;
+            fresh.m_y = centerX(startX, rank);
             m_rows.push_back(fresh);
             it = m_rows.end() - 1;
         }
         it->m_present = true;
-        it->m_isCurrent = (c == current);
-        it->m_targetY = y0 + rank * step;
+        it->m_isCurrent = (rank == 0);
+        it->m_targetY = centerX(startX, rank);
         it->m_rank = rank + 1;
-        it->m_name = c->getName();
-        it->m_spd = c->getSpeed();
+        it->m_name = Strings::localizedName(character->getName());
+        it->m_hp = std::max(0, character->getCurrentHp());
+        it->m_maxHp = character->getStats().m_hp;
+        it->m_spd = character->getSpeed();
+        it->m_element = character->getElement();
+        it->m_isHero = dynamic_cast<const Player*>(character) != nullptr;
         ++rank;
     }
 
-    // ---- Animation ----
-    for (Row& r : m_rows) {
-        if (r.m_present) {
-            r.m_y = approach(r.m_y, r.m_targetY, SLIDE_RATE, dt);
-            r.m_alpha = std::min(1.0f, r.m_alpha + FADE_IN_RATE * dt);
+    for (Row& row : m_rows) {
+        if (row.m_present) {
+            row.m_y = approach(row.m_y, row.m_targetY, SLIDE_RATE, dt);
+            row.m_alpha = std::min(1.0f, row.m_alpha + FADE_IN_RATE * dt);
         } else {
-            r.m_alpha -= FADE_OUT_RATE * dt;                 // nhan vat het trong danh sach -> mo dan
+            row.m_alpha -= FADE_OUT_RATE * dt;
         }
-        r.m_active = approach(r.m_active, r.m_isCurrent ? 1.0f : 0.0f, ACTIVE_RATE, dt);
-        r.m_x = approach(r.m_x, r.m_isCurrent ? -POP_OUT_PX : 0.0f, SLIDE_RATE, dt);
     }
     m_rows.erase(std::remove_if(m_rows.begin(), m_rows.end(),
-                                [](const Row& r) { return !r.m_present && r.m_alpha <= 0.0f; }),
-                 m_rows.end());
+        [](const Row& row) { return !row.m_present && row.m_alpha <= 0.0f; }), m_rows.end());
 
     // ---- Ve ----
-    DrawText("TURN ORDER", static_cast<int>(x0), static_cast<int>(MARGIN), 16, GOLD);
-
     const float pulse = 0.5f + 0.5f * std::sin(m_time * 6.0f);
-    for (const Row& r : m_rows) {
-        const float act = r.m_active;
-        const Rectangle box = { x0 + r.m_x, r.m_y, BOX_W, BOX_H };
+    const Color navy{ 12, 10, 38, 235 };
+    for (const Row& row : m_rows) {
+        const bool active = row.m_present && row.m_isCurrent;
+        const float radius = active ? ACTIVE_R + pulse : NEXT_R;
+        const Vector2 center{ row.m_y, midY };
+        const Color accent = row.m_isHero ? UiTheme::cyan : UiTheme::hpEnemy;
 
-        DrawRectangleRec(box, withAlpha(lerpColor(Color{ 25, 25, 40, 200 }, Color{ 90, 70, 20, 230 }, act), r.m_alpha));
-        if (r.m_isCurrent && m_flash > 0.0f)
-            DrawRectangleRec(box, withAlpha(WHITE, 0.45f * m_flash * r.m_alpha));   // tia sang khi vua doi luot
-        if (act > 0.01f)
-            DrawRectangleLinesEx(Rectangle{ box.x - 3.0f, box.y - 3.0f, box.width + 6.0f, box.height + 6.0f },
-                                 1.0f, withAlpha(GOLD, (0.15f + 0.30f * pulse) * act * r.m_alpha));   // quang nhap nhay
-        DrawRectangleLinesEx(box, 1.0f + 1.5f * act, withAlpha(lerpColor(GRAY, GOLD, act), r.m_alpha));
+        Rectangle portrait;
+        if (active) {
+            // Kim cuong lon
+            DrawPoly(center, 4, radius, 0.0f, withAlpha(navy, row.m_alpha));
+            DrawPolyLinesEx(center, 4, radius, 0.0f, 2.0f, withAlpha(accent, row.m_alpha));
+            if (m_flash > 0.0f)
+                DrawPolyLinesEx(center, 4, radius + 4.0f + pulse * 2.0f, 0.0f, 1.5f,
+                                withAlpha(WHITE, 0.6f * m_flash * row.m_alpha));
+            const float side = radius * 1.04f;
+            portrait = Rectangle{ center.x - side * 0.5f, center.y - side * 0.5f, side, side };
+        } else {
+            // Chan dung tron nho
+            DrawCircleV(center, radius, withAlpha(navy, row.m_alpha));
+            DrawRing(center, radius - 1.5f, radius, 0.0f, 360.0f, 24,
+                     withAlpha(accent, row.m_alpha * 0.85f));
+            const float side = radius * 1.38f;
+            portrait = Rectangle{ center.x - side * 0.5f, center.y - side * 0.5f, side, side };
+        }
 
-        DrawText(TextFormat("%d. %s", r.m_rank, r.m_name.c_str()),
-                 static_cast<int>(box.x) + 8, static_cast<int>(box.y) + 8, 14, withAlpha(RAYWHITE, r.m_alpha));
-        const char* spd = TextFormat("SPD %d", r.m_spd);
-        DrawText(spd, static_cast<int>(box.x + BOX_W - MeasureText(spd, 12) - 8), static_cast<int>(box.y) + 9, 12,
-                 withAlpha(SKYBLUE, r.m_alpha));
+        const auto view = std::find_if(views.begin(), views.end(),
+            [&row](const std::unique_ptr<CombatantView>& candidate) {
+                return candidate && candidate->getCharacter() == row.m_character;
+            });
+        if (view == views.end() || !(*view)->drawPortrait(portrait, withAlpha(WHITE, row.m_alpha)))
+            UiIcons::draw(elementKey(row.m_element), portrait, withAlpha(WHITE, row.m_alpha));
+
+        const Rectangle hit{ center.x - radius, center.y - radius, radius * 2.0f, radius * 2.0f };
+        const std::string tooltip = row.m_name +
+            TextFormat(" · HP %d/%d · Tốc độ %d", row.m_hp, row.m_maxHp, row.m_spd);
+        UiWidgets::Tooltip(hit, tooltip);
     }
 }

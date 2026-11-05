@@ -38,6 +38,8 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <cmath>
+#include <algorithm>
 
 // GameEngine (Core) la noi NOI tat ca module:
 //   Data     -> GameData (CSV: hero, quai, skill)
@@ -47,6 +49,8 @@
 // GameEngine ke thua rieng ICombatObserver de tu nhan thong bao mau/chet.
 class GameEngine : private ICombatObserver
 {
+    friend struct GameEngineTestAccess;
+
 public:
     GameEngine() = default;
     ~GameEngine() override = default;
@@ -67,10 +71,13 @@ private:
     void update(float deltaTime);
     void render();
     void renderBattleUI();
+    void drawActiveMarker() const;
+    void drawFieldStats() const;
     void renderCombatants();
+    
 
     // ----- thiet lap tran dau -----
-    void startNewGame(int startStage = 1);
+    void startNewGame(int startStage = 1, bool preservePreparedRun = false);
     void loadStage(int stage);
     void createHero();
     void spawnEnemies(int stage);
@@ -102,6 +109,9 @@ private:
     void closeShop();
     void refreshShop();
     void handleShopInput();
+    bool handleDialogInput();
+    void drawDialog(const std::string& title, const std::string& body,
+                    const std::vector<std::string>& buttons) const;
     void buyShopItem(int stockIndex);
     void equipFromBag(int bagIndex, int memberIndex);
     void unequipMember(int memberIndex);
@@ -121,8 +131,11 @@ private:
         PLAYER_CONFIRM,   // da danh/dung item -> ENTER ket thuc luot, ESC/Z hoan tac
         AI_THINKING       // quai dang suy nghi
     };
+    enum class TargetAction { BASIC_ATTACK, SKILL };
 
     void processPlayerInput();
+    void handleBattleClick(Vector2 position);
+    void rejectTargetClick(const char* reason, Vector2 position) const;
     void cycleTarget();
     void ensureValidTarget();
     void doBasicAttack();
@@ -203,6 +216,9 @@ HeroConfig m_heroConfig;
     std::vector<std::string> m_gearIds;
     Character* m_selectedAlly = nullptr;
     bool m_isSelectingItem = false;
+    bool m_battleLogOpen = false;
+    bool m_paused = false;
+    int m_dialogSelected = 0;
     int m_selectedItemIndex = 0;
 
     // ----- Tien / Shop / Am thanh -----
@@ -214,6 +230,7 @@ HeroConfig m_heroConfig;
     ShopScreen m_shop;
     int m_gold = 0;
     bool m_shopOpen = false;
+    bool m_shopPreparedRun = false;
     bool m_resumeRun = false;                            // true = dang nghi giua 2 wave (Chuan bi + Shop), KHONG tao lai doi hinh
     ItemPtr m_equippedGear[Party::MAX_SIZE];             // trang bi dang deo cua tung hero (theo vi tri trong Party)
     std::unordered_set<const Character*> m_goldPaid;     // quai da tra tien (chong tra 2 lan)
@@ -221,6 +238,7 @@ HeroConfig m_heroConfig;
 
     // ----- Tracking State -----
     Character* m_currentCharacter = nullptr;
+    std::vector<const Character*> m_actedThisRound;   // ai đã đi trong vòng hiện tại (cho thanh lượt)
     Character* m_selectedTarget = nullptr;
     BattlePhase m_battlePhase = BattlePhase::PLAYER_TURN;
     int m_stage = 1;
@@ -229,10 +247,14 @@ HeroConfig m_heroConfig;
     // ----- UI & Timer -----
     int m_selectedSkillIndex = 0;
     bool m_isSelectingSkill = false;
+    bool m_isSelectingTarget = false;
+    TargetAction m_targetAction = TargetAction::BASIC_ATTACK;
     float m_aiTurnTimer = 0.0f;
     std::string m_battleLog = "Chao mung den voi Battle Engine!";
 
     std::mt19937 m_rng{ std::random_device{}() };
     bool m_isRunning = false;
     bool m_isInitialized = false;
+
+    
 };

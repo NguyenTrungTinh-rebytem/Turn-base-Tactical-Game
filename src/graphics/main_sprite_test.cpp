@@ -4,6 +4,7 @@
 // Member 4 - Huynh Quang Khai | Sprint 1: Window + Sprite Sheet + Idle Animation
 // File test doc lap: chi can SpriteAnimation + Raylib. KHONG la main.cpp cua game.
 #include "raylib.h"
+#include "graphics/UiText.h"
 #include "SpriteAnimation.h"
 #include <memory>
 
@@ -53,20 +54,12 @@ int test_sprite_main() {
         if (hero->isLoaded()) {
             const Texture2D& tex = hero->getTexture();
             Vector2 origin = { 760.0f, 60.0f };
-            DrawText("SPRITE SHEET", (int)origin.x, (int)origin.y - 24, 18, GOLD);
             DrawRectangle((int)origin.x - 4, (int)origin.y - 4, tex.width + 8, tex.height + 8, Color{ 10, 10, 10, 255 });
             DrawTextureV(tex, origin, WHITE);
             DrawRectangleLinesEx(
                 { origin.x + hero->getCurrentFrame() * FRAME_W, origin.y + hero->getCurrentRow() * FRAME_H,
                   (float)FRAME_W, (float)FRAME_H }, 2.0f, RED);
         }
-
-        // Thong tin debug
-        DrawText(loaded ? "Sprite sheet: LOADED" : "Sprite sheet: NOT FOUND (dang ve placeholder)",
-                 20, 20, 20, loaded ? GREEN : ORANGE);
-        DrawText(TextFormat("Frame: %d | Row: %d | FPS: %d", hero->getCurrentFrame(), hero->getCurrentRow(), GetFPS()),
-                 20, 50, 20, RAYWHITE);
-        DrawText("[1] IDLE  [2] ATTACK  [3] TAKE_DAMAGE  [F] Flip  [ESC] Thoat", 20, SCREEN_H - 35, 18, LIGHTGRAY);
 
         EndDrawing();
     }

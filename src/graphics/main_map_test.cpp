@@ -4,6 +4,7 @@
 // Member 4 - Huynh Quang Khai | Test Map + Slot 2.5D (doc lap, khong can Character)
 // Phim: 1 = Stage 1 (3 vs 3) | 2 = Stage 2 (3 vs Boss) | F1 = hien diem slot | ESC = thoat
 #include "raylib.h"
+#include "graphics/UiText.h"
 #include "BattleMap.h"
 #include "SpriteAnimation.h"
 #include <algorithm>
@@ -68,14 +69,7 @@ int test_map_main(){
         for (Actor* a : order) {
             map.drawShadow(a->m_slot, 64.0f);
             a->m_anim->drawFrame(BattleMap::toTopLeft(a->m_slot, 64, 64), a->m_slot.m_flipX, a->m_slot.m_scale, a->m_tint);
-            if (showSlots) {
-                DrawCircleV(a->m_slot.m_feetPos, 4, RED);
-                Vector2 h = BattleMap::getHeadPos(a->m_slot, 64);
-                DrawCircleV(h, 4, YELLOW);
-            }
         }
-        DrawText(map.hasBackground() ? "Background: IMAGE" : "Background: PROCEDURAL (chua co anh)", 20, 20, 20, RAYWHITE);
-        DrawText("[1] Stage 1  [2] Stage 2 (Boss)  [F1] Slot  [ESC] Thoat", 20, 690, 18, LIGHTGRAY);
         EndDrawing();
     }
     actors.clear();   // giai phong texture truoc CloseWindow

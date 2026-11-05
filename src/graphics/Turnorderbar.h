@@ -2,16 +2,20 @@
 // src/graphics/TurnOrderBar.h - Thanh thu tu luot (goc phai tren) co hieu ung chuyen dong.
 // Chi ve + animation, khong chua logic game. Thay cho BattleUI::drawTurnOrder.
 #include "raylib.h"
+#include "data/Element.h"
+#include <memory>
 #include <string>
 #include <vector>
 
 class Character;   // Forward declaration
+class CombatantView;
 
 class TurnOrderBar {
 public:
     // Ve va cap nhat animation (dung GetFrameTime()).
     // upcoming = thu tu hien thi, current = nguoi dang di (co the nullptr).
-    void draw(const std::vector<Character*>& upcoming, const Character* current);
+    void draw(const std::vector<Character*>& upcoming, const Character* current,
+              const std::vector<std::unique_ptr<CombatantView>>& views);
 
     // Xoa trang thai. Goi khi vao man moi / van moi, vi con tro Character cu khong con hop le.
     void reset();
@@ -20,10 +24,14 @@ private:
     struct Row {
         const Character* m_character = nullptr;   // CHI de so sanh dia chi, khong dereference
         std::string m_name;                       // luu ban sao de hang dang mo dan van ve duoc
+        int   m_hp = 0;
+        int   m_maxHp = 0;
         int   m_spd = 0;
+        Element m_element = Element::KIM;
         int   m_rank = 0;
         bool  m_present = false;                  // con trong danh sach hien tai?
         bool  m_isCurrent = false;
+        bool  m_isHero = false;
         float m_targetY = 0.0f;
         float m_y = 0.0f;                         // vi tri dang hien thi (truot muot toi m_targetY)
         float m_x = 0.0f;                         // lech ngang: hang dang di nhich ra ben trai

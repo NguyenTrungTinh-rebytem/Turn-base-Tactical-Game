@@ -1,5 +1,8 @@
 // src/graphics/ItemIcons.cpp
 #include "graphics/ItemIcons.h"
+#include "graphics/UiShapes.h"
+#include "graphics/UiTheme.h"
+#include "graphics/UiText.h"
 #include <algorithm>
 
 ItemIcons::~ItemIcons() { unloadAll(); }
@@ -44,16 +47,15 @@ void ItemIcons::draw(const std::string& itemId, Rectangle dest, Color tint) cons
         return;
     }
     // o thay the: mau theo nhom + chu cai dau cua phan sau "ITM_"
-    Color c = Color{ 200, 80, 90, 255 };
+    Color c = UiTheme::crimson;
     if (it != m_icons.end()) {
-        if (it->second.m_category == 1) c = Color{ 220, 170, 60, 255 };
-        else if (it->second.m_category == 2) c = Color{ 90, 150, 230, 255 };
+        if (it->second.m_category == 1) c = UiTheme::gold;
+        else if (it->second.m_category == 2) c = UiTheme::mpHigh;
     }
-    DrawRectangleRounded(dest, 0.25f, 4, c);
-    DrawRectangleLinesEx(dest, 2.0f, Color{ 20, 20, 30, 255 });
+    UiShapes::seal(dest, c, true);
     const size_t us = itemId.find('_');
     const char letter[2] = { us != std::string::npos && us + 1 < itemId.size() ? itemId[us + 1] : (itemId.empty() ? '?' : itemId[0]), 0 };
     const int fs = static_cast<int>(dest.height * 0.5f);
-    DrawText(letter, static_cast<int>(dest.x + (dest.width - MeasureText(letter, fs)) / 2.0f),
+    UiText::draw(letter, static_cast<int>(dest.x + (dest.width - UiText::measure(letter, fs)) / 2.0f),
              static_cast<int>(dest.y + (dest.height - fs) / 2.0f), fs, WHITE);
 }

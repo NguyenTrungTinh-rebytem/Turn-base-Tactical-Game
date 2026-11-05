@@ -1,0 +1,15 @@
+# TIEN & ROI TIEN - doc luc chay game (sua file nay, KHONG can bien dich lai).
+# key,value
+key,value
+# Tien luc bat dau chuyen di
+start_gold,100
+# Moi quai thuong roi: enemy_base_gold + (HP toi da cua quai / enemy_hp_divisor), dao dong +-variance_percent %
+enemy_base_gold,8
+enemy_hp_divisor,10
+variance_percent,20
+# Boss roi: tien cua quai thuong x boss_multiplier
+boss_multiplier,5
+# Thuong them khi quet sach 1 wave
+wave_clear_bonus,40
+# Vao thang wave Boss (bo qua wave truoc): tang them tien cho moi wave bi bo qua
+skip_wave_gold,60

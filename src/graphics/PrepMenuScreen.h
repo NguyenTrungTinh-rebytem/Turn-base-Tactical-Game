@@ -14,6 +14,7 @@ struct PrepHeroInfo {
     std::string m_name;
     std::string m_race;
     std::string m_class;
+    std::string m_portraitPath;
     Element     m_element = Element::KIM;
     Stats       m_stats{};
 };
@@ -59,7 +60,7 @@ struct PrepInfo {
     int                        m_teammateSlots = 2;   // so o dong doi con trong
 };
 
-enum class PrepMenuAction { NONE = 0, START, BACK, EDIT_MEMBER_1, EDIT_MEMBER_2, EDIT_MEMBER_3 };
+enum class PrepMenuAction { NONE = 0, START, BACK, SHOP, EDIT_MEMBER_1, EDIT_MEMBER_2, EDIT_MEMBER_3 };
 
 class PrepMenuScreen {
 public:
@@ -83,7 +84,7 @@ public:
 
 private:
     enum Tab { TAB_PARTY = 0, TAB_SKILLS, TAB_ITEMS, TAB_GATE, TAB_COUNT };
-    enum Btn { BTN_BACK = 0, BTN_START, BTN_COUNT };
+    enum Btn { BTN_BACK = 0, BTN_SHOP, BTN_START, BTN_COUNT };
 
     Rectangle tabRect(int index) const;
     Rectangle contentRect() const;
@@ -97,15 +98,18 @@ private:
     void drawItemsTab(const Rectangle& area) const;
     void drawGateTab(const Rectangle& area) const;
     void drawButtons() const;
+    void unloadPortraits();
 
     PrepInfo m_info;
     int      m_tab = TAB_PARTY;
     int      m_hoverTab = -1;
     int      m_hoverButton = -1;
     mutable int m_hoverSkill = -1;   // dong skill dang tro chuot (draw() cap nhat moi frame)
+    mutable int m_hoverElement = -1;
     float    m_time = 0.0f;
 
     const ItemIcons* m_icons = nullptr;
+    Texture2D m_memberPortraits[3]{};
 
     Texture2D m_background{};
     bool      m_hasBackground = false;

@@ -114,7 +114,7 @@ std::vector<ItemData> parseFile(const std::string& path) {
         };
 
         ItemData d;
-        d.m_id = text("id");
+            d.m_id = text("id");
         d.m_name = text("name");
         d.m_nameVi = text("nameVi");
         d.m_descriptionVi = text("description");
@@ -140,6 +140,28 @@ std::vector<ItemData> parseFile(const std::string& path) {
         d.m_value2 = number("value2", false);
         d.m_duration = number("duration", false);
         d.m_maxCarry = number("maxCarry", false);
+
+        if (d.m_descriptionVi.empty()) {
+            auto pct = [](int value) { return std::to_string(value) + "%"; };
+            switch (d.m_effect) {
+            case ItemEffect::HEAL_HP_PCT:         d.m_descriptionVi = u8"Hồi ngay " + pct(d.m_value) + u8" HP tối đa"; break;
+            case ItemEffect::RESTORE_MP_PCT:      d.m_descriptionVi = u8"Phục hồi " + pct(d.m_value) + u8" MP tối đa"; break;
+            case ItemEffect::REVIVE_PCT:          d.m_descriptionVi = u8"Hồi sinh một đồng đội với " + pct(d.m_value) + " HP"; break;
+            case ItemEffect::BOOST_DAMAGE_UP:     d.m_descriptionVi = u8"Tăng " + pct(d.m_value) + u8" sát thương trong " + std::to_string(d.m_duration) + u8" lượt"; break;
+            case ItemEffect::BOOST_DAMAGE_REDUCE: d.m_descriptionVi = u8"Giảm " + pct(d.m_value) + u8" sát thương nhận vào trong " + std::to_string(d.m_duration) + u8" lượt"; break;
+            case ItemEffect::BOOST_EXTRA_TURN:    d.m_descriptionVi = u8"Thêm " + std::to_string(d.m_value) + u8" lượt hành động ngay lập tức"; break;
+            case ItemEffect::BOOST_CRIT_RATE:     d.m_descriptionVi = u8"Tăng " + pct(d.m_value) + u8" tỉ lệ chí mạng cho đòn kế tiếp"; break;
+            case ItemEffect::HELD_REGEN:          d.m_descriptionVi = u8"Hồi " + pct(d.m_value) + u8" HP tối đa vào cuối mỗi lượt"; break;
+            case ItemEffect::HELD_LIFESTEAL:      d.m_descriptionVi = u8"Hồi HP bằng " + pct(d.m_value) + u8" sát thương gây ra"; break;
+            case ItemEffect::HELD_SURVIVE:        d.m_descriptionVi = u8"Đang đầy HP mà nhận đòn chí mạng: giữ lại " + std::to_string(d.m_value) + u8" HP (1 lần/trận)"; break;
+            case ItemEffect::HELD_DAMAGE_REDUCE:  d.m_descriptionVi = u8"Giảm " + pct(d.m_value) + u8" sát thương nhận vào"; break;
+            case ItemEffect::HELD_BERSERK:        d.m_descriptionVi = u8"Tăng " + pct(d.m_value) + u8" sát thương, mất " + pct(d.m_value2) + u8" HP tối đa sau khi đánh"; break;
+            case ItemEffect::HELD_EXECUTE:        d.m_descriptionVi = u8"Thêm " + pct(d.m_value) + u8" sát thương nếu mục tiêu dưới " + pct(d.m_value2) + u8" HP"; break;
+            case ItemEffect::HELD_CRIT_DAMAGE:    d.m_descriptionVi = u8"Tăng " + pct(d.m_value) + u8" sát thương chí mạng"; break;
+            case ItemEffect::HELD_COUNTER:        d.m_descriptionVi = u8"Phản lại " + pct(d.m_value) + u8" sát thương khi bị đánh cận chiến"; break;
+            default: break;
+            }
+        }
 
         if (d.m_value <= 0) throw ItemLoadError(where + "value phai > 0");
         if (d.m_value2 < 0 || d.m_duration < 0 || d.m_maxCarry < 0)

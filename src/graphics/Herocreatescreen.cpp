@@ -1,31 +1,35 @@
 #include "HeroCreateScreen.h"
+#include "graphics/UiCanvas.h"
+#include "graphics/UiText.h"
+#include "graphics/Strings.h"
+#include "graphics/UiIcons.h"
+#include "graphics/UiShapes.h"
+#include "graphics/UiTheme.h"
 #include <algorithm>
 #include <cmath>
 
 namespace {
 // ---- Bo cuc (thiet ke cho 1280x720) ----
-constexpr float AREA_X = 40.0f, AREA_W = 1200.0f;
-constexpr float CARD_Y = 95.0f, CARD_AREA_H = 305.0f, CARD_MAX_W = 380.0f, CARD_GAP = 30.0f, CARD_GAP_COMPACT = 14.0f;
+constexpr float AREA_X = 28.0f, AREA_W = 1224.0f;
+constexpr float CARD_Y = 86.0f, CARD_AREA_H = 196.0f, CARD_MAX_W = 236.0f, CARD_GAP = 12.0f, CARD_GAP_COMPACT = 12.0f;
 constexpr size_t MAX_COLUMNS = 5;          // nhieu hon 5 tuong -> xuong hang (the nho gon)
-constexpr float COMPACT_BELOW_H = 200.0f;  // the thap hon muc nay -> bo cuc nho gon
-constexpr float DETAIL_Y = 410.0f, DETAIL_H = 210.0f;
-constexpr float BTN_W = 220.0f, BTN_H = 52.0f, BTN_GAP = 30.0f, BTN_Y = 640.0f;
+constexpr float DETAIL_Y = 296.0f, DETAIL_H = 316.0f;
+constexpr float BTN_W = 220.0f, BTN_H = 48.0f, BTN_GAP = 30.0f, BTN_Y = 642.0f;
 constexpr int   MAX_SKILL_LINES = 4;
 constexpr float IDLE_FPS = 6.0f;
 constexpr float SPRITE_SCALE = 1.5f;     // 128px * 1.5 = 192px
 
 // ---- Mau ----
-constexpr Color COL_TITLE      { 255, 214, 96, 255 };
-constexpr Color COL_PANEL      { 16, 13, 36, 215 };
-constexpr Color COL_EDGE       { 140, 120, 180, 255 };
-constexpr Color COL_EDGE_FOCUS { 255, 214, 96, 255 };
-constexpr Color COL_LABEL      { 190, 185, 220, 255 };
-constexpr Color COL_TEXT       { 238, 235, 252, 255 };
-constexpr Color COL_DIM        { 130, 126, 160, 255 };
-constexpr Color COL_BAR_BG     { 34, 30, 60, 255 };
-constexpr Color COL_BAR        { 255, 190, 70, 255 };
+constexpr Color COL_TITLE = UiTheme::silver;
+constexpr Color COL_PANEL = UiTheme::panel;
+constexpr Color COL_EDGE = UiTheme::ash;
+constexpr Color COL_EDGE_FOCUS = UiTheme::crimson;
+constexpr Color COL_LABEL = UiTheme::ashText;
+constexpr Color COL_TEXT = UiTheme::silver;
+constexpr Color COL_DIM = UiTheme::ashText;
+constexpr Color COL_BAR = UiTheme::hpHigh;
 
-const char* const ELEMENT_NAMES[] = { "Kim", "Moc", "Thuy", "Hoa", "Tho" };
+const char* const* const ELEMENT_NAMES = Strings::elements;
 constexpr size_t ELEMENT_COUNT = 5;
 
 Color elementColor(size_t i) {
@@ -40,18 +44,19 @@ Color elementColor(size_t i) {
 
 float clamp01(float v) { return std::max(0.0f, std::min(1.0f, v)); }
 
-void drawCenteredText(const char* text, float cx, float y, int size, Color c) {
-    DrawText(text, static_cast<int>(cx - MeasureText(text, size) / 2.0f), static_cast<int>(y), size, c);
+void drawCenteredText(const char* text, float cx, float y, int size, Color c,
+                      float trackingEm = 0.0f) {
+    UiText::draw(text, static_cast<int>(cx -
+        UiText::measure(text, size, trackingEm) / 2.0f), static_cast<int>(y), size, c, trackingEm);
 }
 
 void drawStatBar(const char* label, int value, int maxValue, float x, float y, float barW) {
-    DrawText(label, static_cast<int>(x), static_cast<int>(y), 16, COL_LABEL);
-    const float bx = x + 70.0f, by = y + 3.0f, bh = 12.0f;
-    DrawRectangle(static_cast<int>(bx), static_cast<int>(by), static_cast<int>(barW), static_cast<int>(bh), COL_BAR_BG);
+    UiText::draw(label, static_cast<int>(x), static_cast<int>(y), 14, COL_LABEL);
+    const float bx = x + 48.0f, by = y + 5.0f, bh = 10.0f;
     const float ratio = clamp01(static_cast<float>(value) / static_cast<float>(std::max(1, maxValue)));
-    DrawRectangle(static_cast<int>(bx), static_cast<int>(by), static_cast<int>(barW * ratio), static_cast<int>(bh), COL_BAR);
-    DrawRectangleLines(static_cast<int>(bx), static_cast<int>(by), static_cast<int>(barW), static_cast<int>(bh), COL_EDGE);
-    DrawText(TextFormat("%d", value), static_cast<int>(bx + barW + 10.0f), static_cast<int>(y), 16, COL_TEXT);
+    UiShapes::runeBar(Rectangle{ bx, by, barW, bh }, ratio, COL_BAR);
+    UiText::draw(TextFormat("%d", value), static_cast<int>(bx + barW + 8.0f),
+                 static_cast<int>(y - 3.0f), 22, COL_TEXT);
 }
 } // namespace
 
@@ -154,19 +159,17 @@ size_t HeroCreateScreen::columnCount() const {
 }
 
 Rectangle HeroCreateScreen::cardRect(size_t index) const {
-    const size_t n = std::max<size_t>(1, m_presets.size());
-    const size_t cols = columnCount();
-    const size_t rows = (n + cols - 1) / cols;
-    const float gapX = (rows == 1) ? CARD_GAP : CARD_GAP_COMPACT;
-    const float gapY = CARD_GAP_COMPACT;
-    const float w = std::min(CARD_MAX_W, (AREA_W - gapX * static_cast<float>(cols - 1)) / static_cast<float>(cols));
-    const float h = (rows == 1) ? CARD_AREA_H - 5.0f
-                                : (CARD_AREA_H - gapY * static_cast<float>(rows - 1)) / static_cast<float>(rows);
+    const size_t cols = std::max<size_t>(1, std::min(m_presets.size(), MAX_COLUMNS));
     const size_t row = index / cols, col = index % cols;
-    const size_t inRow = std::min(cols, n - row * cols);                 // so the o hang nay (hang cuoi co the thieu)
-    const float total = w * static_cast<float>(inRow) + gapX * static_cast<float>(inRow - 1);
-    const float x0 = AREA_X + (AREA_W - total) / 2.0f;
-    return Rectangle{ x0 + static_cast<float>(col) * (w + gapX), CARD_Y + static_cast<float>(row) * (h + gapY), w, h };
+    const size_t inRow = std::min(cols, m_presets.size() - row * cols);
+    const float w = std::min(CARD_MAX_W,
+        (AREA_W - CARD_GAP * static_cast<float>(cols - 1)) / static_cast<float>(cols));
+    const float total = w * static_cast<float>(inRow) + CARD_GAP * static_cast<float>(inRow - 1);
+    const float x0 = (static_cast<float>(UiCanvas::width()) - total) * 0.5f;
+    const float rowH = (CARD_AREA_H - CARD_GAP_COMPACT) * 0.5f;
+    return Rectangle{ x0 + static_cast<float>(col) * (w + CARD_GAP),
+                      CARD_Y + static_cast<float>(row) * (rowH + CARD_GAP_COMPACT),
+                      w, rowH };
 }
 
 Rectangle HeroCreateScreen::buttonRect(int index) const {
@@ -206,7 +209,7 @@ HeroCreateAction HeroCreateScreen::handleInput() {
     if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER) || IsKeyPressed(KEY_SPACE))
         return HeroCreateAction::CONFIRM;
 
-    const Vector2 mouse = GetMousePosition();
+    const Vector2 mouse = UiCanvas::mousePosition();
     const bool clicked = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
     m_hoverCard = -1;
@@ -230,30 +233,28 @@ HeroCreateAction HeroCreateScreen::handleInput() {
 // ============ Ve ============
 void HeroCreateScreen::drawBackground() const {
     if (m_hasBackground) {
-        DrawTexturePro(m_background,
-                       Rectangle{ 0, 0, static_cast<float>(m_background.width), static_cast<float>(m_background.height) },
-                       Rectangle{ 0, 0, 1280.0f, 720.0f }, Vector2{ 0, 0 }, 0.0f, WHITE);
+        UiCanvas::drawCover(m_background, Rectangle{ 0.0f, 0.0f,
+            static_cast<float>(UiCanvas::width()), static_cast<float>(UiCanvas::height()) });
         DrawRectangle(0, 0, 1280, 720, Color{ 0, 0, 0, 120 });
     } else {
-        DrawRectangleGradientV(0, 0, 1280, 720, Color{ 24, 20, 48, 255 }, Color{ 8, 6, 20, 255 });
+        DrawRectangleGradientV(0, 0, 1280, 720, Color{ 25, 16, 23, 255 }, UiTheme::ink);
     }
 }
 
 void HeroCreateScreen::drawCards() const {
     for (size_t i = 0; i < m_presets.size(); ++i) {
         const HeroPreset& p = m_presets[i];
-        const Rectangle r = cardRect(i);
-        const bool compact = r.height < COMPACT_BELOW_H;
+        Rectangle r = cardRect(i);
         const bool selected = (i == m_selected);
         const bool hover = (static_cast<int>(i) == m_hoverCard);
+        if (selected) r.y -= 4.0f;
+        UiShapes::plate(r,
+            selected ? Color{ 50, 10, 17, 224 } : UiTheme::panel,
+            selected ? COL_EDGE_FOCUS : (hover ? COL_LABEL : COL_EDGE),
+            selected ? 2.0f : 1.0f);
 
-        DrawRectangleRec(r, selected ? Color{ 34, 28, 64, 235 } : COL_PANEL);
-        DrawRectangleLinesEx(r, selected ? 3.0f : 2.0f, selected ? COL_EDGE_FOCUS : (hover ? COL_LABEL : COL_EDGE));
-
-        // --- Sprite IDLE (dai frame vuong, vd 4 x 128px) ---
-        const float spriteSize = compact ? 96.0f : 192.0f;
-        const Vector2 spritePos = compact ? Vector2{ r.x + 8.0f, r.y + (r.height - spriteSize) / 2.0f }
-                                          : Vector2{ r.x + (r.width - spriteSize) / 2.0f, r.y + 16.0f };
+        const float spriteSize = 64.0f;
+        const Vector2 spritePos{ r.x + 10.0f, r.y + 10.0f };
         const Texture2D& tex = m_presetTextures[i];
         if (tex.id != 0 && tex.height > 0) {
             const int fs = tex.height;
@@ -262,104 +263,160 @@ void HeroCreateScreen::drawCards() const {
             DrawTexturePro(tex,
                            Rectangle{ static_cast<float>(frame * fs), 0.0f, static_cast<float>(fs), static_cast<float>(fs) },
                            Rectangle{ spritePos.x, spritePos.y, spriteSize, spriteSize },
-                           Vector2{ 0, 0 }, 0.0f, WHITE);
+                           Vector2{ 0, 0 }, 0.0f,
+                           selected ? WHITE : Color{ 175, 175, 185, 255 });
         } else {
             const float scale = spriteSize / static_cast<float>(std::max(1, m_sprite.getFrameWidth()));
-            m_sprite.drawFrame(spritePos, false, scale);
+            m_sprite.drawFrame(spritePos, false, scale,
+                               selected ? WHITE : Color{ 175, 175, 185, 255 });
         }
 
         const bool validIdx = p.m_raceIndex < m_races.size() && p.m_classIndex < m_classes.size();
         const size_t e = static_cast<size_t>(p.m_element);
-        const Color nameCol = selected ? COL_TITLE : COL_TEXT;
-
-        if (compact) {
-            // Chu ben phai sprite: ten / Chung toc / Lop / He
-            const float tx = r.x + 8.0f + spriteSize + 8.0f;
-            DrawText(p.m_name.c_str(), static_cast<int>(tx), static_cast<int>(r.y + 14.0f), 20, nameCol);
-            if (validIdx) {
-                DrawText(m_races[p.m_raceIndex].m_name.c_str(), static_cast<int>(tx), static_cast<int>(r.y + 44.0f), 16, COL_LABEL);
-                DrawText(m_classes[p.m_classIndex].m_name.c_str(), static_cast<int>(tx), static_cast<int>(r.y + 66.0f), 16, COL_LABEL);
+        const Color nameCol = selected ? COL_TITLE : Color{ 190, 188, 205, 255 };
+        const float tx = r.x + spriteSize + 22.0f;
+        const float textWidth = r.width - spriteSize - 30.0f;
+        const std::string heroName = Strings::localizedName(p.m_name);
+        UiText::draw(heroName.c_str(), static_cast<int>(tx), static_cast<int>(r.y + 12.0f), 17, nameCol);
+        if (validIdx) {
+            const std::string race = Strings::localizedName(m_races[p.m_raceIndex].m_name);
+            const std::string heroClass = Strings::localizedName(m_classes[p.m_classIndex].m_name);
+            const std::string role = race + u8" · " + heroClass;
+            if (UiText::measure(role, 15) <= textWidth) {
+                UiText::draw(role.c_str(), static_cast<int>(tx), static_cast<int>(r.y + 39.0f), 15,
+                             selected ? COL_TEXT : COL_LABEL);
+            } else {
+                UiText::draw(race.c_str(), static_cast<int>(tx), static_cast<int>(r.y + 35.0f), 14, COL_LABEL);
+                UiText::draw(heroClass.c_str(), static_cast<int>(tx), static_cast<int>(r.y + 54.0f), 14, COL_LABEL);
             }
-            if (e < ELEMENT_COUNT) {
-                DrawCircle(static_cast<int>(tx + 5.0f), static_cast<int>(r.y + 100.0f), 5.0f, elementColor(e));
-                DrawText(ELEMENT_NAMES[e], static_cast<int>(tx + 16.0f), static_cast<int>(r.y + 92.0f), 16, COL_TEXT);
-            }
-        } else {
-            const float cx = r.x + r.width / 2.0f;
-            drawCenteredText(p.m_name.c_str(), cx, r.y + 214.0f, 26, nameCol);
-            if (validIdx) {
-                const std::string rc = m_races[p.m_raceIndex].m_name + " " + m_classes[p.m_classIndex].m_name;
-                drawCenteredText(rc.c_str(), cx, r.y + 246.0f, 18, COL_LABEL);
-            }
-            if (e < ELEMENT_COUNT) {
-                const char* text = TextFormat("He %s", ELEMENT_NAMES[e]);
-                const int tw = MeasureText(text, 18);
-                DrawCircle(static_cast<int>(cx - tw / 2.0f - 12.0f), static_cast<int>(r.y + 278.0f), 6.0f, elementColor(e));
-                DrawText(text, static_cast<int>(cx - tw / 2.0f), static_cast<int>(r.y + 269.0f), 18, COL_TEXT);
-            }
+        }
+        if (e < ELEMENT_COUNT) {
+            UiIcons::draw(std::string("element:") + (e == 0 ? "kim" : e == 1 ? "moc" :
+                e == 2 ? "thuy" : e == 3 ? "hoa" : "tho"),
+                Rectangle{ tx, r.y + 74.0f, 16.0f, 16.0f }, elementColor(e));
+            UiText::draw(ELEMENT_NAMES[e], static_cast<int>(tx + 22.0f),
+                         static_cast<int>(r.y + 74.0f), 13, selected ? COL_TEXT : COL_LABEL);
         }
     }
 }
 
 void HeroCreateScreen::drawDetail() const {
     const Rectangle panel{ AREA_X, DETAIL_Y, AREA_W, DETAIL_H };
-    DrawRectangleRec(panel, COL_PANEL);
-    DrawRectangleLinesEx(panel, 2.0f, COL_EDGE);
+    UiShapes::plate(panel, COL_PANEL, COL_EDGE, 1.0f);
     if (m_selected >= m_presets.size()) return;
 
     const HeroPreset& p = m_presets[m_selected];
     const Stats s = totalStats(p);
+    const std::string heroName = Strings::localizedName(p.m_name);
+    const std::string race = p.m_raceIndex < m_races.size()
+        ? Strings::localizedName(m_races[p.m_raceIndex].m_name) : std::string{};
+    const std::string heroClass = p.m_classIndex < m_classes.size()
+        ? Strings::localizedName(m_classes[p.m_classIndex].m_name) : std::string{};
+    const float previewX = panel.x + 28.0f;
+    const float previewY = panel.y + 76.0f;
+    const float previewSize = 172.0f;
+    const Color element = elementColor(static_cast<size_t>(p.m_element));
+    DrawEllipse(static_cast<int>(previewX + previewSize * 0.5f),
+                static_cast<int>(previewY + previewSize - 8.0f), 76.0f, 16.0f,
+                Color{ element.r, element.g, element.b, 105 });
+    const Texture2D& preview = m_presetTextures[m_selected];
+    if (preview.id != 0 && preview.height > 0) {
+        const int frameSize = preview.height;
+        const int frames = std::max(1, preview.width / frameSize);
+        const int frame = static_cast<int>(m_time * IDLE_FPS) % frames;
+        DrawTexturePro(preview,
+            Rectangle{ static_cast<float>(frame * frameSize), 0.0f,
+                       static_cast<float>(frameSize), static_cast<float>(frameSize) },
+            Rectangle{ previewX, previewY, previewSize, previewSize },
+            Vector2{ 0.0f, 0.0f }, 0.0f, WHITE);
+    } else {
+        const float scale = previewSize /
+            static_cast<float>(std::max(1, m_sprite.getFrameWidth()));
+        m_sprite.drawFrame(Vector2{ previewX, previewY }, false, scale);
+    }
 
-    // --- Chi so (2 cot) ---
-    DrawText(TextFormat("CHI SO - %s", p.m_name.c_str()), static_cast<int>(panel.x + 24), static_cast<int>(panel.y + 14), 18, COL_TITLE);
-    const float col1 = panel.x + 24.0f, col2 = panel.x + 320.0f, y0 = panel.y + 48.0f, pitch = 38.0f, barW = 140.0f;
-    drawStatBar("HP",   s.m_hp,  m_statMax.m_hp,  col1, y0,             barW);
-    drawStatBar("MP",   s.m_mp,  m_statMax.m_mp,  col1, y0 + pitch,     barW);
-    drawStatBar("ATK",  s.m_a,   m_statMax.m_a,   col1, y0 + pitch * 2, barW);
-    drawStatBar("MATK", s.m_ma,  m_statMax.m_ma,  col1, y0 + pitch * 3, barW);
-    drawStatBar("DEF",  s.m_d,   m_statMax.m_d,   col2, y0,             barW);
-    drawStatBar("MDEF", s.m_md,  m_statMax.m_md,  col2, y0 + pitch,     barW);
-    drawStatBar("SPD",  s.m_spd, m_statMax.m_spd, col2, y0 + pitch * 2, barW);
+    const float infoX = panel.x + 220.0f;
+    UiText::draw(heroName.c_str(), static_cast<int>(infoX), static_cast<int>(panel.y + 20.0f), 26, COL_TITLE);
+    UiText::draw((race + u8" · " + heroClass).c_str(), static_cast<int>(infoX),
+                 static_cast<int>(panel.y + 54.0f), 19, COL_TEXT);
+    UiIcons::draw(std::string("element:") + (static_cast<int>(p.m_element) == 0 ? "kim" :
+        static_cast<int>(p.m_element) == 1 ? "moc" : static_cast<int>(p.m_element) == 2 ? "thuy" :
+        static_cast<int>(p.m_element) == 3 ? "hoa" : "tho"),
+        Rectangle{ infoX, panel.y + 80.0f, 20.0f, 20.0f }, element);
+    UiText::draw(TextFormat(Strings::elementPrefix, ELEMENT_NAMES[static_cast<size_t>(p.m_element)]),
+                 static_cast<int>(infoX + 28.0f), static_cast<int>(panel.y + 80.0f), 16, element);
 
-    // --- Ky nang: [T] cua Chung toc, [L] cua Lop ---
-    const float sx = panel.x + 660.0f;
-    DrawText("KY NANG", static_cast<int>(sx), static_cast<int>(panel.y + 14), 18, COL_TITLE);
-    int line = 0;
-    auto drawSkills = [&](const std::vector<std::string>& names, const char* tag, Color tagColor) {
-        for (const std::string& name : names) {
-            if (line >= MAX_SKILL_LINES) return;
-            const float y = panel.y + 48.0f + static_cast<float>(line) * 34.0f;
-            DrawText(tag, static_cast<int>(sx), static_cast<int>(y), 20, tagColor);
-            DrawText(name.c_str(), static_cast<int>(sx + 40.0f), static_cast<int>(y), 20, COL_TEXT);
-            ++line;
-        }
-    };
-    if (p.m_raceIndex < m_races.size())   drawSkills(m_races[p.m_raceIndex].m_skillNames,   "[T]", Color{ 120, 230, 160, 255 });
-    if (p.m_classIndex < m_classes.size()) drawSkills(m_classes[p.m_classIndex].m_skillNames, "[L]", Color{ 120, 170, 255, 255 });
+    const float statX = infoX;
+    const float y0 = panel.y + 116.0f;
+    const float pitch = 26.0f;
+    const float barW = 96.0f;
+    drawStatBar("HP", s.m_hp, m_statMax.m_hp, statX, y0, barW);
+    drawStatBar("MP", s.m_mp, m_statMax.m_mp, statX, y0 + pitch, barW);
+    drawStatBar("ATK", s.m_a, m_statMax.m_a, statX, y0 + pitch * 2, barW);
+    drawStatBar("MATK", s.m_ma, m_statMax.m_ma, statX, y0 + pitch * 3, barW);
+    drawStatBar("DEF", s.m_d, m_statMax.m_d, statX + 210.0f, y0, barW);
+    drawStatBar("MDEF", s.m_md, m_statMax.m_md, statX + 210.0f, y0 + pitch, barW);
+    drawStatBar("SPD", s.m_spd, m_statMax.m_spd, statX + 210.0f, y0 + pitch * 2, barW);
+
+    const float sx = panel.x + 650.0f;
+    UiText::draw(Strings::skillMenuTitle, static_cast<int>(sx), static_cast<int>(panel.y + 20), 18, COL_TITLE);
+    struct SkillEntry { std::string name; const char* source; Color color; };
+    std::vector<SkillEntry> skills;
+    if (p.m_raceIndex < m_races.size())
+        for (const std::string& name : m_races[p.m_raceIndex].m_skillNames)
+            if (skills.size() < MAX_SKILL_LINES) skills.push_back({ name, u8"Tộc", Color{ 120, 230, 160, 255 } });
+    if (p.m_classIndex < m_classes.size())
+        for (const std::string& name : m_classes[p.m_classIndex].m_skillNames)
+            if (skills.size() < MAX_SKILL_LINES) skills.push_back({ name, u8"Lớp", Color{ 120, 170, 255, 255 } });
+    m_hoverSkill = -1;
+    const Vector2 mouse = UiCanvas::mousePosition();
+    for (size_t i = 0; i < skills.size(); ++i) {
+        const float y = panel.y + 50.0f + static_cast<float>(i) * 48.0f;
+        const Rectangle row{ sx, y, panel.x + panel.width - sx - 24.0f, 40.0f };
+        const bool hovered = CheckCollisionPointRec(mouse, row);
+        if (hovered) m_hoverSkill = static_cast<int>(i);
+        UiShapes::bladeStrip(row,
+            hovered ? UiTheme::panelRaised : UiTheme::panel,
+            hovered ? COL_EDGE_FOCUS : COL_EDGE, false, hovered, hovered);
+        UiIcons::draw("action:skill",
+            Rectangle{ row.x + 8.0f, row.y + 7.0f, 26.0f, 26.0f }, element);
+        UiText::draw(skills[i].source, static_cast<int>(row.x + 42.0f),
+                     static_cast<int>(row.y + 11.0f), 14, skills[i].color);
+        const std::string name = Strings::localizedName(skills[i].name);
+        UiText::draw(name.c_str(), static_cast<int>(row.x + 86.0f),
+                     static_cast<int>(row.y + 10.0f), 15, COL_TEXT);
+    }
+    if (m_hoverSkill >= 0) {
+        const SkillEntry& skill = skills[static_cast<size_t>(m_hoverSkill)];
+        UiText::draw(Strings::localizedName(skill.name).c_str(), static_cast<int>(sx),
+                     static_cast<int>(panel.y + panel.height - 28.0f), 14, COL_LABEL);
+    }
 }
 
 void HeroCreateScreen::drawButtons() const {
-    const char* const labels[BTN_COUNT] = { "QUAY LAI", "XAC NHAN" };
+    const char* const labels[BTN_COUNT] = { Strings::back, Strings::confirm };
     for (int b = 0; b < BTN_COUNT; ++b) {
         const Rectangle r = buttonRect(b);
         const bool hover = (m_hoverButton == b);
         const bool primary = (b == BTN_CONFIRM);
-        DrawRectangleRec(r, hover ? Color{ 52, 44, 92, 255 } : COL_PANEL);
-        DrawRectangleLinesEx(r, 2.0f, primary ? COL_EDGE_FOCUS : COL_EDGE);
-        drawCenteredText(labels[b], r.x + r.width / 2.0f, r.y + 14.0f, 24, primary ? COL_TITLE : COL_TEXT);
+        UiShapes::bladeStrip(r, primary ? Color{ 50, 10, 17, 224 } : COL_PANEL,
+                             primary ? COL_EDGE_FOCUS : COL_EDGE, false,
+                             primary, hover);
+        drawCenteredText(labels[b], r.x + r.width / 2.0f, r.y + 14.0f, 24,
+                         primary ? COL_TITLE : COL_TEXT, UiTheme::displayTracking);
     }
 }
 
 void HeroCreateScreen::draw() const {
     drawBackground();
-    drawCenteredText(m_slotLabel.c_str(), 640.0f, 28.0f, 44, COL_TITLE);
+    drawCenteredText(m_slotLabel.c_str(), 640.0f, 28.0f, 44, COL_TITLE,
+                     UiTheme::displayTracking);
     if (!hasOptions()) {
-        drawCenteredText("Chua co du lieu tuong (data/heroes.csv, races.csv, classes.csv)", 640.0f, 340.0f, 22, COL_DIM);
+        drawCenteredText(u8"Chưa có dữ liệu tướng (data/heroes.csv, races.csv, classes.csv)", 640.0f, 340.0f, 22, COL_DIM);
         drawButtons();
         return;
     }
     drawCards();
     drawDetail();
     drawButtons();
-    drawCenteredText("[Mui ten] Chon tuong   [ENTER] Xac nhan   [ESC] Quay lai", 640.0f, 698.0f, 16, COL_DIM);
 }

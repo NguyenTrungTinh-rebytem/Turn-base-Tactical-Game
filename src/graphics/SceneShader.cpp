@@ -1,6 +1,8 @@
 // src/graphics/SceneShader.cpp
 #include "graphics/SceneShader.h"
+#include "graphics/UiTheme.h"
 #include <cmath>
+#include <iostream>
 
 namespace {
 // GLSL 330 (raylib desktop OpenGL 3.3)
@@ -137,7 +139,9 @@ bool SceneShader::init(int width, int height)
     m_width = width;
     m_height = height;
 
-    m_target = LoadRenderTexture(width, height);
+    const int targetWidth = static_cast<int>(std::lround(width * UiCanvas::scale()));
+    const int targetHeight = static_cast<int>(std::lround(height * UiCanvas::scale()));
+    m_target = LoadRenderTexture(targetWidth, targetHeight);
     if (m_target.id == 0) {
         TraceLog(LOG_WARNING, "SceneShader: khong tao duoc RenderTexture -> tat shader.");
         return false;
@@ -174,6 +178,7 @@ bool SceneShader::init(int width, int height)
 
 void SceneShader::unload()
 {
+    end();
     if (!m_ready) return;
     if (IsWindowReady()) {
         UnloadShader(m_shader);
@@ -186,20 +191,37 @@ void SceneShader::unload()
 
 void SceneShader::begin()
 {
-    if (!isActive()) return;
-    BeginTextureMode(m_target);
+    if (!isActive() || m_targetScope) return;
+    m_captureValid = false;
+    m_canvasSuspension = std::make_unique<UiCanvas::SuspensionGuard>();
+    if (!*m_canvasSuspension) {
+        std::cerr << "SceneShader: battle capture skipped because UiCanvas is not active\n";
+        m_canvasSuspension.reset();
+        return;
+    }
+    m_targetScope = std::make_unique<RaylibScope::TextureMode>(m_target);
+    if (!*m_targetScope) {
+        std::cerr << "SceneShader: unable to begin battle render target\n";
+        m_targetScope.reset();
+        m_canvasSuspension.reset();
+        return;
+    }
     ClearBackground(BLACK);
+    m_cameraScope = std::make_unique<RaylibScope::CameraMode>(UiCanvas::camera());
 }
 
 void SceneShader::end()
 {
-    if (!isActive()) return;
-    EndTextureMode();
+    if (!m_targetScope) return;
+    m_cameraScope.reset();
+    m_targetScope.reset();
+    m_canvasSuspension.reset();
+    m_captureValid = true;
 }
 
 void SceneShader::draw(SceneMood mood, float timeSeconds)
 {
-    if (!isActive()) return;
+    if (!isActive() || !m_captureValid) return;
 
     float tint[3], rayColor[3], lightColor[3], hazeColor[3], lightPos[2];
     float vignette, contrast, saturation, bloom, dof, rays, relief, haze, ao;
@@ -226,7 +248,8 @@ void SceneShader::draw(SceneMood mood, float timeSeconds)
         hazeColor[0] = 0.12f; hazeColor[1] = 0.30f; hazeColor[2] = 0.28f;
         relief = 0.0f; haze = 0.14f; ao = 0.0f;
     }
-    float res[2] = { static_cast<float>(m_width), static_cast<float>(m_height) };
+    float res[2] = { static_cast<float>(m_target.texture.width),
+                     static_cast<float>(m_target.texture.height) };
     SetShaderValue(m_shader, m_locRes, res, SHADER_UNIFORM_VEC2);
     SetShaderValue(m_shader, m_locTime, &timeSeconds, SHADER_UNIFORM_FLOAT);
     SetShaderValue(m_shader, m_locTint, tint, SHADER_UNIFORM_VEC3);
@@ -244,12 +267,15 @@ void SceneShader::draw(SceneMood mood, float timeSeconds)
     SetShaderValue(m_shader, m_locHazeColor, hazeColor, SHADER_UNIFORM_VEC3);
     SetShaderValue(m_shader, m_locAo, &ao, SHADER_UNIFORM_FLOAT);
 
-    BeginShaderMode(m_shader);
-    // RenderTexture bi lat doc -> chieu cao am
-    DrawTextureRec(m_target.texture,
-                   Rectangle{ 0.0f, 0.0f, static_cast<float>(m_width), -static_cast<float>(m_height) },
-                   Vector2{ 0.0f, 0.0f }, WHITE);
-    EndShaderMode();
+    {
+        RaylibScope::ShaderMode shader(m_shader);
+        DrawTexturePro(m_target.texture,
+            Rectangle{ 0.0f, 0.0f, static_cast<float>(m_target.texture.width),
+                       -static_cast<float>(m_target.texture.height) },
+            Rectangle{ 0.0f, 0.0f, static_cast<float>(m_width),
+                       static_cast<float>(m_height) },
+            Vector2{ 0.0f, 0.0f }, 0.0f, WHITE);
+    }
 
     updateEmbers(GetFrameTime(), mood);
     drawEmbers(mood, timeSeconds);
@@ -283,7 +309,7 @@ void SceneShader::updateEmbers(float dt, SceneMood mood)
 void SceneShader::drawEmbers(SceneMood mood, float t)
 {
     const Color core = (mood == SceneMood::BOSS) ? Color{ 255, 90, 50, 255 } : Color{ 210, 230, 255, 255 };
-    BeginBlendMode(BLEND_ADDITIVE);
+    RaylibScope::Blend blend(BLEND_ADDITIVE);
     for (const Ember& e : m_embers) {
         float tw = 0.55f + 0.45f * std::sin(t * 4.0f + e.phase);
         float fadeIn = std::fmin(1.0f, e.life);                // tat dan khi het song
@@ -291,5 +317,4 @@ void SceneShader::drawEmbers(SceneMood mood, float t)
         DrawCircleV(Vector2{ e.x, e.y }, e.size * 2.6f, Color{ core.r, core.g, core.b, static_cast<unsigned char>(a / 6) });
         DrawCircleV(Vector2{ e.x, e.y }, e.size, Color{ core.r, core.g, core.b, a });
     }
-    EndBlendMode();
 }

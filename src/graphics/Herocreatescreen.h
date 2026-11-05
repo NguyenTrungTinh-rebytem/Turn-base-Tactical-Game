@@ -91,6 +91,7 @@ private:
     size_t       m_selected = 0;
     int          m_hoverCard = -1;
     int          m_hoverButton = -1;
+    mutable int  m_hoverSkill = -1;
 
     float        m_time = 0.0f;
 

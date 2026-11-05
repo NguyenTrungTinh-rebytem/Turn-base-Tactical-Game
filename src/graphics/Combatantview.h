@@ -2,6 +2,7 @@
 // Member 4 - Huynh Quang Khai | src/graphics/CombatantView.h
 // Ghep 1 Character (chi QUAN SAT, khong so huu) <-> 1 SpriteAnimation (so huu) + 1 BattleSlot.
 #include "raylib.h"
+#include "BattleAnchors.h"
 #include "BattleMap.h"
 #include "SpriteAnimation.h"
 #include <memory>
@@ -24,12 +25,16 @@ public:
     void play(AnimState state, bool restart = true);
     void update(float deltaTime);
     void draw(const BattleMap& map, Color baseTint = WHITE) const;   // bong + sprite (co lam mo khi chet)
+    bool drawPortrait(Rectangle bounds, Color tint = WHITE) const;
     bool isOneShotFinished() const;
 
     // ---- Tien ich ----
     void triggerHitFlash();                         // nhap nhay do ~0.4s
     void setSlot(const BattleSlot& slot) { m_slot = slot; }
     const BattleSlot& getSlot() const { return m_slot; }
+    Rectangle getDrawBounds() const;
+    bool containsPoint(Vector2 point) const;
+    BattleAnchor getAnchor() const;
     Vector2 getHeadPos() const;                     // dung cho BattleUI::drawHpMpBar / spawnFloatingText
     const Character* getCharacter() const { return m_character; }
     bool isVisible() const { return m_alpha > 0.01f; }
