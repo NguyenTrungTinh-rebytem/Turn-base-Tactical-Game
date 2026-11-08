@@ -249,6 +249,7 @@ void GameEngine::initialize()
     SetExitKey(KEY_NULL);   // ESC do game tu xu ly (Undo / ve Menu), khong thoat thang
     m_audio.init();                                          // khong co loa -> game van chay, chi im lang
     m_audio.loadAll(resolvePath("assets/audio"));
+    m_vfx.load(resolvePath("assets/vfx"));                   // thieu thu muc -> khong co hieu ung ky nang, game van chay
     m_sceneShader.init(UiCanvas::width(), UiCanvas::height()); // loi shader -> tu tat, game ve binh thuong
 
     try {
@@ -314,6 +315,7 @@ void GameEngine::shutdown()
 {
     m_combatSubject.clearObservers();
     // Giai phong Texture (sprite) TRUOC khi dong cua so
+    m_vfx.unloadAll();
     m_views.clear();
     m_ui.unloadAll();
     m_turnOrderBar.reset();
@@ -943,6 +945,7 @@ void GameEngine::beginRun(int startStage)
     m_combatants.clear();
     m_baseSpeed.clear();
     m_scaleMul.clear();
+    m_vfx.clear();                   // hieu ung giu con tro toi CombatantView => xoa truoc khi xoa view
     m_views.clear();
     m_ui.unloadAll();
     m_goldPaid.clear();
@@ -2067,6 +2070,7 @@ bool GameEngine::castSkill(size_t skillIndex)
         syncHealth(h);
         syncHealth(target);
         applySkillEffect(skill, target);
+        playSkillVfx(skill, h, target);
 
         if (offensive)
             m_battleLog = Strings::localizedName(h->getName()) + " dùng " +
@@ -2238,6 +2242,8 @@ void GameEngine::update(float deltaTime)
 
     // Cap nhat sprite + hieu ung UI (chu bay)
     for (auto& v : m_views) v->update(deltaTime);
+    syncVfxStatus();
+    m_vfx.update(deltaTime);
     m_ui.update(deltaTime);
     if (m_battlePhase == BattlePhase::PLAYER_TURN && m_currentCharacter &&
         isHero(m_currentCharacter)) {
@@ -2371,6 +2377,7 @@ void GameEngine::applySkillEffect(const Skill& skill, Character* target)
     case EffectType::NONE:      return;
     }
     m_statusEffects[target].addEffect(type, skill.m_effectTurns, value);
+    m_vfx.startStatus(skill.m_name, viewOf(target), type);   // hieu ung lap, tu tat khi het status
 }
 
 void GameEngine::playAnimation(Character* character, AnimState state)
@@ -2379,6 +2386,32 @@ void GameEngine::playAnimation(Character* character, AnimState state)
     if (idx >= 0 && static_cast<size_t>(idx) < m_views.size())
         m_views[static_cast<size_t>(idx)]->play(state, true);
     playActionSfx(character, state);
+}
+
+const CombatantView* GameEngine::viewOf(const Character* character) const
+{
+    const int idx = indexOf(character);
+    if (idx < 0 || static_cast<size_t>(idx) >= m_views.size()) return nullptr;
+    return m_views[static_cast<size_t>(idx)].get();
+}
+
+void GameEngine::playSkillVfx(const Skill& skill, Character* caster, Character* target)
+{
+    // Cung dieu kien voi applySkillEffect: neu skill se gan status thi clip "status" do startStatus lo.
+    const bool statusApplies = skill.m_effect != EffectType::NONE && skill.m_effectTurns > 0 &&
+                               target && target->isAlive();
+    m_vfx.playSkill(skill.m_name, viewOf(caster), viewOf(target), statusApplies);
+}
+
+void GameEngine::syncVfxStatus()
+{
+    const std::size_t count = std::min(m_combatants.size(), m_views.size());
+    for (std::size_t i = 0; i < count; ++i)
+    {
+        if (!m_combatants[i] || !m_views[i]) continue;
+        const auto it = m_statusEffects.find(m_combatants[i].get());
+        m_vfx.syncStatus(m_views[i].get(), it == m_statusEffects.end() ? nullptr : &it->second);
+    }
 }
 
 // =====================================================================
@@ -2601,6 +2634,7 @@ void GameEngine::renderCombatants()
         const Color tint = (i < m_party.size()) ? WHITE : elementColor(m_combatants[i]->getElement());
         m_views[i]->draw(m_battleMap, tint);   // da gom bong + mo dan khi chet
     }
+    m_vfx.draw();                              // hieu ung ky nang ve len tren nhan vat (nam trong canh => an theo SceneShader)
 }
 
 void GameEngine::renderBattleUI()

@@ -41,6 +41,7 @@ set(OLD_GLOB
   "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/PrepMenuScreen.cpp"
   "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/SceneShader.cpp"
   "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/ShopScreen.cpp"
+  "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/SkillVfx.cpp"
   "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/Skilltooltip.cpp"
   "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/SpriteAnimation.cpp"
   "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/graphics/StartMenu.cpp"

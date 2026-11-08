@@ -31,6 +31,7 @@
 #include "graphics/ItemIcons.h"
 #include "graphics/SceneShader.h"
 #include "graphics/ShopScreen.h"
+#include "graphics/SkillVfx.h"
 #include "raylib.h"
 #include <memory>
 #include <random>
@@ -159,6 +160,10 @@ private:
     void spendMpWithoutDamage(Character* caster, const Skill& skill);
     void applySkillEffect(const Skill& skill, Character* target);
     void playAnimation(Character* character, AnimState state);
+    // ----- hieu ung ky nang (SkillVfxPlayer chi ve; Core quyet dinh luc nao phat) -----
+    const CombatantView* viewOf(const Character* character) const;
+    void playSkillVfx(const Skill& skill, Character* caster, Character* target);
+    void syncVfxStatus();                                // go hieu ung bam theo khi status da het / bi undo
 
     // ----- Observer (ICombatObserver) -----
     void onHealthChanged(Character* character, int newHealth) override;
@@ -226,6 +231,7 @@ HeroConfig m_heroConfig;
     AudioManager m_audio;
     ItemIcons m_itemIcons;
     SceneShader m_sceneShader;
+    SkillVfxPlayer m_vfx;
     ShopConfig m_shopConfig;
     ShopScreen m_shop;
     int m_gold = 0;
