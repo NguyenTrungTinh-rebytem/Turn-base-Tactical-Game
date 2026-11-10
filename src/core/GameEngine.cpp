@@ -59,6 +59,20 @@ namespace
         return "assets/images/hero_" + id + "_battle.png";
     }
     
+    // Anh icon/chan dung tuong cho Shop + Chuan bi: uu tien portraits/portrait_<id>.png (1 anh vuong).
+    // KHONG dung hero_<id>_battle.png vi do la DAI NHIEU KHUNG -> ve vao icon se bi ep thanh cac cham nho.
+    template <class ResolveFn>
+    std::string heroIconPath(const std::string& heroName, ResolveFn resolve)
+    {
+        std::string id;
+        for (char ch : heroName) id += static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+        while (!id.empty() && (std::isdigit(static_cast<unsigned char>(id.back())) || id.back() == ' ')) id.pop_back();
+        if (id.empty()) return "";
+        const std::string portrait = resolve("assets/images/portraits/portrait_" + id + ".png");
+        if (FileExists(portrait.c_str())) return portrait;
+        return resolve(heroSpritePath(heroName));   // thieu chan dung -> dung tam anh cu
+    }
+
     // Tuong nu (giong hero_<id> trong heroes.csv) -> dung tieng nu. Con lai dung tieng nam.
     bool isFemaleHeroName(const std::string& heroName)
     {
@@ -621,7 +635,7 @@ void GameEngine::openPrepMenu(int wave)
     info.m_hero.m_name = m_heroConfig.m_name;
     info.m_hero.m_race = m_heroConfig.m_race;
     info.m_hero.m_class = m_heroConfig.m_class;
-    info.m_hero.m_portraitPath = resolvePath(heroSpritePath(m_heroConfig.m_name));
+    info.m_hero.m_portraitPath = heroIconPath(m_heroConfig.m_name, [this](const std::string& p) { return resolvePath(p); });
     info.m_hero.m_element = m_heroConfig.m_element;
     info.m_hero.m_stats = Stats{ 120, 50, 25, 20, 5, 8, 15 };   // du phong
     info.m_teammateSlots = static_cast<int>(Party::MAX_SIZE) - static_cast<int>(m_partyConfigs.size());
@@ -630,7 +644,7 @@ void GameEngine::openPrepMenu(int wave)
         member.m_name = config.m_name;
         member.m_race = config.m_race;
         member.m_class = config.m_class;
-        member.m_portraitPath = resolvePath(heroSpritePath(config.m_name));
+        member.m_portraitPath = heroIconPath(config.m_name, [this](const std::string& p) { return resolvePath(p); });
         member.m_element = config.m_element;
         try { member.m_stats = m_gameData.getBaseStats(config.m_race, config.m_class); }
         catch (const std::exception&) { member.m_stats = Stats{120,50,25,20,5,8,15}; }
@@ -1150,7 +1164,7 @@ void GameEngine::refreshShop()
     for (std::size_t i = 0; i < m_party.size(); ++i) {
         ShopMemberInfo m;
         m.m_name = m_party.getMember(i)->getName();
-        m.m_portraitPath = resolvePath(heroSpritePath(m.m_name));
+        m.m_portraitPath = heroIconPath(m.m_name, [this](const std::string& p) { return resolvePath(p); });
         if (i < Party::MAX_SIZE && m_equippedGear[i]) {
             m.m_gearId = m_equippedGear[i]->getId();
             m.m_gearName = m_equippedGear[i]->getNameVi();
