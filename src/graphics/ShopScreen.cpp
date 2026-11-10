@@ -681,9 +681,11 @@ void ShopScreen::drawMemberSelector(bool shopTab, const Rectangle& bounds) const
             // Anh dai nhieu khung (sprite) -> chi lay khung vuong dau tien; anh vuong (chan dung) -> ve ca anh
             const float texW = static_cast<float>(m_memberPortraits[index].width);
             const float texH = static_cast<float>(m_memberPortraits[index].height);
-            const float srcW = (texW > texH * 1.5f) ? texH : texW;
+            const bool isSquare = std::fabs(texW - texH) < 1.0f;   // chan dung vuong -> ve ca anh
+            const float srcW = isSquare ? texW : std::min(128.0f, std::min(texW, texH));
+            const float srcH = isSquare ? texH : srcW;             // sheet 128x128/o -> chi lay o dau
             DrawTexturePro(m_memberPortraits[index],
-                Rectangle{ 0.0f, 0.0f, srcW, texH },
+                Rectangle{ 0.0f, 0.0f, srcW, srcH },
                 hex, Vector2{ 0.0f, 0.0f }, 0.0f, WHITE);
             DrawTriangle(Vector2{ hex.x, hex.y }, Vector2{ hex.x + hex.width * 0.25f, hex.y },
                          Vector2{ hex.x, hex.y + hex.height * 0.5f }, cardFill);

@@ -331,8 +331,8 @@ void PrepMenuScreen::drawPartyTab(const Rectangle& area) const {
                         48.0f, 12.0f, Color{ tint.r, tint.g, tint.b, 100 });
             const Texture2D& texture = m_memberPortraits[i];
             if (texture.id != 0 && texture.height > 0) {
-                // Dai sprite: khung vuong = chieu cao; lay khung dau tien (model pixel, khong cat mat)
-                const float frame = static_cast<float>(texture.height);
+                // Sheet hero: o 128x128, nhieu hang/cot -> chi lay o dau tien (idle frame 0)
+                const float frame = static_cast<float>(std::min(128, std::min(texture.width, texture.height)));
                 DrawTexturePro(texture,
                     Rectangle{ 0.0f, 0.0f, frame, frame }, portrait,
                     Vector2{ 0.0f, 0.0f }, 0.0f, WHITE);
