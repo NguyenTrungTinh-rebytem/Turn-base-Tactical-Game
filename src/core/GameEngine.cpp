@@ -29,6 +29,7 @@
 #include "data/HeroPresetConfig.h"
 #include "data/CharacterRules.h"
 #include "graphics/SceneShader.h"
+#include "graphics/AttackLunge.h"
 #include <cctype>
 
 namespace
@@ -946,6 +947,7 @@ void GameEngine::beginRun(int startStage)
     m_baseSpeed.clear();
     m_scaleMul.clear();
     m_vfx.clear();                   // hieu ung giu con tro toi CombatantView => xoa truoc khi xoa view
+    AttackLunge::clear();            // tuong tu: huy luot toi dang chay truoc khi xoa view
     m_views.clear();
     m_ui.unloadAll();
     m_goldPaid.clear();
@@ -1979,7 +1981,13 @@ void GameEngine::doBasicAttack()
         return;
 
     const int dealt = hpBefore - target->getCurrentHp();
-    playAnimation(attacker, AnimState::ATTACK);
+    {
+        // Can chien (thien ve ATK) -> luot toi danh; tu xa (thien ve MATK) -> dung yen danh nhu cu
+        const bool melee = attacker->getStats().m_a >= attacker->getStats().m_ma;
+        auto play = [this, attacker]() { playAnimation(attacker, AnimState::ATTACK); };
+        if (!(melee && AttackLunge::start(const_cast<CombatantView*>(viewOf(attacker)), viewOf(target), play)))
+            play();
+    }
     syncHealth(target);
 
     m_battleLog = Strings::localizedName(attacker->getName()) + " tấn công " +
@@ -2049,6 +2057,7 @@ bool GameEngine::castSkill(size_t skillIndex)
         *casterSnapshot = CharacterSnapshot(*h);
         *previousEffects = m_statusEffects[target];
         const int hpBefore = target->getCurrentHp();
+        bool vfxDeferred = false;
 
         if (offensive)
         {
@@ -2058,7 +2067,16 @@ bool GameEngine::castSkill(size_t skillIndex)
             Skill cast = skill;
             cast.m_power = static_cast<int>(total) - static_cast<int>(atk);
             h->executeSkill(&cast, target);
-            playAnimation(h, AnimState::ATTACK);
+            // Skill vat ly -> luot toi; VFX + animation + tieng cho toi luc cham muc tieu
+            auto onHit = [this, h, target, skill]() {
+                playAnimation(h, AnimState::ATTACK);
+                playSkillVfx(skill, h, target);
+            };
+            if (!skill.m_isMagic &&
+                AttackLunge::start(const_cast<CombatantView*>(viewOf(h)), viewOf(target), onHit))
+                vfxDeferred = true;
+            else
+                playAnimation(h, AnimState::ATTACK);
         }
         else
         {
@@ -2070,7 +2088,7 @@ bool GameEngine::castSkill(size_t skillIndex)
         syncHealth(h);
         syncHealth(target);
         applySkillEffect(skill, target);
-        playSkillVfx(skill, h, target);
+        if (!vfxDeferred) playSkillVfx(skill, h, target);
 
         if (offensive)
             m_battleLog = Strings::localizedName(h->getName()) + " dùng " +
@@ -2212,7 +2230,11 @@ void GameEngine::executeAiTurn(Character* aiChar)
     aiChar->executeSkill(&basic, h);
     const int dealt = hpBefore - h->getCurrentHp();
 
-    playAnimation(aiChar, AnimState::ATTACK);
+    {
+        auto play = [this, aiChar]() { playAnimation(aiChar, AnimState::ATTACK); };
+        if (!(!useMagic && AttackLunge::start(const_cast<CombatantView*>(viewOf(aiChar)), viewOf(h), play)))
+            play();
+    }
     syncHealth(h);
 
     aiChar->onTurnEnd();
@@ -2242,6 +2264,7 @@ void GameEngine::update(float deltaTime)
 
     // Cap nhat sprite + hieu ung UI (chu bay)
     for (auto& v : m_views) v->update(deltaTime);
+    AttackLunge::update(deltaTime, m_views);     // luot toi danh cua can chien
     syncVfxStatus();
     m_vfx.update(deltaTime);
     m_ui.update(deltaTime);
@@ -2628,6 +2651,10 @@ void GameEngine::renderCombatants()
         DrawEllipse(static_cast<int>(f.x + 4.0f), static_cast<int>(f.y + 1.0f),
                     30.0f * k, 8.0f * k, Color{ 0, 0, 0, 90 });       // bong tiep dat dam o chan
     }
+
+    AttackLunge::drawGhosts(m_battleMap, m_views, [&](size_t i) {      // bong mo khi dang lao
+        return (i < m_party.size()) ? WHITE : elementColor(m_combatants[i]->getElement());
+    });
 
     for (size_t i : order)
     {
