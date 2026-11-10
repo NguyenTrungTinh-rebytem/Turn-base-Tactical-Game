@@ -29,6 +29,9 @@
 #include "data/HeroPresetConfig.h"
 #include "data/CharacterRules.h"
 #include "graphics/SceneShader.h"
+#include "graphics/AttackLunge.h"
+#include "graphics/SettingsScreen.h"
+#include "data/GameSettings.h"
 #include <cctype>
 
 namespace
@@ -40,6 +43,9 @@ namespace
     constexpr int   BOSS_FRAME     = 192;    // sheet boss: moi frame 192x192
     constexpr int SCREEN_WIDTH = 1280;
     constexpr int SCREEN_HEIGHT = 720;
+
+    // ----- Cai dat (khong dung GPU => de o day, khong can them thanh vien vao GameEngine.h) -----
+    SettingsScreen g_settings;
 
     // ----- Sprite -----
     constexpr int FRAME_W = 64;
@@ -58,6 +64,20 @@ namespace
         return "assets/images/hero_" + id + "_battle.png";
     }
     
+    // Anh icon/chan dung tuong cho Shop + Chuan bi: uu tien portraits/portrait_<id>.png (1 anh vuong).
+    // KHONG dung hero_<id>_battle.png vi do la DAI NHIEU KHUNG -> ve vao icon se bi ep thanh cac cham nho.
+    template <class ResolveFn>
+    std::string heroIconPath(const std::string& heroName, ResolveFn resolve)
+    {
+        std::string id;
+        for (char ch : heroName) id += static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+        while (!id.empty() && (std::isdigit(static_cast<unsigned char>(id.back())) || id.back() == ' ')) id.pop_back();
+        if (id.empty()) return "";
+        const std::string portrait = resolve("assets/images/portraits/portrait_" + id + ".png");
+        if (FileExists(portrait.c_str())) return portrait;
+        return resolve(heroSpritePath(heroName));   // thieu chan dung -> dung tam anh cu
+    }
+
     // Tuong nu (giong hero_<id> trong heroes.csv) -> dung tieng nu. Con lai dung tieng nam.
     bool isFemaleHeroName(const std::string& heroName)
     {
@@ -249,8 +269,12 @@ void GameEngine::initialize()
     SetExitKey(KEY_NULL);   // ESC do game tu xu ly (Undo / ve Menu), khong thoat thang
     m_audio.init();                                          // khong co loa -> game van chay, chi im lang
     m_audio.loadAll(resolvePath("assets/audio"));
+    GameSettings::get().load(resolvePath("settings.cfg"));   // am luong / shader / ngon ngu da luu
+    m_audio.setMusicVolume(GameSettings::get().m_musicVolume);
+    m_audio.setSfxVolume(GameSettings::get().m_sfxVolume);
     m_vfx.load(resolvePath("assets/vfx"));                   // thieu thu muc -> khong co hieu ung ky nang, game van chay
     m_sceneShader.init(UiCanvas::width(), UiCanvas::height()); // loi shader -> tu tat, game ve binh thuong
+    m_sceneShader.setEnabled(GameSettings::get().m_shaderEnabled);
 
     try {
         m_gameData.loadAll(resolvePath("data"));
@@ -320,6 +344,7 @@ void GameEngine::shutdown()
     m_ui.unloadAll();
     m_turnOrderBar.reset();
     m_actedThisRound.clear();
+    GameSettings::get().save(resolvePath("settings.cfg"));
     m_startMenu.unloadAll();
     m_heroCreate.unloadAll();
     m_waveSelect.unloadAll();
@@ -620,7 +645,7 @@ void GameEngine::openPrepMenu(int wave)
     info.m_hero.m_name = m_heroConfig.m_name;
     info.m_hero.m_race = m_heroConfig.m_race;
     info.m_hero.m_class = m_heroConfig.m_class;
-    info.m_hero.m_portraitPath = resolvePath(heroSpritePath(m_heroConfig.m_name));
+    info.m_hero.m_portraitPath = resolvePath(heroSpritePath(m_heroConfig.m_name));   // Chuan bi: dung model pixel
     info.m_hero.m_element = m_heroConfig.m_element;
     info.m_hero.m_stats = Stats{ 120, 50, 25, 20, 5, 8, 15 };   // du phong
     info.m_teammateSlots = static_cast<int>(Party::MAX_SIZE) - static_cast<int>(m_partyConfigs.size());
@@ -629,7 +654,7 @@ void GameEngine::openPrepMenu(int wave)
         member.m_name = config.m_name;
         member.m_race = config.m_race;
         member.m_class = config.m_class;
-        member.m_portraitPath = resolvePath(heroSpritePath(config.m_name));
+        member.m_portraitPath = resolvePath(heroSpritePath(config.m_name));   // Chuan bi: dung model pixel
         member.m_element = config.m_element;
         try { member.m_stats = m_gameData.getBaseStats(config.m_race, config.m_class); }
         catch (const std::exception&) { member.m_stats = Stats{120,50,25,20,5,8,15}; }
@@ -946,6 +971,7 @@ void GameEngine::beginRun(int startStage)
     m_baseSpeed.clear();
     m_scaleMul.clear();
     m_vfx.clear();                   // hieu ung giu con tro toi CombatantView => xoa truoc khi xoa view
+    AttackLunge::clear();            // tuong tu: huy luot toi dang chay truoc khi xoa view
     m_views.clear();
     m_ui.unloadAll();
     m_goldPaid.clear();
@@ -1148,7 +1174,7 @@ void GameEngine::refreshShop()
     for (std::size_t i = 0; i < m_party.size(); ++i) {
         ShopMemberInfo m;
         m.m_name = m_party.getMember(i)->getName();
-        m.m_portraitPath = resolvePath(heroSpritePath(m.m_name));
+        m.m_portraitPath = heroIconPath(m.m_name, [this](const std::string& p) { return resolvePath(p); });
         if (i < Party::MAX_SIZE && m_equippedGear[i]) {
             m.m_gearId = m_equippedGear[i]->getId();
             m.m_gearName = m_equippedGear[i]->getNameVi();
@@ -1414,6 +1440,36 @@ void GameEngine::processEvents()
     if (UiDevGallery::handleInput())
         return;
     if (IsKeyPressed(KEY_F11)) ToggleFullscreen();
+
+    // ----- Cai dat: dang mo thi chan moi input khac -----
+    if (g_settings.isOpen()) {
+        GameSettings& cfg = GameSettings::get();
+        switch (g_settings.handleInput()) {
+        case SettingsAction::CHANGED:
+            m_audio.setMusicVolume(cfg.m_musicVolume);
+            m_audio.setSfxVolume(cfg.m_sfxVolume);
+            m_sceneShader.setEnabled(cfg.m_shaderEnabled);
+            break;
+        case SettingsAction::SFX_PREVIEW:
+            m_audio.setSfxVolume(cfg.m_sfxVolume);
+            m_audio.playSfx(SfxId::CLICK);
+            break;
+        case SettingsAction::CLOSE:
+            cfg.save(resolvePath("settings.cfg"));
+            break;
+        case SettingsAction::NONE:
+            break;
+        }
+        return;
+    }
+    if (m_stateMachine.is(GameStateMachine::State::MENU) && !m_paused &&
+        (IsKeyPressed(KEY_F1) ||
+         (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+          CheckCollisionPointRec(UiCanvas::mousePosition(), SettingsScreen::menuButtonRect())))) {
+        m_audio.playSfx(SfxId::CLICK);
+        g_settings.open();
+        return;
+    }
     if (handleDialogInput())
         return;
 
@@ -1979,7 +2035,13 @@ void GameEngine::doBasicAttack()
         return;
 
     const int dealt = hpBefore - target->getCurrentHp();
-    playAnimation(attacker, AnimState::ATTACK);
+    {
+        // Can chien (thien ve ATK) -> luot toi danh; tu xa (thien ve MATK) -> dung yen danh nhu cu
+        const bool melee = attacker->getStats().m_a >= attacker->getStats().m_ma;
+        auto play = [this, attacker]() { playAnimation(attacker, AnimState::ATTACK); };
+        if (!(melee && AttackLunge::start(const_cast<CombatantView*>(viewOf(attacker)), viewOf(target), play)))
+            play();
+    }
     syncHealth(target);
 
     m_battleLog = Strings::localizedName(attacker->getName()) + " tấn công " +
@@ -2049,6 +2111,7 @@ bool GameEngine::castSkill(size_t skillIndex)
         *casterSnapshot = CharacterSnapshot(*h);
         *previousEffects = m_statusEffects[target];
         const int hpBefore = target->getCurrentHp();
+        bool vfxDeferred = false;
 
         if (offensive)
         {
@@ -2058,7 +2121,16 @@ bool GameEngine::castSkill(size_t skillIndex)
             Skill cast = skill;
             cast.m_power = static_cast<int>(total) - static_cast<int>(atk);
             h->executeSkill(&cast, target);
-            playAnimation(h, AnimState::ATTACK);
+            // Skill vat ly -> luot toi; VFX + animation + tieng cho toi luc cham muc tieu
+            auto onHit = [this, h, target, skill]() {
+                playAnimation(h, AnimState::ATTACK);
+                playSkillVfx(skill, h, target);
+            };
+            if (!skill.m_isMagic &&
+                AttackLunge::start(const_cast<CombatantView*>(viewOf(h)), viewOf(target), onHit))
+                vfxDeferred = true;
+            else
+                playAnimation(h, AnimState::ATTACK);
         }
         else
         {
@@ -2070,7 +2142,7 @@ bool GameEngine::castSkill(size_t skillIndex)
         syncHealth(h);
         syncHealth(target);
         applySkillEffect(skill, target);
-        playSkillVfx(skill, h, target);
+        if (!vfxDeferred) playSkillVfx(skill, h, target);
 
         if (offensive)
             m_battleLog = Strings::localizedName(h->getName()) + " dùng " +
@@ -2212,7 +2284,11 @@ void GameEngine::executeAiTurn(Character* aiChar)
     aiChar->executeSkill(&basic, h);
     const int dealt = hpBefore - h->getCurrentHp();
 
-    playAnimation(aiChar, AnimState::ATTACK);
+    {
+        auto play = [this, aiChar]() { playAnimation(aiChar, AnimState::ATTACK); };
+        if (!(!useMagic && AttackLunge::start(const_cast<CombatantView*>(viewOf(aiChar)), viewOf(h), play)))
+            play();
+    }
     syncHealth(h);
 
     aiChar->onTurnEnd();
@@ -2227,7 +2303,11 @@ void GameEngine::update(float deltaTime)
     UiWidgets::update(deltaTime);
     m_audio.update(deltaTime);
     updateMusic();
-    if (IsKeyPressed(KEY_F9)) m_sceneShader.setEnabled(!m_sceneShader.isEnabled());   // bat/tat shader canh
+    g_settings.update(deltaTime);
+    if (IsKeyPressed(KEY_F9)) {
+        m_sceneShader.setEnabled(!m_sceneShader.isEnabled());
+        GameSettings::get().m_shaderEnabled = m_sceneShader.isEnabled();   // dong bo voi man Cai dat
+    }   // bat/tat shader canh
     if (m_paused) return;
     if (m_shopOpen) m_shop.update(deltaTime);
     if (m_stateMachine.is(GameStateMachine::State::MENU))
@@ -2242,6 +2322,7 @@ void GameEngine::update(float deltaTime)
 
     // Cap nhat sprite + hieu ung UI (chu bay)
     for (auto& v : m_views) v->update(deltaTime);
+    AttackLunge::update(deltaTime, m_views);     // luot toi danh cua can chien
     syncVfxStatus();
     m_vfx.update(deltaTime);
     m_ui.update(deltaTime);
@@ -2522,6 +2603,8 @@ void GameEngine::render()
     {
     case GameStateMachine::State::MENU:
         m_startMenu.draw();
+        SettingsScreen::drawMenuButton(!g_settings.isOpen() &&
+            CheckCollisionPointRec(UiCanvas::mousePosition(), SettingsScreen::menuButtonRect()));
         break;
     case GameStateMachine::State::CREATE_HERO:
     m_heroCreate.draw();
@@ -2585,6 +2668,7 @@ void GameEngine::render()
                    { "Thử lại", "Về menu" });
     }
 
+    g_settings.draw();
     UiWidgets::Toast();
     UiCursor::draw();
 }
@@ -2628,6 +2712,10 @@ void GameEngine::renderCombatants()
         DrawEllipse(static_cast<int>(f.x + 4.0f), static_cast<int>(f.y + 1.0f),
                     30.0f * k, 8.0f * k, Color{ 0, 0, 0, 90 });       // bong tiep dat dam o chan
     }
+
+    AttackLunge::drawGhosts(m_battleMap, m_views, [&](size_t i) {      // bong mo khi dang lao
+        return (i < m_party.size()) ? WHITE : elementColor(m_combatants[i]->getElement());
+    });
 
     for (size_t i : order)
     {
