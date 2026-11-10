@@ -30,6 +30,8 @@
 #include "data/CharacterRules.h"
 #include "graphics/SceneShader.h"
 #include "graphics/AttackLunge.h"
+#include "graphics/SettingsScreen.h"
+#include "data/GameSettings.h"
 #include <cctype>
 
 namespace
@@ -41,6 +43,9 @@ namespace
     constexpr int   BOSS_FRAME     = 192;    // sheet boss: moi frame 192x192
     constexpr int SCREEN_WIDTH = 1280;
     constexpr int SCREEN_HEIGHT = 720;
+
+    // ----- Cai dat (khong dung GPU => de o day, khong can them thanh vien vao GameEngine.h) -----
+    SettingsScreen g_settings;
 
     // ----- Sprite -----
     constexpr int FRAME_W = 64;
@@ -264,8 +269,12 @@ void GameEngine::initialize()
     SetExitKey(KEY_NULL);   // ESC do game tu xu ly (Undo / ve Menu), khong thoat thang
     m_audio.init();                                          // khong co loa -> game van chay, chi im lang
     m_audio.loadAll(resolvePath("assets/audio"));
+    GameSettings::get().load(resolvePath("settings.cfg"));   // am luong / shader / ngon ngu da luu
+    m_audio.setMusicVolume(GameSettings::get().m_musicVolume);
+    m_audio.setSfxVolume(GameSettings::get().m_sfxVolume);
     m_vfx.load(resolvePath("assets/vfx"));                   // thieu thu muc -> khong co hieu ung ky nang, game van chay
     m_sceneShader.init(UiCanvas::width(), UiCanvas::height()); // loi shader -> tu tat, game ve binh thuong
+    m_sceneShader.setEnabled(GameSettings::get().m_shaderEnabled);
 
     try {
         m_gameData.loadAll(resolvePath("data"));
@@ -335,6 +344,7 @@ void GameEngine::shutdown()
     m_ui.unloadAll();
     m_turnOrderBar.reset();
     m_actedThisRound.clear();
+    GameSettings::get().save(resolvePath("settings.cfg"));
     m_startMenu.unloadAll();
     m_heroCreate.unloadAll();
     m_waveSelect.unloadAll();
@@ -635,7 +645,7 @@ void GameEngine::openPrepMenu(int wave)
     info.m_hero.m_name = m_heroConfig.m_name;
     info.m_hero.m_race = m_heroConfig.m_race;
     info.m_hero.m_class = m_heroConfig.m_class;
-    info.m_hero.m_portraitPath = heroIconPath(m_heroConfig.m_name, [this](const std::string& p) { return resolvePath(p); });
+    info.m_hero.m_portraitPath = resolvePath(heroSpritePath(m_heroConfig.m_name));   // Chuan bi: dung model pixel
     info.m_hero.m_element = m_heroConfig.m_element;
     info.m_hero.m_stats = Stats{ 120, 50, 25, 20, 5, 8, 15 };   // du phong
     info.m_teammateSlots = static_cast<int>(Party::MAX_SIZE) - static_cast<int>(m_partyConfigs.size());
@@ -644,7 +654,7 @@ void GameEngine::openPrepMenu(int wave)
         member.m_name = config.m_name;
         member.m_race = config.m_race;
         member.m_class = config.m_class;
-        member.m_portraitPath = heroIconPath(config.m_name, [this](const std::string& p) { return resolvePath(p); });
+        member.m_portraitPath = resolvePath(heroSpritePath(config.m_name));   // Chuan bi: dung model pixel
         member.m_element = config.m_element;
         try { member.m_stats = m_gameData.getBaseStats(config.m_race, config.m_class); }
         catch (const std::exception&) { member.m_stats = Stats{120,50,25,20,5,8,15}; }
@@ -1430,6 +1440,36 @@ void GameEngine::processEvents()
     if (UiDevGallery::handleInput())
         return;
     if (IsKeyPressed(KEY_F11)) ToggleFullscreen();
+
+    // ----- Cai dat: dang mo thi chan moi input khac -----
+    if (g_settings.isOpen()) {
+        GameSettings& cfg = GameSettings::get();
+        switch (g_settings.handleInput()) {
+        case SettingsAction::CHANGED:
+            m_audio.setMusicVolume(cfg.m_musicVolume);
+            m_audio.setSfxVolume(cfg.m_sfxVolume);
+            m_sceneShader.setEnabled(cfg.m_shaderEnabled);
+            break;
+        case SettingsAction::SFX_PREVIEW:
+            m_audio.setSfxVolume(cfg.m_sfxVolume);
+            m_audio.playSfx(SfxId::CLICK);
+            break;
+        case SettingsAction::CLOSE:
+            cfg.save(resolvePath("settings.cfg"));
+            break;
+        case SettingsAction::NONE:
+            break;
+        }
+        return;
+    }
+    if (m_stateMachine.is(GameStateMachine::State::MENU) && !m_paused &&
+        (IsKeyPressed(KEY_F1) ||
+         (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+          CheckCollisionPointRec(UiCanvas::mousePosition(), SettingsScreen::menuButtonRect())))) {
+        m_audio.playSfx(SfxId::CLICK);
+        g_settings.open();
+        return;
+    }
     if (handleDialogInput())
         return;
 
@@ -2263,7 +2303,11 @@ void GameEngine::update(float deltaTime)
     UiWidgets::update(deltaTime);
     m_audio.update(deltaTime);
     updateMusic();
-    if (IsKeyPressed(KEY_F9)) m_sceneShader.setEnabled(!m_sceneShader.isEnabled());   // bat/tat shader canh
+    g_settings.update(deltaTime);
+    if (IsKeyPressed(KEY_F9)) {
+        m_sceneShader.setEnabled(!m_sceneShader.isEnabled());
+        GameSettings::get().m_shaderEnabled = m_sceneShader.isEnabled();   // dong bo voi man Cai dat
+    }   // bat/tat shader canh
     if (m_paused) return;
     if (m_shopOpen) m_shop.update(deltaTime);
     if (m_stateMachine.is(GameStateMachine::State::MENU))
@@ -2559,6 +2603,8 @@ void GameEngine::render()
     {
     case GameStateMachine::State::MENU:
         m_startMenu.draw();
+        SettingsScreen::drawMenuButton(!g_settings.isOpen() &&
+            CheckCollisionPointRec(UiCanvas::mousePosition(), SettingsScreen::menuButtonRect()));
         break;
     case GameStateMachine::State::CREATE_HERO:
     m_heroCreate.draw();
@@ -2622,6 +2668,7 @@ void GameEngine::render()
                    { "Thử lại", "Về menu" });
     }
 
+    g_settings.draw();
     UiWidgets::Toast();
     UiCursor::draw();
 }
