@@ -32,6 +32,7 @@
 #include "graphics/AttackLunge.h"
 #include "graphics/SettingsScreen.h"
 #include "data/GameSettings.h"
+#include "data/SaveGame.h"
 #include <cctype>
 
 namespace
@@ -46,6 +47,8 @@ namespace
 
     // ----- Cai dat (khong dung GPU => de o day, khong can them thanh vien vao GameEngine.h) -----
     SettingsScreen g_settings;
+    bool g_hasSave = false;                       // cache: co file luu hay khong (cap nhat trong refreshSaveInfo)
+    const char* const SAVE_FILE = "savegame.dat";
 
     // ----- Sprite -----
     constexpr int FRAME_W = 64;
@@ -272,6 +275,7 @@ void GameEngine::initialize()
     GameSettings::get().load(resolvePath("settings.cfg"));   // am luong / shader / ngon ngu da luu
     m_audio.setMusicVolume(GameSettings::get().m_musicVolume);
     m_audio.setSfxVolume(GameSettings::get().m_sfxVolume);
+    refreshSaveInfo();                                       // biet co file luu hay chua (nut Tiep tuc)
     m_vfx.load(resolvePath("assets/vfx"));                   // thieu thu muc -> khong co hieu ung ky nang, game van chay
     m_sceneShader.init(UiCanvas::width(), UiCanvas::height()); // loi shader -> tu tat, game ve binh thuong
     m_sceneShader.setEnabled(GameSettings::get().m_shaderEnabled);
@@ -1054,6 +1058,140 @@ void GameEngine::beginBattleAfterBreak()
 }
 
 // =====================================================================
+//  LUU / TAI TIEN TRINH
+// =====================================================================
+
+SaveData GameEngine::buildSaveData(int nextWave) const
+{
+    SaveData d;
+    d.m_nextWave = nextWave;
+    d.m_gold = m_gold;
+    const std::vector<HeroConfig> configs = m_partyConfigs.empty()
+        ? std::vector<HeroConfig>{ m_heroConfig } : m_partyConfigs;
+    for (std::size_t i = 0; i < configs.size() && i < Party::MAX_SIZE; ++i) {
+        SaveHero h;
+        h.m_name = configs[i].m_name;
+        h.m_race = configs[i].m_race;
+        h.m_class = configs[i].m_class;
+        h.m_element = static_cast<int>(configs[i].m_element);
+        const Player* member = m_party.getMember(i);
+        h.m_hp = member ? member->getCurrentHp() : 1;
+        h.m_mp = member ? member->getCurrentMp() : 0;
+        d.m_heroes.push_back(h);
+    }
+    for (const ItemPtr& item : m_party.getInventory().getItems()) {
+        if (!item) continue;
+        auto it = std::find_if(d.m_bag.begin(), d.m_bag.end(),
+                               [&](const std::pair<std::string, int>& e) { return e.first == item->getId(); });
+        if (it == d.m_bag.end()) d.m_bag.emplace_back(item->getId(), 1);
+        else ++it->second;
+    }
+    for (std::size_t i = 0; i < Party::MAX_SIZE; ++i)
+        if (m_equippedGear[i]) d.m_gear[i] = m_equippedGear[i]->getId();
+    return d;
+}
+
+void GameEngine::autoSaveCheckpoint(int nextWave)
+{
+    if (m_party.isEmpty()) return;
+    SaveGame::save(resolvePath(SAVE_FILE), buildSaveData(nextWave));   // that bai (o dia day/chi doc) -> bo qua, game van chay
+    refreshSaveInfo();
+}
+
+bool GameEngine::applySaveData(const SaveData& d)
+{
+    if (!m_dataLoaded || d.m_heroes.empty()) return false;
+
+    m_partyConfigs.clear();
+    for (const SaveHero& h : d.m_heroes)
+        m_partyConfigs.push_back(HeroConfig{ h.m_name, h.m_race, h.m_class, static_cast<Element>(h.m_element) });
+    m_heroConfig = m_partyConfigs.front();
+
+    beginRun(d.m_nextWave);                       // dung lai doi hinh, don tran dang choi
+    if (m_party.size() != d.m_heroes.size()) {    // thieu hero trong du lieu CSV -> khong khoi phuc duoc
+        m_party.clear();
+        m_combatants.clear();
+        m_views.clear();
+        return false;
+    }
+
+    // Thay tui khoi dau bang tui da luu
+    const std::vector<ItemPtr> starter = m_party.getInventory().getItems();
+    for (const ItemPtr& item : starter) m_party.getInventory().removeItem(item);
+    for (ItemPtr& gear : m_equippedGear) gear.reset();
+    if (m_itemsLoaded) {
+        for (const auto& entry : d.m_bag) {
+            if (!m_itemDatabase.findItem(entry.first)) continue;
+            for (int k = 0; k < entry.second; ++k)
+                m_party.addItem(ItemFactory::createItem(m_itemDatabase, entry.first));
+        }
+        for (std::size_t i = 0; i < Party::MAX_SIZE && i < m_party.size(); ++i) {
+            if (d.m_gear[i].empty() || !m_itemDatabase.findItem(d.m_gear[i])) continue;
+            const ItemPtr gear = ItemFactory::createItem(m_itemDatabase, d.m_gear[i]);
+            if (m_party.addItem(gear) && m_party.equipGear(i, gear)) m_equippedGear[i] = gear;
+        }
+    }
+
+    // HP / MP dung luc luu (hero moi tao day HP, MP)
+    for (std::size_t i = 0; i < d.m_heroes.size(); ++i) {
+        Character* c = m_party.getMember(i);
+        if (!c) continue;
+        const int hp = std::max(0, std::min(d.m_heroes[i].m_hp, c->getStats().m_hp));
+        const int mp = std::max(0, std::min(d.m_heroes[i].m_mp, c->getStats().m_mp));
+        if (c->getCurrentHp() > hp) c->takeDamage(c->getCurrentHp() - hp);
+        if (c->getCurrentMp() > mp) c->consumeMp(c->getCurrentMp() - mp);
+    }
+
+    // Tien do wave
+    m_gold = d.m_gold;
+    m_wavesCleared.assign(static_cast<std::size_t>(d.m_nextWave) + 1, false);
+    for (int w = 1; w < d.m_nextWave; ++w) m_wavesCleared[static_cast<std::size_t>(w)] = true;
+    m_unlockedWave = d.m_nextWave;
+    m_waveManager.reset();
+    for (int w = 1; w <= d.m_nextWave; ++w) m_waveManager.unlockWave(w);
+
+    m_paused = false;
+    m_shopOpen = false;
+    m_shopPreparedRun = false;
+    m_pendingWave = d.m_nextWave;
+    if (m_itemsLoaded && waveHasBoss(d.m_nextWave)) {
+        m_resumeRun = true;                        // man nghi truoc Boss: Shop + trang bi
+        openPrepMenu(d.m_nextWave);
+    } else {
+        m_resumeRun = false;
+        m_stateMachine.changeState(GameStateMachine::State::IN_BATTLE);
+        loadStage(d.m_nextWave);
+        advanceTurn();
+        m_battleLog = std::string("Đã tải tiến trình! Đến lượt: ") +
+            Strings::localizedName(m_currentCharacter ? m_currentCharacter->getName() : std::string{});
+    }
+    return true;
+}
+
+void GameEngine::refreshSaveInfo()
+{
+    SaveSummary info;
+    SaveData d;
+    if (SaveGame::load(resolvePath(SAVE_FILE), d)) {
+        info.m_exists = true;
+        info.m_savedAt = d.m_savedAt;
+        info.m_nextWave = d.m_nextWave;
+        info.m_gold = d.m_gold;
+        const bool en = GameSettings::get().isEnglish();
+        for (const SaveHero& h : d.m_heroes) {
+            std::string line = Strings::localizedName(h.m_name) + "   HP " + std::to_string(h.m_hp) +
+                               "   MP " + std::to_string(h.m_mp);
+            if (h.m_hp <= 0) line += en ? "  (down)" : u8"  (gục)";
+            info.m_heroLines.push_back(line);
+        }
+    }
+    g_hasSave = info.m_exists;
+    info.m_canSave = m_stateMachine.is(GameStateMachine::State::PREP_MENU) && m_resumeRun &&
+                     !m_shopOpen && !m_party.isEmpty();
+    g_settings.setSaveInfo(info);
+}
+
+// =====================================================================
 //  TIEN ROI + CUA HANG
 // =====================================================================
 
@@ -1454,6 +1592,32 @@ void GameEngine::processEvents()
             m_audio.setSfxVolume(cfg.m_sfxVolume);
             m_audio.playSfx(SfxId::CLICK);
             break;
+        case SettingsAction::SAVE: {
+            const bool en = cfg.isEnglish();
+            const bool ok = m_resumeRun && m_stateMachine.is(GameStateMachine::State::PREP_MENU) &&
+                SaveGame::save(resolvePath(SAVE_FILE), buildSaveData(m_pendingWave));
+            refreshSaveInfo();
+            g_settings.setMessage(ok ? (en ? "Game saved." : u8"Đã lưu game.")
+                                     : (en ? "Could not save here." : u8"Không thể lưu ở thời điểm này."), ok);
+            break;
+        }
+        case SettingsAction::LOAD: {
+            const bool en = cfg.isEnglish();
+            SaveData data;
+            if (SaveGame::load(resolvePath(SAVE_FILE), data) && applySaveData(data)) {
+                g_settings.close();
+                cfg.save(resolvePath("settings.cfg"));
+            } else {
+                g_settings.setMessage(en ? "Could not load this save." : u8"Không tải được file lưu.", false);
+                refreshSaveInfo();
+            }
+            break;
+        }
+        case SettingsAction::DELETE_SAVE:
+            SaveGame::remove(resolvePath(SAVE_FILE));
+            refreshSaveInfo();
+            g_settings.setMessage(cfg.isEnglish() ? "Save deleted." : u8"Đã xóa file lưu.", true);
+            break;
         case SettingsAction::CLOSE:
             cfg.save(resolvePath("settings.cfg"));
             break;
@@ -1462,12 +1626,24 @@ void GameEngine::processEvents()
         }
         return;
     }
-    if (m_stateMachine.is(GameStateMachine::State::MENU) && !m_paused &&
+    const bool onMenu = m_stateMachine.is(GameStateMachine::State::MENU) && !m_paused;
+    const bool settingsAllowed = onMenu || m_paused ||
+        (m_stateMachine.is(GameStateMachine::State::PREP_MENU) && !m_shopOpen);   // F1: menu / chuan bi / tam dung
+    if (settingsAllowed &&
         (IsKeyPressed(KEY_F1) ||
-         (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+         (onMenu && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
           CheckCollisionPointRec(UiCanvas::mousePosition(), SettingsScreen::menuButtonRect())))) {
         m_audio.playSfx(SfxId::CLICK);
+        refreshSaveInfo();
         g_settings.open();
+        return;
+    }
+    if (onMenu && g_hasSave && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+        CheckCollisionPointRec(UiCanvas::mousePosition(), SettingsScreen::continueButtonRect())) {
+        SaveData data;
+        m_audio.playSfx(SfxId::CLICK);
+        if (SaveGame::load(resolvePath(SAVE_FILE), data) && applySaveData(data)) return;
+        refreshSaveInfo();
         return;
     }
     if (handleDialogInput())
@@ -2403,13 +2579,18 @@ void GameEngine::checkBattleCondition()
     }
     if (m_stage < finalStage())
     {
+        autoSaveCheckpoint(m_stage + 1);       // moc luu: da qua wave, chua vao wave ke tiep
         if (m_itemsLoaded && waveHasBoss(m_stage + 1))
             enterBossBreak(m_stage + 1);       // nghi truoc wave Boss: Shop + trang bi
         else
             loadStage(m_stage + 1);
     }
     else
+    {
+        SaveGame::remove(resolvePath(SAVE_FILE));   // thang game -> het tien trinh dang do
+        refreshSaveInfo();
         m_stateMachine.changeState(GameStateMachine::State::VICTORY);
+    }
 }
 
 // =====================================================================
@@ -2605,6 +2786,9 @@ void GameEngine::render()
         m_startMenu.draw();
         SettingsScreen::drawMenuButton(!g_settings.isOpen() &&
             CheckCollisionPointRec(UiCanvas::mousePosition(), SettingsScreen::menuButtonRect()));
+        if (g_hasSave)
+            SettingsScreen::drawContinueButton(!g_settings.isOpen() &&
+                CheckCollisionPointRec(UiCanvas::mousePosition(), SettingsScreen::continueButtonRect()));
         break;
     case GameStateMachine::State::CREATE_HERO:
     m_heroCreate.draw();
