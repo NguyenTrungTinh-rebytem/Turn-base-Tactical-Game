@@ -1,0 +1,7 @@
+# name,hp,mp,spd,a,ma,d,md,skill1,skill2
+Mage,-10,40,0,-2,14,-3,6,C_MAGE_1,C_MAGE_2
+Swordman,15,5,2,12,0,6,2,C_SWORD_1,C_SWORD_2
+Assassin,-5,10,6,10,2,-2,0,C_ASSASSIN_1,C_ASSASSIN_2
+Tanker,40,0,-3,3,0,14,10,C_TANKER_1,C_TANKER_2
+Enchanter,5,35,1,0,8,2,8,C_ENCHANT_1,C_ENCHANT_2
+Paladin,25,20,-1,8,6,9,9,C_PALADIN_1,C_PALADIN_2

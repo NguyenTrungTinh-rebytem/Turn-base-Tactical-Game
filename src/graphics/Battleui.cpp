@@ -8,6 +8,7 @@
 #include "graphics/Strings.h"
 #include "graphics/UiIcons.h"
 #include "graphics/BattleAnchors.h"
+#include "graphics/UnitSizing.h"
 #include "entities/Character.h"
 #include "entities/Player.h"
 #include "entities/Boss.h"
@@ -187,16 +188,21 @@ Rectangle BattleUI::itemRowBounds(int itemIndex, int itemCount, int selectedInde
     return menuRow(itemIndex - first + 1);
 }
 
-void BattleUI::drawHpMpBar(const Character& character, Vector2 head, int enemyIndex) const {    
-    if (dynamic_cast<const Player*>(&character)) return;   // hero: không vẽ thanh máu trên sân
+void BattleUI::drawHpMpBar(const Character& character, Vector2 head, int enemyIndex) const {
+    // Duong cu: chi co dinh dau => doan lai anchor. Nen goi ban nhan BattleAnchor ben duoi.
+    if (dynamic_cast<const Player*>(&character)) return;   // hero: khong ve thanh mau tren san
+    const bool boss = dynamic_cast<const Boss*>(&character) != nullptr;
+    const int frameSize = boss ? 192 : 64;
+    // he so cu * he so phong to them cua CombatantView (UnitSizing)
+    const float scaleMultiplier = (boss ? 1.0666667f : 1.3f) * (boss ? UnitSizing::BOSS : UnitSizing::ENEMY);
+    drawHpMpBar(character, BattleAnchors::fromHead(head, frameSize, frameSize, scaleMultiplier), enemyIndex);
+}
+
+void BattleUI::drawHpMpBar(const Character& character, const BattleAnchor& anchor, int enemyIndex) const {
+    if (dynamic_cast<const Player*>(&character)) return;   // hero: khong ve thanh mau tren san
     const int maxHp = character.getStats().m_hp;
     const float hpRatio = ratioOf(character.getCurrentHp(), maxHp);
-    const bool boss = dynamic_cast<const Boss*>(&character) != nullptr;
-    const bool player = dynamic_cast<const Player*>(&character) != nullptr;
-    const int frameSize = boss ? 192 : player ? 128 : 64;
-    const float scaleMultiplier = boss ? 1.0666667f : player ? 0.78f : 1.3f;
-    const BattleAnchor anchor = BattleAnchors::fromHead(head, frameSize, frameSize,
-                                                        scaleMultiplier);
+    const bool player = false;
     const Rectangle hpBounds = fieldHpBounds(character, anchor);
     const float x = hpBounds.x;
     const float y = hpBounds.y;
@@ -252,8 +258,7 @@ void BattleUI::drawHpMpBar(const Character& character, Vector2 head, int enemyIn
         logRect("bar(canvas 1920x1080)", hpBounds, 1.5f, 1.5f);
         std::cerr << ' ';
         logRect("bar(window px)", hpBounds, windowX, windowY);
-        std::cerr << " source=head(canvas 1280x720)=" << head.x << ',' << head.y
-                  << " scale-multiplier=" << scaleMultiplier << '\n';
+        std::cerr << '\n';
     }
     if (!valid && violations.insert(unitId).second)
         std::cerr << "[UI anchor violation] unit-id=" << static_cast<const void*>(unitId)

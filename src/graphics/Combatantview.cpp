@@ -1,6 +1,8 @@
 // Member 4 - Huynh Quang Khai | src/graphics/CombatantView.cpp
 #include "CombatantView.h"
 #include "entities/Character.h"
+#include "entities/Boss.h"
+#include "entities/Enemy.h"
 #include <algorithm>
 #include <cmath>
 
@@ -11,6 +13,10 @@ CombatantView::CombatantView(const Character* character, const std::string& shee
       m_slot(slot),
       m_frameWidth(frameWidth),
       m_frameHeight(frameHeight) {
+    // Quai to hon nguoi choi: tu nhan dien theo loai Character
+    if (dynamic_cast<const Boss*>(m_character))       m_sizeMultiplier = UnitSizing::BOSS;
+    else if (dynamic_cast<const Enemy*>(m_character)) m_sizeMultiplier = UnitSizing::ENEMY;
+
     m_sprite->load(sheetPath, frameWidth, frameHeight);   // that bai => placeholder, khong crash
     m_sprite->play(AnimState::IDLE);
     if (m_character && !m_character->isAlive()) m_alpha = 0.0f;
@@ -32,12 +38,18 @@ bool CombatantView::isOneShotFinished() const { return m_sprite->isOneShotFinish
 
 void CombatantView::triggerHitFlash() { m_flashTimer = FLASH_SECONDS; }
 
+BattleSlot CombatantView::effectiveSlot() const {
+    BattleSlot s = m_slot;
+    s.m_scale *= m_sizeMultiplier;   // chan (m_feetPos) giu nguyen => to len theo chieu ngang va len tren
+    return s;
+}
+
 BattleAnchor CombatantView::getAnchor() const {
-    return BattleAnchors::forUnit(m_slot, m_frameWidth, m_frameHeight);
+    return BattleAnchors::forUnit(effectiveSlot(), m_frameWidth, m_frameHeight);
 }
 
 Vector2 CombatantView::getHeadPos() const {
-    return BattleMap::getHeadPos(m_slot, m_frameHeight);
+    return BattleMap::getHeadPos(effectiveSlot(), m_frameHeight);
 }
 
 Rectangle CombatantView::getDrawBounds() const { return getAnchor().spriteBounds; }
@@ -54,10 +66,11 @@ void CombatantView::draw(const BattleMap& map, Color baseTint) const {
         tint = Color{ 255, 80, 80, 255 };
     tint.a = static_cast<unsigned char>(tint.a * m_alpha);
 
-    map.drawShadow(m_slot, static_cast<float>(m_frameWidth), m_alpha);
+    const BattleSlot slot = effectiveSlot();
+    map.drawShadow(slot, static_cast<float>(m_frameWidth), m_alpha);
     const BattleAnchor anchor = getAnchor();
     const Rectangle bounds = anchor.spriteBounds;
-    m_sprite->drawFrame(Vector2{ bounds.x, bounds.y }, m_slot.m_flipX, m_slot.m_scale, tint);
+    m_sprite->drawFrame(Vector2{ bounds.x, bounds.y }, slot.m_flipX, slot.m_scale, tint);
 
 #if UI_DEV_TOOLS
     DrawRectangleLinesEx(bounds, 1.0f, Color{ 255, 59, 59, 220 });

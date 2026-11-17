@@ -5,6 +5,7 @@
 #include "BattleAnchors.h"
 #include "BattleMap.h"
 #include "SpriteAnimation.h"
+#include "UnitSizing.h"
 #include <memory>
 #include <string>
 
@@ -31,6 +32,9 @@ public:
     // ---- Tien ich ----
     void triggerHitFlash();                         // nhap nhay do ~0.4s
     void setSlot(const BattleSlot& slot) { m_slot = slot; }
+    // He so phong to them (nhan vao scale cua slot). Boss/Enemy tu dong duoc dat trong constructor.
+    void  setSizeMultiplier(float m) { m_sizeMultiplier = m; }
+    float getSizeMultiplier() const { return m_sizeMultiplier; }
     const BattleSlot& getSlot() const { return m_slot; }
     Rectangle getDrawBounds() const;
     bool containsPoint(Vector2 point) const;
@@ -49,7 +53,11 @@ private:
     int                              m_frameHeight = 64;
     float                            m_alpha = 1.0f;          // 1 song, 0 da bien mat
     float                            m_flashTimer = 0.0f;
+    float                            m_sizeMultiplier = 1.0f; // 1 = nhu cu; 2 = to gap doi
+
+    BattleSlot effectiveSlot() const;   // m_slot da nhan he so phong to (feet giu nguyen)
 
     static constexpr float FADE_SECONDS  = 0.6f;
     static constexpr float FLASH_SECONDS = 0.4f;
+
 };

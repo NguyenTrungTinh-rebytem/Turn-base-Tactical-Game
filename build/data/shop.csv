@@ -1,0 +1,20 @@
+# GIA VAT PHAM TRONG CUA HANG - doc luc chay game (sua file nay, KHONG can bien dich lai).
+# id = id trong items.csv. Vat pham khong co trong file nay thi cua hang khong ban.
+# Cua hang chi mo o man Chuan bi truoc wave Boss.
+id,price
+ITM_HP_MINOR,30
+ITM_HP_MAJOR,80
+ITM_ENERGY,45
+ITM_PHOENIX,140
+ITM_POWER_SERUM,60
+ITM_IRON_SHIELD,60
+ITM_HASTE,120
+ITM_PRECISION,50
+ITM_LEFTOVER,150
+ITM_VAMPIRIC,160
+ITM_SASH,140
+ITM_GUARDIAN,150
+ITM_BERSERK,180
+ITM_EXECUTIONER,170
+ITM_HEAVY_STONE,140
+ITM_COUNTER,130

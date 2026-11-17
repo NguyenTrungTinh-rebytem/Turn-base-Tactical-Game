@@ -84,6 +84,7 @@ bool HeroCreateScreen::loadPreviewSprite(const std::string& path, int frameWidth
 }
 
 void HeroCreateScreen::unloadPresetTextures() {
+    m_portraits.unloadAll();
     for (Texture2D& t : m_presetTextures)
         if (t.id != 0 && IsWindowReady()) UnloadTexture(t);
     m_presetTextures.clear();
@@ -125,6 +126,15 @@ void HeroCreateScreen::setPresets(const std::vector<HeroPreset>& presets) {
             if (tex.id != 0) SetTextureFilter(tex, TEXTURE_FILTER_POINT);   // pixel art: khong lam mo
         }
         m_presetTextures.push_back(tex);
+
+        // Chan dung: m_portraitPath, neu trong thi suy ra tu thu muc cua anh idle
+        std::string portrait = p.m_portraitPath;
+        if (portrait.empty() && !p.m_id.empty()) {
+            const size_t slash = p.m_idleSpritePath.find_last_of("/\\");
+            const std::string dir = (slash == std::string::npos) ? std::string{} : p.m_idleSpritePath.substr(0, slash + 1);
+            portrait = dir + "portraits/portrait_" + p.m_id + ".png";
+        }
+        if (IsWindowReady() && !portrait.empty()) m_portraits.load(p.m_id, portrait);
     }
     m_selected = std::min(m_selected, m_presets.empty() ? size_t{ 0 } : m_presets.size() - 1);
 }
@@ -320,7 +330,10 @@ void HeroCreateScreen::drawDetail() const {
                 static_cast<int>(previewY + previewSize - 8.0f), 76.0f, 16.0f,
                 Color{ element.r, element.g, element.b, 105 });
     const Texture2D& preview = m_presetTextures[m_selected];
-    if (preview.id != 0 && preview.height > 0) {
+    const Rectangle portraitRect{ panel.x + 14.0f, panel.y + 14.0f, 192.0f, panel.height - 28.0f };
+    if (m_portraits.draw(p.m_id, portraitRect)) {
+        // da ve chan dung -> khong ve sprite nho
+    } else if (preview.id != 0 && preview.height > 0) {
         const int frameSize = preview.height;
         const int frames = std::max(1, preview.width / frameSize);
         const int frame = static_cast<int>(m_time * IDLE_FPS) % frames;

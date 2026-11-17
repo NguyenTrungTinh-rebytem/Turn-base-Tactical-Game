@@ -4,6 +4,7 @@
 // Khong include GameData/GameEngine => de test doc lap.
 #include "raylib.h"
 #include "SpriteAnimation.h"
+#include "graphics/HeroPortraits.h"
 #include "data/Stats.h"
 #include "data/Element.h"
 #include <string>
@@ -24,6 +25,7 @@ struct HeroPreset {
     size_t      m_classIndex = 0;     // chi so trong danh sach Class (setOptions)
     Element     m_element    = Element::KIM;
     std::string m_idleSpritePath;     // dai frame IDLE (o vuong, vd 4 x 128px); thieu file -> placeholder
+    std::string m_portraitPath;       // anh chan dung (tuy chon). De trong -> tu suy ra: <thu muc anh>/portraits/portrait_<id>.png
 };
 
 // Ket qua nguoi choi chon (giu nguyen cau truc cu de GameEngine khong phai doi)
@@ -96,6 +98,7 @@ private:
     float        m_time = 0.0f;
 
     SpriteAnimation m_sprite;     // placeholder khi tuong chua co anh
+    HeroPortraits   m_portraits;  // chan dung tuong (khung ben trai bang chi tiet)
     Texture2D    m_background{};
     bool         m_hasBackground = false;
 };
