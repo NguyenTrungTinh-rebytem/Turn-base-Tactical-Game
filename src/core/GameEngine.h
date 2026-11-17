@@ -28,6 +28,7 @@
 #include "entities/ItemFactory.h"
 #include "audio/AudioManager.h"
 #include "data/ShopConfig.h"
+#include "data/SaveGame.h"
 #include "graphics/ItemIcons.h"
 #include "graphics/SceneShader.h"
 #include "graphics/ShopScreen.h"
@@ -101,6 +102,10 @@ private:
     void beginRun(int startStage);                       // dung doi hinh + tui do + tien (chua vao tran)
     bool waveHasBoss(int wave);
     void recoverPartyAfterWave();
+    SaveData buildSaveData(int nextWave) const;          // gom tien trinh de luu (doi hinh, HP/MP, tui, trang bi, vang)
+    bool applySaveData(const SaveData& data);            // dung lai tien trinh tu file luu
+    void autoSaveCheckpoint(int nextWave);               // tu luu khi vua qua wave
+    void refreshSaveInfo();                              // cap nhat tab "Luu game" + nut "Tiep tuc"
     void enterBossBreak(int nextWave);                   // dung chan truoc wave boss: mo man Chuan bi co Shop
     void beginBattleAfterBreak();
     void settleGold();                                   // tra tien cho quai da chet (chi khi khong con Undo)

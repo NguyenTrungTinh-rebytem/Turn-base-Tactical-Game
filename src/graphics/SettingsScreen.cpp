@@ -119,6 +119,14 @@ Rectangle SettingsScreen::languageRect(int index) {
     const Rectangle c = contentRect();
     return { c.x + 24.0f + index * 190.0f, c.y + 80.0f, 170.0f, 90.0f };
 }
+Rectangle SettingsScreen::saveButtonRect(int index) {
+    const Rectangle c = contentRect();
+    return { c.x + 24.0f + index * 164.0f, c.y + 256.0f, 150.0f, 42.0f };
+}
+Rectangle SettingsScreen::continueButtonRect() {
+    return { UiCanvas::width() - 390.0f, UiCanvas::height() - 70.0f, 170.0f, 44.0f };
+}
+
 Rectangle SettingsScreen::menuButtonRect() {
     return { UiCanvas::width() - 200.0f, UiCanvas::height() - 70.0f, 170.0f, 44.0f };
 }
@@ -128,6 +136,13 @@ void SettingsScreen::drawMenuButton(bool hover) {
     UiShapes::plate(r, hover ? Color{ 70, 56, 30, 230 } : Color{ 18, 16, 28, 200 },
                     hover ? COL_GOLD : UiTheme::ash, 1.0f);
     drawCentered(std::string(tr(u8"Cài đặt", "Settings")) + "  [F1]", r, 17, hover ? COL_GOLD : COL_TEXT);
+}
+
+void SettingsScreen::drawContinueButton(bool hover) {
+    const Rectangle r = continueButtonRect();
+    UiShapes::plate(r, hover ? Color{ 30, 86, 52, 235 } : Color{ 18, 16, 28, 200 },
+                    hover ? UiTheme::heal : UiTheme::ash, 1.0f);
+    drawCentered(tr(u8"Tiếp tục", "Continue"), r, 17, hover ? UiTheme::heal : COL_TEXT);
 }
 
 // ---------------- Logic ----------------
@@ -140,6 +155,7 @@ void SettingsScreen::open() {
 
 void SettingsScreen::update(float deltaTime) {
     if (m_open) m_time += deltaTime;
+    if (m_messageTime > 0.0f) m_messageTime -= deltaTime;
 }
 
 SettingsAction SettingsScreen::handleInput() {
@@ -157,12 +173,13 @@ SettingsAction SettingsScreen::handleInput() {
     // ---- Chuyen tab: chuot, phim 1-4, TAB ----
     if (IsKeyPressed(KEY_ONE))   m_tab = TAB_AUDIO;
     if (IsKeyPressed(KEY_TWO))   m_tab = TAB_LANGUAGE;
-    if (IsKeyPressed(KEY_THREE)) m_tab = TAB_STORY;
-    if (IsKeyPressed(KEY_FOUR))  m_tab = TAB_TEAM;
+    if (IsKeyPressed(KEY_THREE)) m_tab = TAB_SAVE;
+    if (IsKeyPressed(KEY_FOUR))  m_tab = TAB_STORY;
+    if (IsKeyPressed(KEY_FIVE))  m_tab = TAB_TEAM;
     if (IsKeyPressed(KEY_TAB))   m_tab = (m_tab + ((IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) ? TAB_COUNT - 1 : 1)) % TAB_COUNT;
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         for (int i = 0; i < TAB_COUNT; ++i)
-            if (CheckCollisionPointRec(mouse, tabRect(i))) { m_tab = i; m_drag = -1; }
+            if (CheckCollisionPointRec(mouse, tabRect(i))) { m_tab = i; m_drag = -1; m_confirmDelete = false; }
 
     if (m_tab == TAB_AUDIO) {
         float* values[2] = { &s.m_musicVolume, &s.m_sfxVolume };
@@ -206,6 +223,17 @@ SettingsAction SettingsScreen::handleInput() {
                 m_drag = -1;
             }
         }
+    } else if (m_tab == TAB_SAVE) {
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            if (CheckCollisionPointRec(mouse, saveButtonRect(0)) && m_save.m_canSave) { m_confirmDelete = false; return SettingsAction::SAVE; }
+            if (CheckCollisionPointRec(mouse, saveButtonRect(1)) && m_save.m_exists)  { m_confirmDelete = false; return SettingsAction::LOAD; }
+            if (CheckCollisionPointRec(mouse, saveButtonRect(2)) && m_save.m_exists) {
+                if (m_confirmDelete) { m_confirmDelete = false; return SettingsAction::DELETE_SAVE; }
+                m_confirmDelete = true;
+            } else if (!CheckCollisionPointRec(mouse, saveButtonRect(2))) {
+                m_confirmDelete = false;
+            }
+        }
     } else if (m_tab == TAB_LANGUAGE) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             for (int i = 0; i < 2; ++i)
@@ -241,7 +269,7 @@ void SettingsScreen::draw() const {
 
     // Tab
     const char* tabNames[TAB_COUNT] = {
-        tr(u8"Âm thanh", "Audio"), tr(u8"Ngôn ngữ", "Language"),
+        tr(u8"Âm thanh", "Audio"), tr(u8"Ngôn ngữ", "Language"), tr(u8"Lưu game", "Save game"),
         tr(u8"Cốt truyện", "Story"), tr(u8"Thành viên", "Credits") };
     for (int i = 0; i < TAB_COUNT; ++i) {
         const Rectangle r = tabRect(i);
@@ -259,6 +287,7 @@ void SettingsScreen::draw() const {
     switch (m_tab) {
     case TAB_AUDIO:    drawAudio(c); break;
     case TAB_LANGUAGE: drawLanguage(c); break;
+    case TAB_SAVE:     drawSave(c); break;
     case TAB_STORY:    drawStory(c); break;
     default:           drawTeam(c); break;
     }
@@ -316,6 +345,45 @@ void SettingsScreen::drawLanguage(const Rectangle& area) const {
     UiText::draw(tr(u8"Cài đặt được lưu tự động và giữ nguyên ở lần chơi sau.",
                     "Settings are saved automatically and kept for your next session."),
                  static_cast<int>(area.x + 24), static_cast<int>(area.y + 200), 16, COL_DIM);
+}
+
+void SettingsScreen::drawSave(const Rectangle& area) const {
+    const Vector2 mouse = UiCanvas::mousePosition();
+    const int x = static_cast<int>(area.x + 24);
+    UiText::draw(tr(u8"Lưu game", "Save game"), x, static_cast<int>(area.y + 8), 24, COL_TEXT);
+
+    const Rectangle card{ area.x + 14.0f, area.y + 48.0f, area.width - 28.0f, 190.0f };
+    UiShapes::plate(card, Color{ 24, 20, 36, 220 }, UiTheme::ash, 1.0f);
+    if (m_save.m_exists) {
+        int y = static_cast<int>(card.y + 12);
+        UiText::draw(std::string(tr(u8"Lưu lúc: ", "Saved: ")) + m_save.m_savedAt, x, y, 17, COL_DIM); y += 28;
+        UiText::draw(std::string(tr(u8"Wave tiếp theo: ", "Next wave: ")) + std::to_string(m_save.m_nextWave), x, y, 20, COL_GOLD); y += 30;
+        UiText::draw(std::string(tr(u8"Vàng: ", "Gold: ")) + std::to_string(m_save.m_gold), x, y, 18, COL_TEXT); y += 34;
+        for (const std::string& line : m_save.m_heroLines) { UiText::draw(line, x, y, 17, COL_TEXT); y += 24; }
+    } else {
+        UiText::draw(tr(u8"Chưa có dữ liệu lưu.", "No save data yet."), x, static_cast<int>(card.y + 14), 19, COL_DIM);
+        drawWrapped(tr(u8"Game tự lưu mỗi khi bạn vượt qua một wave.", "The game auto-saves whenever you clear a wave."),
+                    x, static_cast<int>(card.y + 48), static_cast<int>(card.width - 40), 16, 22, COL_DIM);
+    }
+
+    const char* labels[3] = { tr(u8"Lưu", "Save"), tr(u8"Tải", "Load"),
+        m_confirmDelete ? tr(u8"Chắc chắn?", "Sure?") : tr(u8"Xóa", "Delete") };
+    const bool enabled[3] = { m_save.m_canSave, m_save.m_exists, m_save.m_exists };
+    for (int i = 0; i < 3; ++i) {
+        const Rectangle r = saveButtonRect(i);
+        const bool hov = enabled[i] && CheckCollisionPointRec(mouse, r);
+        Color fill = Color{ 24, 20, 36, 200 };
+        if (enabled[i]) fill = hov ? Color{ 86, 62, 24, 235 } : Color{ 44, 38, 60, 230 };
+        if (i == 2 && m_confirmDelete) fill = Color{ 130, 40, 40, 240 };
+        UiShapes::plate(r, fill, enabled[i] ? (hov ? COL_GOLD : UiTheme::ash) : Color{ 60, 56, 70, 255 }, 1.0f);
+        drawCentered(labels[i], r, 18, enabled[i] ? COL_TEXT : Color{ 110, 106, 124, 255 });
+    }
+
+    if (m_messageTime > 0.0f && !m_message.empty())
+        UiText::draw(m_message, x, static_cast<int>(area.y + 312), 17, m_messageOk ? UiTheme::heal : UiTheme::danger);
+    drawWrapped(tr(u8"Tự động lưu khi vượt qua mỗi wave. Lưu tay được ở màn Chuẩn bị giữa các wave (F1). Tải sẽ quay lại đúng wave, đội hình, máu/MP, vàng và túi đồ đã lưu.",
+                   "Auto-saves after every cleared wave. Manual save is available on the prep screen between waves (F1). Loading restores your wave, party, HP/MP, gold and bag."),
+                x, static_cast<int>(area.y + 346), static_cast<int>(area.width - 48), 14, 20, COL_DIM);
 }
 
 void SettingsScreen::drawStory(const Rectangle& area) const {
