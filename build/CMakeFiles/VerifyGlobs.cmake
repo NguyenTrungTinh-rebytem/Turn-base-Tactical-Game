@@ -15,6 +15,7 @@ set(OLD_GLOB
   "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/GameData.cpp"
   "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/GameSettings.cpp"
   "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/HeroPresetConfig.cpp"
+  "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/SaveGame.cpp"
   "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/ShopConfig.cpp"
   "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/data/SkillElementConfig.cpp"
   "D:/KIET/devC/DSA/Turn-base-Tactical-Game/src/dsa/CombatAI.cpp"

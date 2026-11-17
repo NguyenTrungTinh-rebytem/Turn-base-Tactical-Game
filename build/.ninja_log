@@ -58,3 +58,14 @@
 26490	29974	8166312706020506	CMakeFiles/game.dir/src/graphics/UiWidgets.cpp.obj	c11ffdd7b29737f1
 27275	33606	8166312714818563	CMakeFiles/game.dir/src/main.cpp.obj	47321d347fd390a0
 33607	36146	8166312777326115	game.exe	b5f26840aba9fa0f
+42	170	8166323938327356	D:/KIET/devC/DSA/Turn-base-Tactical-Game/build/CMakeFiles/cmake.verify_globs	10a43915dcc5d7b7
+224	4627	8166323939946410	CMakeFiles/game.dir/src/graphics/Combatantview.cpp.obj	d0c619efac49aefd
+188	4834	8166323939326911	CMakeFiles/game.dir/src/data/SaveGame.cpp.obj	1be4ed82a3164968
+195	5010	8166323939565773	CMakeFiles/game.dir/src/graphics/AttackLunge.cpp.obj	35edd8ca4c138d88
+243	5240	8166323940058262	CMakeFiles/game.dir/src/graphics/SettingsScreen.cpp.obj	6b67e24aaf6d29db
+204	5978	8166323939716854	CMakeFiles/game.dir/src/graphics/Battleui.cpp.obj	7b42af3b4851a85e
+4935	10101	8166323987579541	CMakeFiles/game.dir/src/graphics/Turnorderbar.cpp.obj	b6ead0a0d6c990c7
+4654	12266	8166323985363266	CMakeFiles/game.dir/src/graphics/SkillVfx.cpp.obj	7d01d87cb1000aa6
+5016	14333	8166323988867794	CMakeFiles/game.dir/src/main.cpp.obj	47321d347fd390a0
+182	22963	8166323939326911	CMakeFiles/game.dir/src/core/GameEngine.cpp.obj	d404715133faaa77
+22964	26646	8166324167104473	game.exe	83dfa1da77b99909
