@@ -19,7 +19,10 @@ public:
     StartMenu& operator=(const StartMenu&) = delete;
 
     // Nap anh nen (PNG 16:9, vd 1280x720). Khong co file -> tu ve nen thu tuc (dem, trang, nui) => khong crash.
+    // Dong thoi tu nap logo "name_game.png" nam CUNG THU MUC voi anh nen (neu co).
     bool loadBackground(const std::string& path);
+    // Nap logo ten game (PNG nen trong suot). Khong co file -> ve chu "NAM PHONG AN" nhu cu.
+    bool loadLogo(const std::string& path);
     // Giai phong texture. Core goi trong shutdown(), TRUOC CloseWindow(). Goi nhieu lan van an toan.
     void unloadAll();
 
@@ -43,6 +46,7 @@ private:
     void drawBackground() const;
     void drawProceduralBackground() const;
     void drawTitle() const;
+    void drawLogo() const;
     void drawButtons() const;
     void drawFooter() const;
 
@@ -54,4 +58,6 @@ private:
     bool        m_menuOnRight = true;
     Texture2D   m_background{};
     bool        m_hasBackground = false;
+    Texture2D   m_logo{};
+    bool        m_hasLogo = false;
 };

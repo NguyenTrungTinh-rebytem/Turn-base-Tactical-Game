@@ -9,6 +9,7 @@
 #include "graphics/UiTheme.h"
 #include <algorithm>
 #include <cmath>
+#include <filesystem>
 #include <iostream>
 
 namespace {
@@ -18,6 +19,10 @@ constexpr float BUTTON_GAP      = 10.0f;
 constexpr float BUTTONS_Y_RATIO = 0.37f;
 constexpr float FADE_IN_SECONDS = 0.8f;
 constexpr float HOVER_SPEED     = 10.0f;
+constexpr float LOGO_W          = 520.0f;   // chieu rong logo tren canvas 1280x720 (~40%)
+constexpr float LOGO_Y          = 50.0f;    // mep tren logo
+constexpr float LOGO_MARGIN     = 16.0f;    // khong cho logo sat mep man hinh
+const char*     LOGO_FILE       = "name_game.png";
 
 float clamp01(float v) { return std::max(0.0f, std::min(1.0f, v)); }
 
@@ -81,8 +86,30 @@ StartMenu::StartMenu() {
 
 StartMenu::~StartMenu() { unloadAll(); }
 
+bool StartMenu::loadLogo(const std::string& path) {
+    if (m_hasLogo) {
+        if (IsWindowReady()) UnloadTexture(m_logo);
+        m_hasLogo = false;
+        m_logo = Texture2D{};
+    }
+    if (path.empty() || !FileExists(path.c_str())) return false;   // thieu logo -> ve chu nhu cu
+    m_logo = LoadTexture(path.c_str());
+    m_hasLogo = (m_logo.id != 0);
+    if (m_hasLogo) {
+        // Logo 2172x724 thu nho ~4 lan: mipmap + trilinear de khong bi rang cua
+        GenTextureMipmaps(&m_logo);
+        SetTextureFilter(m_logo, TEXTURE_FILTER_TRILINEAR);
+    }
+    return m_hasLogo;
+}
+
 bool StartMenu::loadBackground(const std::string& path) {
     unloadAll();
+    if (!path.empty()) {   // logo nam cung thu muc voi anh nen: assets/images/name_game.png
+        const std::filesystem::path logoPath =
+            std::filesystem::path(path).parent_path() / LOGO_FILE;
+        loadLogo(logoPath.generic_string());
+    }
     if (path.empty() || !FileExists(path.c_str())) return false;   // thieu anh -> nen thu tuc
     m_background = LoadTexture(path.c_str());
     m_hasBackground = (m_background.id != 0);
@@ -99,6 +126,11 @@ void StartMenu::unloadAll() {
         m_hasBackground = false;
     }
     m_background = Texture2D{};
+    if (m_hasLogo) {
+        if (IsWindowReady()) UnloadTexture(m_logo);
+        m_hasLogo = false;
+    }
+    m_logo = Texture2D{};
 }
 
 Rectangle StartMenu::buttonRect(size_t index) const {
@@ -232,7 +264,22 @@ void StartMenu::drawProceduralBackground() const {
     DrawRectangle(0, H - 70, W, 70, UiTheme::ink);
 }
 
+void StartMenu::drawLogo() const {
+    const float W = static_cast<float>(UiCanvas::width());
+    const float w = LOGO_W;
+    const float h = w * static_cast<float>(m_logo.height) / static_cast<float>(m_logo.width);
+    // Can giua theo cot nut, nhung kep lai de logo khong tran ra ngoai man hinh
+    const float cx = std::max(w * 0.5f + LOGO_MARGIN,
+                              std::min(W - LOGO_MARGIN - w * 0.5f, W * m_menuCenterX));
+    DrawTexturePro(m_logo,
+                   Rectangle{ 0.0f, 0.0f, static_cast<float>(m_logo.width),
+                              static_cast<float>(m_logo.height) },
+                   Rectangle{ cx - w * 0.5f, LOGO_Y, w, h },
+                   Vector2{ 0.0f, 0.0f }, 0.0f, WHITE);
+}
+
 void StartMenu::drawTitle() const {
+    if (m_hasLogo) { drawLogo(); return; }   // co logo: thay toan bo bieu tuong + chu + phu de
     const float W = static_cast<float>(UiCanvas::width());
     const float cx = W * m_menuCenterX;
     const Vector2 emblemCenter{ cx, 45.0f };
