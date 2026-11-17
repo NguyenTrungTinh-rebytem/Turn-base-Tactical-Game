@@ -426,3 +426,7 @@ FodyWeavers.xsd
 
 # Official VS Code C# Dev Kit Extension exclusion
 #*.lscache
+# The First Step - du lieu nguoi choi (luu game + cai dat), khong dua len Git
+savegame.dat
+savegame.dat.tmp
+settings.cfg
