@@ -2465,7 +2465,12 @@ void GameEngine::executeAiTurn(Character* aiChar)
 
     {
         auto play = [this, aiChar]() { playAnimation(aiChar, AnimState::ATTACK); };
-        if (!(!useMagic && AttackLunge::start(const_cast<CombatantView*>(viewOf(aiChar)), viewOf(h), play)))
+        if (dynamic_cast<const Boss*>(aiChar)) {
+            // Boss danh tu xa: khong lao toi, phat animation roi ban qua cau lua bay den muc tieu
+            play();
+            m_vfx.playSkill("Boss Fireball", viewOf(aiChar), viewOf(h), false);
+        }
+        else if (!(!useMagic && AttackLunge::start(const_cast<CombatantView*>(viewOf(aiChar)), viewOf(h), play)))
             play();
     }
     syncHealth(h);
