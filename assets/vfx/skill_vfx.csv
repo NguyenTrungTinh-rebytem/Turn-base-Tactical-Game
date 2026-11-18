@@ -73,3 +73,4 @@ Divine Shield,status,holy/shield-bubble,target,feet,0,16,75,72,88,36,84,1,skills
 Divine Shield,support,holy/angel-feathers,target,head,0,21,70,56,72,28,17,0,skills/C_PALADIN_2_DivineShield/C_PALADIN_2__support__angel-feathers__lit.png,skills/C_PALADIN_2_DivineShield/C_PALADIN_2__support__angel-feathers__strict.png
 Divine Shield,alt,holy/barrier-block,target,feet,0,16,55,40,56,20,56,0,skills/C_PALADIN_2_DivineShield/C_PALADIN_2__alt__barrier-block__lit.png,skills/C_PALADIN_2_DivineShield/C_PALADIN_2__alt__barrier-block__strict.png
 Boss Fireball,projectile,boss_fireball,caster,body,250,4,70,128,128,110,65,1,boss_fireball.png,boss_fireball.png
+Boss Fireball,impact,boss_fire_pillar,target,feet,650,12,70,56,68,28,66,0,boss_fire_pillar.png,boss_fire_pillar.png
