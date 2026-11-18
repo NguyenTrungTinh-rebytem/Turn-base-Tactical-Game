@@ -4,6 +4,9 @@
 // SkillVfxPlayer CHI VE: khong chua logic game, khong include GameEngine.
 // Du lieu: <dir>/skill_vfx.csv (sinh boi tools/vfx_import.py). Thieu file / thieu anh => bo qua, khong crash.
 //
+// Role "projectile" trong CSV: hieu ung bay tu nguoi cast (diem 'point') den than muc tieu,
+// lap lai cac frame trong luc bay, pivot = dau vien dan. Thoi gian bay = PROJECTILE_SECONDS.
+//
 // Cach dung (GameEngine):
 //   load()                      sau InitWindow
 //   playSkill()                 khi cast skill           -> hieu ung 1 lan (main / support)
@@ -75,6 +78,11 @@ private:
         bool        persistent = false;
         const CombatantView* owner = nullptr;    // chi dung cho persistent
         StatusType  status = StatusType::ATK_BOOST;
+        // ---- projectile (role = "projectile"): bay tu from -> to, quay dau theo huong bay ----
+        bool        travel = false;
+        Vector2     from{}, to{};
+        float       travelTime = 0.45f;          // giay bay het quang duong
+        float       rotation = 0.0f;             // do
     };
 
     Tier        m_tier = Tier::LIT;

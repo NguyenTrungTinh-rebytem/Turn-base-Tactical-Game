@@ -10,6 +10,7 @@
 #include <sstream>
 
 namespace {
+constexpr float PROJECTILE_SECONDS = 0.40f;   // thoi gian vien dan bay tu nguoi cast toi muc tieu
 constexpr float NOMINAL_HEIGHT = 64.0f;   // chieu cao nhan vat "chuan" ma hieu ung duoc ve cho
 
 std::string trim(const std::string& s) {
@@ -156,6 +157,20 @@ void SkillVfxPlayer::playSkill(const std::string& skillName, const CombatantView
         inst.flip = flip;
         inst.scale = scaleFor(*view);
         inst.delay = static_cast<float>(clip.delayMs) / 1000.0f;
+
+        if (clip.role == "projectile" && caster != target) {
+            // Bay tu caster -> than muc tieu. Sprite ve huong sang PHAI (dau o ben phai), pivot = dau.
+            inst.travel = true;
+            inst.from = anchorOf(*caster, clip.point);
+            inst.to = anchorOf(*target, Point::BODY);
+            inst.pos = inst.from;
+            inst.travelTime = PROJECTILE_SECONDS;
+            inst.scale = scaleFor(*target);   // co theo muc tieu: boss to cung khong bien dan thanh khong lo
+            const float dx = inst.to.x - inst.from.x;
+            const float dy = inst.to.y - inst.from.y;
+            // Lat ngang thi sprite huong sang TRAI => goc quay tinh tu huong -x
+            inst.rotation = (flip ? std::atan2(-dy, -dx) : std::atan2(dy, dx)) * 180.0f / 3.14159265f;
+        }
         m_instances.push_back(inst);
     }
 }
@@ -188,6 +203,7 @@ void SkillVfxPlayer::syncStatus(const CombatantView* owner, const StatusEffectMa
 
 int SkillVfxPlayer::frameOf(const Instance& inst) const {
     const int frame = static_cast<int>(inst.time * 1000.0f / static_cast<float>(inst.clip->frameMs));
+    if (inst.travel) return (inst.time >= inst.travelTime) ? -1 : frame % inst.clip->frames;   // lap frame luc bay
     if (inst.persistent) return frame % inst.clip->frames;
     return (frame < inst.clip->frames) ? frame : -1;
 }
@@ -217,6 +233,11 @@ void SkillVfxPlayer::draw() const {
         Vector2 pos = inst.pos;
         float scale = inst.scale;
         bool flip = inst.flip;
+        if (inst.travel) {                          // noi suy vi tri theo thoi gian bay
+            const float u = std::max(0.0f, std::min(1.0f, inst.time / inst.travelTime));
+            pos = Vector2{ inst.from.x + (inst.to.x - inst.from.x) * u,
+                           inst.from.y + (inst.to.y - inst.from.y) * u };
+        }
         if (inst.persistent) {                      // bam theo nhan vat (slot co the doi khi bo tri lai)
             if (!inst.owner || !inst.owner->isVisible()) continue;   // nhan vat da chet => an
             pos = anchorOf(*inst.owner, c.point);
@@ -232,6 +253,6 @@ void SkillVfxPlayer::draw() const {
         // origin = pivot (da nhan scale) -> diem pivot cua frame roi dung vao pos. Lat ngang => pivot lat theo.
         const float ox = static_cast<float>(flip ? (c.w - c.pivotX) : c.pivotX) * scale;
         const float oy = static_cast<float>(c.pivotY) * scale;
-        DrawTexturePro(inst.texture, src, dst, Vector2{ ox, oy }, 0.0f, WHITE);
+        DrawTexturePro(inst.texture, src, dst, Vector2{ ox, oy }, inst.travel ? inst.rotation : 0.0f, WHITE);
     }
 }
