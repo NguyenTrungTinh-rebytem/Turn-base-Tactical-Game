@@ -6,6 +6,7 @@
 #include "graphics/UiTheme.h"
 #include "graphics/UiBlur.h"
 #include "graphics/UiCursor.h"
+#include "graphics/CursorSkin.h"
 #include "graphics/UiDevGallery.h"
 #include "graphics/UiIcons.h"
 #include "graphics/UiInput.h"
@@ -259,6 +260,7 @@ void GameEngine::initialize()
     if (!UiCanvas::initialize())
         throw std::runtime_error("Unable to create the 1920x1080 UI canvas");
     UiCursor::initialize();
+    CursorSkin::initialize(resolvePath("assets/images/cursor"));   // con tro ngoc rong; thieu anh -> dung UiCursor cu
     if (!FontManager::initialize(resolvePath("assets/fonts/NotoSans-Vietnamese.ttf"))) {
         UiCursor::shutdown();
         UiCanvas::shutdown();
@@ -362,6 +364,7 @@ void GameEngine::shutdown()
     m_sceneShader.unload();
     FontManager::shutdown();
     UiCanvas::shutdown();
+    CursorSkin::shutdown();
     UiCursor::shutdown();
     m_audio.unloadAll();                 // dong thiet bi am thanh TRUOC CloseWindow
     m_combatants.clear();
@@ -2462,12 +2465,7 @@ void GameEngine::executeAiTurn(Character* aiChar)
 
     {
         auto play = [this, aiChar]() { playAnimation(aiChar, AnimState::ATTACK); };
-        if (dynamic_cast<const Boss*>(aiChar)) {
-            // Boss danh tu xa: khong lao toi, phat animation roi ban qua cau lua bay den muc tieu
-            play();
-            m_vfx.playSkill("Boss Fireball", viewOf(aiChar), viewOf(h), false);
-        }
-        else if (!(!useMagic && AttackLunge::start(const_cast<CombatantView*>(viewOf(aiChar)), viewOf(h), play)))
+        if (!(!useMagic && AttackLunge::start(const_cast<CombatantView*>(viewOf(aiChar)), viewOf(h), play)))
             play();
     }
     syncHealth(h);
@@ -2859,7 +2857,7 @@ void GameEngine::render()
 
     g_settings.draw();
     UiWidgets::Toast();
-    UiCursor::draw();
+    if (!CursorSkin::draw()) UiCursor::draw();
 }
 
 void GameEngine::renderCombatants()
