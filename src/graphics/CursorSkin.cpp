@@ -57,8 +57,11 @@ void CursorSkin::setHover(bool overClickable) { g_hover = g_hover || overClickab
 
 void CursorSkin::setOverride(Kind kind, bool active) { g_overrideActive = active; g_override = kind; }
 
+bool CursorSkin::isActive() { return g_ready; }
+
 bool CursorSkin::draw() {
     if (!g_ready) return false;
+    if (!IsCursorHidden()) HideCursor();         // phong khi module khac bat lai con tro he dieu hanh (doi man hinh, fullscreen...)
     if (!IsCursorOnScreen()) { g_hover = false; return true; }
 
     Kind kind = Kind::NORMAL;

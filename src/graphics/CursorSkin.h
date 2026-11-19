@@ -12,5 +12,6 @@ namespace CursorSkin {
     void shutdown();                                 // TRUOC CloseWindow
     void setHover(bool overClickable);               // UI goi khi chuot dang tren nut -> con tro "link" (het hieu luc sau 1 khung hinh)
     void setOverride(Kind kind, bool active);        // ep kieu con tro (vd BUSY khi dang tai); active=false de bo ep
+    bool isActive();                                 // true = da nap anh va dang thay con tro cu
     bool draw();                                     // ve tai vi tri chuot (toa do canvas). false = chua nap duoc -> dung con tro cu
 }

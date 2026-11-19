@@ -1,11 +1,13 @@
 #include "UiCursor.h"
 #include "UiCanvas.h"
 #include "UiShapes.h"
+#include "CursorSkin.h"
 
 void UiCursor::initialize() { HideCursor(); }
 void UiCursor::shutdown() { ShowCursor(); }
 
 void UiCursor::draw() {
+    if (CursorSkin::isActive()) return;   // dang dung con tro ngoc rong -> khong ve mui ten cu
     if (UiCanvas::isDrawing()) return;
     const Vector2 position = GetMousePosition();
     const Vector2 points[] = {
