@@ -42,6 +42,7 @@ MENU -> CREATE_HERO (chọn / tạo đội) -> WAVE_SELECT -> PREP_MENU (chuẩn
 | 3 | Boss Ember Dragon | Nền `bg_wave2`, shader tông Boss |
 
 * **Hồi phục sau mỗi wave:** mọi nhân vật còn sống hồi **20% HP và 20% MP** tối đa. Nhân vật đã gục phải dùng vật phẩm hồi sinh.
+* **Lưu tiến trình:** game tự lưu mỗi khi qua một wave (xem mục *Lưu game & Cài đặt*), có thể tiếp tục đúng wave, đội hình, HP/MP, vàng, túi đồ và trang bị.
 * **Số wave tự suy ra từ dữ liệu:** wave cuối là `stage` lớn nhất trong `data/monsters.csv`; wave có Boss được nhận biết bằng cột `isBoss`. Muốn thêm wave chỉ cần thêm dòng quái vào CSV.
 
 ---
@@ -80,7 +81,7 @@ Toàn bộ dự án BẮT BUỘC tuân thủ:
 * **Class / Struct / Enum:** `PascalCase` (`Character`, `TurnManager`, `ShopScreen`).
 * **Hàm:** `camelCase` (`takeDamage()`, `recoverPartyAfterWave()`).
 * **Hằng số / Enum values:** `UPPER_SNAKE_CASE` (`KIM`, `ATK_BOOST`, `WAVE_CLEAR_RECOVER_RATE`).
-* **Chuỗi hiển thị trong game:** tiếng Việt **không dấu** (font mặc định của Raylib không có dấu tiếng Việt).
+* **Chuỗi hiển thị trong game:** tiếng Việt **có dấu**, vẽ qua `UiText` (font riêng hỗ trợ tiếng Việt) và tập trung ở `Strings`; không dùng `DrawText` mặc định của Raylib cho chữ có dấu.
 
 ---
 
@@ -95,7 +96,7 @@ $$\text{Base Stats} = \text{Race Stats} + \text{Class Stats}$$
 ### B. Ma trận Khắc hệ Ngũ Hành ($5 \times 5$)
 * **5 Hệ:** Kim, Mộc, Thủy, Hỏa, Thổ.
 * **Hệ số:** Tương khắc $\rightarrow 1.5$, Bị khắc $\rightarrow 0.5$, Bình hòa $\rightarrow 1.0$.
-* Nguyên tố của từng skill cấu hình trong `data/skill_elements.csv`.
+* Nguyên tố của từng skill cấu hình trong `data/skill_elements.csv` (mỗi skill có hệ riêng, **không** nhất thiết trùng hệ của nhân vật).
 
 ### C. Kỹ năng & Hiệu ứng
 * **34 Skill:** mỗi nhân vật có 4 Skill ($1$ Race + $1$ Class + $2$ Element).
@@ -103,7 +104,8 @@ $$\text{Base Stats} = \text{Race Stats} + \text{Class Stats}$$
 
 ### D. Đội hình & Anh hùng dựng sẵn
 * Đội tối đa **3 anh hùng**, chọn ở màn hình tạo đội / chuẩn bị.
-* **10 anh hùng dựng sẵn** (`data/heroes.csv`): Lyra, Kael, Sylwen, Kurogane, Fenrir, Grumm, Thorin, Aldric, Roland, Brokk. Mỗi người có sprite chiến đấu và bộ animation riêng (idle / attack / hurt / death).
+* **10 anh hùng dựng sẵn** (`data/heroes.csv`): Lyra, Kael, Sylwen, Kurogane, Fenrir, Grumm, Thorin, Aldric, Roland, Brokk. Mỗi người có sprite chiến đấu và bộ animation riêng (idle / attack / hurt / death) cùng ảnh chân dung (`assets/images/portraits/portrait_<id>.png`) hiển thị ở màn chọn anh hùng.
+* **Menu Đội hình / Shop** dùng ô sprite 128x128 đầu tiên (frame idle) làm biểu tượng nhân vật; ảnh chân dung vuông được vẽ nguyên.
 
 ### E. Kinh tế, Vật phẩm, Shop & Trang bị
 * **Vàng:** quái chết rơi vàng (dựa trên HP, có dao động ngẫu nhiên; Boss nhân hệ số lớn) + thưởng qua màn. Thông số trong `data/economy.csv` (`start_gold`, `enemy_base_gold`, `enemy_hp_divisor`, `variance_percent`, `boss_multiplier`, `wave_clear_bonus`, `skip_wave_gold`).
@@ -114,18 +116,38 @@ $$\text{Base Stats} = \text{Race Stats} + \text{Class Stats}$$
 * **Shop** (`data/shop.csv` - id, giá): mở ở màn Chuẩn bị trước wave Boss (nút Shop hoặc phím **B**). Hai tab: **Cửa hàng** và **Kho đồ / Trang bị**.
 * Mỗi vật phẩm có giới hạn mang theo (`maxCarry`); túi đồ dùng chung cả đội.
 
-### F. Âm thanh & Hiệu ứng hình ảnh
+### F. Lưu game & Cài đặt
+Mở **Cài đặt** bằng nút ở góc dưới phải menu chính hoặc phím **F1** (dùng được ở menu chính, màn Chuẩn bị và lúc tạm dừng). Gồm 5 tab:
+
+| Tab | Nội dung |
+| :--- | :--- |
+| **Âm thanh** | Thanh trượt âm lượng nhạc nền / hiệu ứng, công tắc shader cảnh (đồng bộ với F9) |
+| **Ngôn ngữ** | Chọn Tiếng Việt / English (hiện áp dụng cho màn Cài đặt; có thể nối vào `Strings` để đổi toàn game) |
+| **Lưu game** | Xem thông tin file lưu; nút **Lưu**, **Tải**, **Xóa** |
+| **Cốt truyện** | Bối cảnh và cốt truyện của game |
+| **Thành viên** | Danh sách nhóm phát triển và phần việc |
+
+* **Cơ chế lưu:** lưu ở *mốc ổn định* - ngay sau khi qua wave, trước khi vào wave kế (không lưu giữa trận để không phải lưu hàng đợi lượt, hiệu ứng và Undo). File `savegame.dat` chứa: wave kế tiếp, vàng, đội hình, HP/MP từng hero, túi đồ và trang bị đang đeo. Ghi qua file tạm rồi đổi tên nên không hỏng file cũ nếu bị ngắt giữa chừng.
+* **Lưu tay:** nút **Lưu** chỉ dùng được ở màn Chuẩn bị giữa các wave (trước Boss).
+* **Tiếp tục:** nút **Tiếp tục** ở menu chính xuất hiện khi có file lưu; **Tải** đưa người chơi về đúng wave đã lưu (vào trận, hoặc màn Chuẩn bị nếu wave kế là Boss).
+* Thắng game thì file lưu bị xóa; thua thì giữ để tải lại.
+* Cài đặt người chơi lưu ở `settings.cfg` (âm lượng, shader, ngôn ngữ). Cả `savegame.dat` và `settings.cfg` đều nằm trong `.gitignore`.
+
+### G. Âm thanh & Hiệu ứng hình ảnh
 * **AudioManager** (`src/audio`): nhạc nền theo trạng thái (menu, thám hiểm, chiến đấu, game over), tiếng click, tiếng đánh/bị đánh/chết riêng cho anh hùng nam, nữ, quái thường và Rồng.
 * **SceneShader** (`src/graphics`): hậu kỳ cho cảnh chiến đấu - tối viền (vignette), bloom nhẹ, mờ tilt-shift, chỉnh màu, tia nắng xuyên tán lá chuyển động và hạt bụi/tàn lửa; tông màu khác nhau cho wave thường và Boss. UI vẽ sau shader nên vẫn sắc nét. Nếu GPU không hỗ trợ, game tự chạy không shader. Bóng đổ dưới chân nhân vật vẽ riêng trong `GameEngine`.
+* **AttackLunge** (`src/graphics`): nhân vật **cận chiến** lướt tới mục tiêu rồi mới đánh (kèm bóng mờ khi lướt), nhân vật đánh phép đứng yên tại chỗ. Chỉ thay đổi vị trí hiển thị, không ảnh hưởng logic chiến đấu hay Undo.
+* **CursorSkin** (`src/graphics`): con trỏ chuột tùy chỉnh dạng ngọc rồng, có hiệu ứng động; đổi kiểu khi giữ chuột. Thiếu ảnh thì dùng con trỏ cũ.
 
-### G. Điều khiển chính
+### H. Điều khiển chính
 | Phím | Chức năng |
 | :-: | :--- |
 | **A** | Tấn công thường |
 | **S** | Mở menu Kỹ năng |
 | **I** | Mở túi Vật phẩm trong trận |
 | **TAB** | Đổi mục tiêu |
-| **F1 - F3** | Chọn đồng đội |
+| **F1 - F3** | Chọn đồng đội trong trận (ở menu chính / màn Chuẩn bị / tạm dừng: **F1 mở Cài đặt**) |
+| **1 - 5 / TAB** | Chuyển tab trong Cài đặt |
 | **ESC** | Quay lại / Menu |
 | **B** | Mở / đóng Shop (màn Chuẩn bị trước Boss) |
 | **F9** | Bật / tắt shader cảnh |
@@ -144,7 +166,8 @@ cmake --build build
 
 * CMake dùng `file(GLOB_RECURSE ...)` nên **khi thêm file `.cpp` mới phải xóa thư mục `build` và cấu hình lại**:
   `Remove-Item -Recurse -Force build` rồi chạy lại lệnh cmake ở trên.
-* Game tìm thư mục `assets/` và `data/` theo đường dẫn tương đối; thiếu ảnh vật phẩm sẽ hiện ô chữ cái thay thế, thiếu âm thanh game chạy im lặng.
+* Game tìm thư mục `assets/` và `data/` theo đường dẫn tương đối; thiếu ảnh vật phẩm sẽ hiện ô chữ cái thay thế, thiếu âm thanh game chạy im lặng, thiếu ảnh con trỏ thì dùng con trỏ cũ.
+* `savegame.dat` và `settings.cfg` được tạo cạnh thư mục chạy game; xóa hai file này để đặt lại tiến trình / cài đặt.
 
 ---
 
@@ -155,7 +178,9 @@ RPG_Game_DT10/
 ├── assets/
 │   ├── images/             # Sprite anh hùng (hero_<id>_idle/attack/hurt/death/battle.png),
 │   │   │                   # sprite quái (*_sheet.png), background wave
-│   │   └── items/          # Icon vật phẩm ITM_*.png
+│   │   ├── items/          # Icon vật phẩm ITM_*.png
+│   │   ├── portraits/      # Chân dung anh hùng portrait_<id>.png
+│   │   └── cursor/         # Con trỏ chuột (cursor_*.png) + CREDITS.txt
 │   └── audio/              # Nhạc nền (mp3) & SFX (wav/ogg)
 ├── data/                   # Dữ liệu CSV: heroes, monsters, items, shop, economy,
 │                           #   races, classes, skills, skill_elements
@@ -165,12 +190,20 @@ RPG_Game_DT10/
 │   │                       #   Factory, Inventory<T>, Item, ItemFactory, Party
 │   ├── dsa/                # Member 3 (Nguyễn Quốc Đạt): TurnManager, Status Effects, Observer, AI
 │   ├── graphics/           # Member 4 (Huỳnh Quang Khải): Sprite Animation, Map, BattleUI,
-│   │                       #   PrepMenuScreen, ShopScreen, ItemIcons, SceneShader
+│   │                       #   PrepMenuScreen, ShopScreen, ItemIcons, SceneShader,
+│   │                       #   SettingsScreen, AttackLunge, HeroPortraits, CursorSkin
 │   ├── audio/              # AudioManager (nhạc nền + SFX)
 │   └── data/               # Member 5 (Nguyễn Trung Tỉnh): GameData, ItemDatabase, ShopConfig,
-│                           #   HeroPresetConfig, CharacterRules, Start Menu
+│                           #   HeroPresetConfig, CharacterRules, Start Menu,
+│                           #   GameSettings (cài đặt), SaveGame (lưu/tải tiến trình)
 ├── CMakeLists.txt          # Build bằng CMake + Ninja
 ├── .gitignore
 ├── PROMPT_SYSTEM.md        # Bộ Prompt đồng bộ AI cho 5 thành viên
 └── README.md               # Tài liệu dự án
 ```
+
+---
+
+## 🙏 Ghi công (Credits)
+
+* **Con trỏ chuột:** "Dragon's Jewel" cursor set - tác giả **AJaxx** (chuyển thể từ bộ CursorFX của Artur Berk), giấy phép Creative Commons Attribution + NonCommercial. Nguồn: http://www.rw-designer.com/cursor-set/dragon-s-jewel
